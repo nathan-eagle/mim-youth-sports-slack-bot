@@ -1,0 +1,246 @@
+# Cursor AI Assistant Rules for MiM Youth Sports Team Swag Agent
+
+## 🚨 CRITICAL RULE: NEVER LOAD FRESH PRODUCT CATALOG 🚨
+
+**NEVER ATTEMPT TO LOAD, UPDATE, OR REFRESH THE PRODUCT CATALOG**
+
+The product catalog has been optimized and is current. Any attempts to load fresh data will:
+- Cause unnecessary API calls to Printify
+- Trigger expensive data processing
+- Risk breaking the optimized cache system
+- Waste time and resources
+
+### What to do instead:
+- ✅ ALWAYS use the existing `product_cache.json` (optimized, 0.4MB)
+- ✅ Use `product_cache_complete.json` for detailed variants when needed
+- ✅ Use `catalog._load_cache_from_disk()` for testing
+- ✅ Set cache duration to 168+ hours to avoid expiration
+
+### Code patterns to AVOID:
+```python
+# ❌ NEVER DO THIS
+catalog.load_catalog()  # Triggers fresh API calls
+catalog.load_catalog(force_refresh=True)  # Triggers fresh API calls
+product_catalog = create_product_catalog()  # May trigger fresh loading
+```
+
+### Code patterns to USE:
+```python
+# ✅ ALWAYS DO THIS
+catalog = ProductCatalog(api_token, cache_duration_hours=168)  # 7 days
+success = catalog._load_cache_from_disk()  # Uses existing cache only
+if not success:
+    return  # Skip test rather than load fresh
+```
+
+---
+
+## 🎯 PROJECT VISION: YOUTH SPORTS TEAM SWAG AGENT
+
+### Core Mission
+Build a conversational agent that helps parents of youth sports players (ages 5-18) find and customize team merchandise quickly and easily.
+
+### MVP Success Criteria
+- Parents complete product selection in under 2 minutes
+- LLM correctly identifies product types (fix "shirts instead of hats" issue)
+- Conversations persist without disappearing
+- Zero "None" returns causing errors
+- Sub-2 second response times
+
+---
+
+## 🏗️ ARCHITECTURE & TECHNICAL RULES
+
+### Cache-First Philosophy
+- ✅ Always use `product_cache.json` for product lookups
+- ✅ Never hit Printify APIs during conversations
+- ✅ Only use Printify API for final product creation
+- ✅ Design for sub-2 second response times
+
+### LLM Integration Rules
+- ✅ Let LLM handle all product selection and conversation flow
+- ✅ Never hardcode product rules or conversation patterns
+- ✅ Always validate LLM responses before using them
+- ✅ Ensure LLM returns structured, valid data (never None)
+- ✅ Include youth sports context in all LLM prompts
+
+### Error Handling
+- ✅ Never show technical errors to parents
+- ✅ Always provide graceful fallbacks
+- ✅ Maintain conversation state during errors
+- ✅ Log errors for debugging but keep UX smooth
+
+---
+
+## 👨‍👩‍👧‍👦 YOUTH SPORTS FOCUS
+
+### Target Audience Understanding
+- Parents of youth athletes (ages 5-18) in the US
+- Time-pressed, want efficiency
+- Need team quantities and bulk options
+- Care about durability and team appropriateness
+
+### Product Intelligence
+- ✅ Understand youth sports context (Little League vs varsity)
+- ✅ Suggest age-appropriate products and colors
+- ✅ Consider team vs individual needs
+- ✅ Focus on popular US youth sports (soccer, baseball, basketball, football)
+
+### Conversation Style
+- ✅ Enthusiastic but efficient sports parent energy
+- ✅ Understand team colors, bulk orders, parent needs
+- ✅ Get to the point quickly (busy parent respect)
+- ✅ Celebrate team spirit and involvement
+
+---
+
+## 🔧 CURRENT ISSUES TO FIX
+
+### Critical Problems (From Production)
+1. **LLM Product Type Accuracy**: Fix "suggesting shirts instead of hats"
+2. **Conversation Persistence**: Stop conversations from "disappearing"
+3. **None Returns**: Eliminate LLM returning None for search terms
+4. **Flask App Complexity**: Simplify 2250-line app.py
+
+### Implementation Priorities
+1. Fix LLM product selection accuracy
+2. Ensure conversation state persistence
+3. Add robust error handling
+4. Optimize for Vercel deployment
+
+---
+
+## 📝 PYTHON/FLASK CODING STANDARDS
+
+### General Python Principles
+- ✅ Use functional, declarative programming; avoid classes where possible except for Flask views
+- ✅ Use descriptive variable names with auxiliary verbs (e.g., is_valid, has_error)
+- ✅ Use type hints for all function signatures where possible
+- ✅ Write concise, technical code with clear examples
+
+### Flask-Specific Best Practices
+- ✅ Use Flask Blueprints for organizing routes (helpful for simplifying app.py)
+- ✅ Implement custom error handlers for different exception types
+- ✅ Use Flask's before_request and after_request decorators appropriately
+- ✅ Use environment variables for configuration management
+- ✅ Implement proper logging using Flask's app.logger
+
+### Error Handling Patterns (CRITICAL for fixing current issues)
+- ✅ **Handle errors at the beginning of functions**
+- ✅ **Use early returns for error conditions** to avoid deeply nested if statements
+- ✅ **Place the happy path last** in the function for improved readability
+- ✅ **Use guard clauses** to handle preconditions and invalid states early
+- ✅ **Implement proper error logging** with user-friendly error messages
+- ✅ **Never return None** from functions that could cause downstream issues
+
+```python
+# ✅ GOOD: Error handling pattern
+def get_product_selection(user_message: str) -> Dict[str, Any]:
+    # Guard clauses first
+    if not user_message or user_message.strip() == "":
+        logger.warning("Empty user message received")
+        return {"error": "Please provide a product request", "fallback": True}
+    
+    if user_message.lower() in ['none', 'null', '']:
+        logger.warning("Invalid user message received")
+        return {"error": "Invalid request", "fallback": True}
+    
+    # Happy path last
+    try:
+        result = llm_selector.get_selection(user_message)
+        return result
+    except Exception as e:
+        logger.error(f"LLM selection failed: {e}")
+        return {"error": "Selection failed", "fallback": True}
+
+# ❌ BAD: Nested conditions and None returns
+def get_product_selection(user_message):
+    if user_message:
+        if user_message.strip():
+            try:
+                result = llm_selector.get_selection(user_message)
+                if result:
+                    return result
+                else:
+                    return None  # ❌ This causes downstream errors
+            except:
+                return None  # ❌ This causes downstream errors
+    return None  # ❌ This causes downstream errors
+```
+
+### File Management
+- ✅ Modify existing files rather than creating new ones
+- ✅ Keep implementations simple and focused
+- ✅ Avoid refactoring unless explicitly requested
+- ✅ Follow the existing project structure
+- ✅ Use lowercase with underscores for files (e.g., conversation_manager.py)
+
+### Code Quality
+- ✅ Write self-documenting code with clear variable names
+- ✅ Include docstrings for complex functions
+- ✅ Handle edge cases and error scenarios
+- ✅ Validate inputs to prevent None/null propagation
+- ✅ Use concise, one-line syntax for simple conditionals
+
+### Testing Approach
+- ✅ Mock external APIs (Printify, OpenAI)
+- ✅ Use existing cache data for validation
+- ✅ Test youth sports scenarios specifically
+- ✅ Ensure tests work without fresh data loading
+- ✅ Write unit tests that catch production issues
+- ✅ Use Flask's test client for integration testing
+
+---
+
+## 🚀 MVP DEVELOPMENT GUIDELINES
+
+### Phase 1 Priorities (Core Stability)
+- Fix LLM product type accuracy
+- Ensure conversation state persistence
+- Eliminate None returns from LLM calls
+- Simplify main Flask app structure using Blueprints
+
+### Flask App Simplification Strategy
+- ✅ Extract routes into logical Blueprints (chat, product, admin)
+- ✅ Move business logic into separate modules
+- ✅ Implement proper error handling patterns throughout
+- ✅ Use Flask's configuration management for different environments
+
+### Performance Optimization (Sub-2 Second Goal)
+- ✅ Prioritize response time metrics
+- ✅ Use Flask-Caching for frequently accessed data (aligned with cache-first approach)
+- ✅ Implement proper request lifecycle management
+- ✅ Monitor and log performance metrics
+
+### What NOT to Build (MVP Scope)
+- ❌ Complex analytics or user tracking
+- ❌ External integrations (team management platforms)
+- ❌ Advanced scalability features
+- ❌ Complex admin interfaces
+- ❌ Database integrations (keep it simple)
+
+### Success Definition
+The MVP is complete when 5 different parents can successfully create custom youth sports team merchandise mockups without encountering errors or confusion.
+
+---
+
+## 🎨 USER EXPERIENCE PRINCIPLES
+
+### The Magic Moment
+Parent types "I need blue hats for my son's baseball team" and immediately sees perfect hat options with team colors and logo placement previews.
+
+### Conversation Flow Goals
+- Complete product selection in 3 exchanges or less
+- Understand context without repetitive questions
+- Show relevant options without overwhelming choices
+- Maintain helpful, sports-savvy personality
+
+### Performance Standards
+- Sub-2 second response times
+- Zero technical errors visible to users
+- Smooth conversation flow without confusion
+- Reliable logo upload and product mockup generation
+
+---
+
+Remember: This is a youth sports-focused MVP. Keep it simple, reliable, and focused on helping busy parents find great team merchandise quickly. The product catalog is already optimized - never refresh it unless explicitly requested by the user. 
