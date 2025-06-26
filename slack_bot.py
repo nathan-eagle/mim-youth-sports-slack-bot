@@ -61,8 +61,12 @@ class SlackBot:
                     response = self._handle_initial_message(text, conversation, channel, user)
                 elif conversation["state"] == "awaiting_product_selection":
                     response = self._handle_product_selection(text, conversation, channel, user)
+                elif conversation["state"] == "awaiting_product_selection_with_logo":
+                    response = self._handle_product_selection_with_logo(text, conversation, channel, user)
                 elif conversation["state"] == "awaiting_logo":
                     response = self._handle_logo_request(text, conversation, event, channel, user)
+                elif conversation["state"] == "completed":
+                    response = self._handle_completed_conversation(text, conversation, channel, user)
                 else:
                     response = self._handle_initial_message(text, conversation, channel, user)
                 
@@ -113,9 +117,15 @@ class SlackBot:
             # Get conversation state
             conversation = conversation_manager.get_conversation(channel, user)
             
-            if conversation.get("state") != "awaiting_logo":
-                self._send_message(channel, "Please start by telling me what product you'd like to customize!")
-                return {"status": "ignored"}
+            # If no product selected yet, ask for product type first
+            if not conversation.get("product_selected"):
+                self._send_message(channel, "I see you've uploaded a logo! What type of product would you like to customize? Please tell me if you want a shirt, hoodie, or hat for your team.")
+                # Update state to awaiting product selection with logo ready
+                conversation_manager.update_conversation(channel, user, {
+                    "state": "awaiting_product_selection_with_logo",
+                    "pending_file": file_info
+                })
+                return {"status": "awaiting_product"}
             
             try:
                 # Process the uploaded file
@@ -130,12 +140,11 @@ class SlackBot:
                 # Process the logo and create product
                 response = self._create_custom_product(conversation, logo_result, channel, user)
                 
-                # Send response
-                if response.get("message"):
-                    self._send_message(channel, response["message"])
-                
+                # Send response with purchase link
                 if response.get("image_url") and response.get("purchase_url"):
                     self._send_product_result(channel, response)
+                elif response.get("message"):
+                    self._send_message(channel, response["message"])
                 
                 # Update conversation state to completed
                 conversation_manager.update_conversation(channel, user, {"state": "completed"})
@@ -264,6 +273,56 @@ class SlackBot:
             logger.error(f"Error in _handle_product_selection: {e}")
             raise e
     
+    def _handle_product_selection_with_logo(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
+        """Handle product selection when logo is already uploaded"""
+        try:
+            # Use OpenAI to understand the product selection
+            analysis = openai_service.analyze_parent_request(text)
+            
+            # Find matching product
+            product_match = product_service.find_product_by_intent(text)
+            
+            if product_match:
+                # Update conversation with selected product
+                conversation_manager.update_conversation(channel, user, {
+                    "product_selected": product_match,
+                    "state": "processing_with_logo"
+                })
+                
+                # Get the pending file info
+                pending_file = conversation.get("pending_file")
+                if pending_file:
+                    # Process the uploaded file
+                    logo_result = logo_processor.process_slack_file(pending_file, self.client)
+                    
+                    if not logo_result["success"]:
+                        error_msg = f"File processing failed: {logo_result['error']}"
+                        conversation_manager.record_error(channel, user, error_msg)
+                        return {"message": f"Sorry, there was an issue with your logo: {logo_result['error']}"}
+                    
+                    # Create custom product
+                    response = self._create_custom_product(conversation, logo_result, channel, user)
+                    
+                    # Clean up temporary logo file
+                    logo_processor.cleanup_logo(logo_result["file_path"])
+                    
+                    # Update conversation state to completed
+                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                    
+                    return response
+                else:
+                    # No pending file, ask for logo
+                    conversation_manager.update_conversation(channel, user, {"state": "awaiting_logo"})
+                    return {"message": "Great! Now please upload your team logo as an image file or provide a direct URL to the logo image."}
+            else:
+                # Product not clear, ask for clarification
+                suggestion_message = product_service.get_product_suggestions_text()
+                return {"message": f"I'm not sure which product you'd like. {suggestion_message}"}
+                
+        except Exception as e:
+            logger.error(f"Error in _handle_product_selection_with_logo: {e}")
+            raise e
+    
     def _handle_logo_request(self, text: str, conversation: Dict, event: Dict, channel: str, user: str) -> Dict:
         """Handle logo URL or other text when awaiting logo"""
         try:
@@ -302,6 +361,75 @@ class SlackBot:
             
         except Exception as e:
             logger.error(f"Error in _handle_logo_request: {e}")
+            raise e
+    
+    def _handle_completed_conversation(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
+        """Handle messages after product has been completed"""
+        try:
+            # Check if user wants to create another product
+            analysis = openai_service.analyze_parent_request(text)
+            
+            # Look for indicators of wanting to create something new
+            new_product_indicators = [
+                "another", "different", "new", "also want", "now i want", "next", 
+                "can i get", "i'd like", "shirt", "hoodie", "hat", "cap", "sweatshirt"
+            ]
+            
+            text_lower = text.lower()
+            wants_new_product = any(indicator in text_lower for indicator in new_product_indicators)
+            
+            if wants_new_product:
+                # Check if they specified a product type
+                product_match = product_service.find_product_by_intent(text)
+                if product_match:
+                    # Start new product flow
+                    updates = {
+                        "product_selected": product_match,
+                        "state": "awaiting_logo"
+                    }
+                    conversation_manager.update_conversation(channel, user, updates)
+                    
+                    # Generate logo request message
+                    team_context = ""
+                    if conversation.get("team_info"):
+                        team_parts = []
+                        if conversation["team_info"].get("name"):
+                            team_parts.append(conversation["team_info"]["name"])
+                        if conversation["team_info"].get("sport"):
+                            team_parts.append(conversation["team_info"]["sport"])
+                        team_context = " ".join(team_parts)
+                    
+                    logo_message = openai_service.generate_logo_request_message(
+                        product_match["formatted"]["title"], 
+                        team_context
+                    )
+                    
+                    return {"message": logo_message}
+                else:
+                    # They want something new but didn't specify what
+                    conversation_manager.update_conversation(channel, user, {"state": "awaiting_product_selection"})
+                    suggestion_message = product_service.get_product_suggestions_text()
+                    return {"message": f"Great! What else would you like to create for your team?\n\n{suggestion_message}"}
+            
+            # Check for purchase-related questions
+            purchase_indicators = ["buy", "purchase", "order", "get", "link", "where", "how"]
+            wants_purchase_info = any(indicator in text_lower for indicator in purchase_indicators)
+            
+            if wants_purchase_info:
+                return {"message": "I'd be happy to help you get that product! Please use the purchase link I provided above, or if you need a new link, just let me know which product you're referring to."}
+            
+            # Generic positive response - don't restart the flow
+            positive_responses = ["love", "great", "awesome", "perfect", "thanks", "thank you", "looks good", "nice"]
+            is_positive = any(response in text_lower for response in positive_responses)
+            
+            if is_positive:
+                return {"message": "I'm so glad you like it! 🎉 Is there anything else you'd like to create for your team? Just let me know what product you're interested in!"}
+            
+            # Default response for completed conversations
+            return {"message": "Thanks! Is there anything else I can help you create for your team? Just tell me what product you're interested in (shirt, hoodie, hat) and I'll get started!"}
+            
+        except Exception as e:
+            logger.error(f"Error in _handle_completed_conversation: {e}")
             raise e
     
     def _create_custom_product(self, conversation: Dict, logo_result: Dict, channel: str, user: str) -> Dict:
