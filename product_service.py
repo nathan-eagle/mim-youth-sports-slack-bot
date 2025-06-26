@@ -10,21 +10,21 @@ class ProductService:
         self.products_cache = {}
         self.best_products = {}
         
-        # Hardcoded mappings for the 3 best products since cache doesn't include blueprint/provider data
+        # Real mappings from Printify API for the 3 best products
         self.product_mappings = {
             '157': {  # Kids Heavy Cotton™ Tee
-                'blueprint_id': 9,  # Standard t-shirt blueprint
-                'print_provider_id': 1,  # Common print provider
+                'blueprint_id': 6,        # Unisex Heavy Cotton Tee (Gildan 5000)
+                'print_provider_id': 3,   # Marco Fine Arts (default provider)
                 'category': 'shirt'
             },
             '314': {  # Youth Heavy Blend Hooded Sweatshirt  
-                'blueprint_id': 16,  # Standard hoodie blueprint
-                'print_provider_id': 1,  # Common print provider
+                'blueprint_id': 66,       # Unisex Heavy Blend™ Full Zip Hooded Sweatshirt (Gildan 18600)
+                'print_provider_id': 34,  # The Print Bar (default provider)
                 'category': 'hoodie'
             },
             '1446': {  # Snapback Trucker Cap
-                'blueprint_id': 17,  # Standard cap blueprint  
-                'print_provider_id': 1,  # Common print provider
+                'blueprint_id': 1446,     # Snapback Trucker Cap (Yupoong 6606)
+                'print_provider_id': 217, # Fulfill Engine (default provider)
                 'category': 'hat'
             }
         }
