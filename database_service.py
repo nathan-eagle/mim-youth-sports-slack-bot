@@ -110,7 +110,18 @@ class DatabaseService:
     def get_product_design(self, design_id: str) -> Optional[Dict]:
         """Get a product design by ID"""
         try:
-            return self.data["product_designs"].get(design_id)
+            if self.supabase:
+                # Query Supabase first
+                result = self.supabase.table("product_designs").select("*").eq("id", design_id).execute()
+                if result.data and len(result.data) > 0:
+                    logger.info(f"Retrieved product design from Supabase: {design_id}")
+                    return result.data[0]
+                else:
+                    logger.warning(f"Product design {design_id} not found in Supabase")
+                    return None
+            else:
+                # Fallback to JSON file
+                return self.data["product_designs"].get(design_id)
         except Exception as e:
             logger.error(f"Error getting product design {design_id}: {e}")
             return None
