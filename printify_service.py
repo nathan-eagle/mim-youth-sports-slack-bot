@@ -137,20 +137,33 @@ class PrintifyService:
                 product_result = create_response.json()
                 logger.info(f"Successfully created custom product: {product_result.get('id')}")
                 
-                # Generate mockup
+                # Generate mockup (optional - don't fail if this doesn't work)
                 mockup_result = self._generate_mockup(product_result['id'])
                 
-                return {
+                # Safely extract variant info
+                try:
+                    variant_color = selected_variant.get('title', 'Default')
+                    variant_options = selected_variant.get('options', [])
+                    variant_size = variant_options[0].get('value', 'One Size') if variant_options else 'One Size'
+                except Exception as ve:
+                    logger.warning(f"Error extracting variant info: {ve}")
+                    variant_color = 'Default'
+                    variant_size = 'One Size'
+                
+                result = {
                     "success": True,
                     "product_id": product_result.get('id'),
                     "title": product_result.get('title'),
-                    "mockup_url": mockup_result.get('mockup_url'),
+                    "mockup_url": mockup_result.get('mockup_url') if mockup_result else None,
                     "purchase_url": self._generate_purchase_url(product_result.get('id')),
                     "variant_info": {
-                        "color": selected_variant.get('title', 'Default'),
-                        "size": selected_variant.get('options', [{}])[0].get('value', 'One Size')
+                        "color": variant_color,
+                        "size": variant_size
                     }
                 }
+                
+                logger.info(f"Product creation result: {result}")
+                return result
             else:
                 logger.error(f"Failed to create product: {create_response.status_code} - {create_response.text}")
                 return {"success": False, "error": f"Product creation failed: {create_response.text}"}
@@ -177,40 +190,48 @@ class PrintifyService:
     def _get_print_areas(self, print_provider_id: str, blueprint_id: str, variant_id: str) -> List[Dict]:
         """Get available print areas for product variant"""
         try:
-            # Try different API endpoint structures for print areas
-            # First try: without /variants/{variant_id}
+            # Based on Printify API docs, print areas are available at this endpoint
             response = requests.get(
                 f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/print_areas.json",
                 headers=self.headers,
                 timeout=15
             )
             
-            # If that fails, try with shipping method info
-            if response.status_code == 404:
-                logger.info(f"Trying alternative print areas endpoint for blueprint {blueprint_id}")
-                response = requests.get(
-                    f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/shipping.json",
-                    headers=self.headers,
-                    timeout=15
-                )
-            
             if response.status_code == 200:
                 print_areas_data = response.json()
                 logger.info(f"Print areas response: {print_areas_data}")
-                # Return print areas array - handle different response formats
-                if isinstance(print_areas_data, list):
+                
+                # The response should be a list of print areas
+                if isinstance(print_areas_data, list) and print_areas_data:
                     return print_areas_data
-                elif isinstance(print_areas_data, dict) and 'print_areas' in print_areas_data:
-                    return print_areas_data['print_areas']
                 else:
-                    return print_areas_data if print_areas_data else []
+                    logger.warning(f"Unexpected print areas format: {type(print_areas_data)}")
+                    return []
             else:
                 logger.error(f"Failed to get print areas: {response.status_code} - {response.text}")
-                return []
+                
+                # Try to create a fallback print area for common positions
+                logger.info("Creating fallback print areas")
+                return [{
+                    "id": "front",
+                    "name": "Front",
+                    "width": 300,
+                    "height": 300,
+                    "top": 50,
+                    "left": 50
+                }]
                 
         except Exception as e:
             logger.error(f"Error getting print areas: {e}")
-            return []
+            # Return fallback print area
+            return [{
+                "id": "front", 
+                "name": "Front",
+                "width": 300,
+                "height": 300,
+                "top": 50,
+                "left": 50
+            }]
     
     def _build_product_data(self, blueprint: Dict, print_provider_id: str, variant: Dict, 
                           logo_image_id: str, print_area: Dict) -> Dict:
@@ -263,24 +284,47 @@ class PrintifyService:
         }
     
     def _generate_mockup(self, product_id: str) -> Dict:
-        """Generate product mockup/preview"""
+        """Get product mockup images (automatically generated by Printify)"""
         try:
-            response = requests.post(
-                f"{self.base_url}/shops/{self.shop_id}/products/{product_id}/mockups.json",
+            logger.info(f"Getting mockup images for product: {product_id}")
+            
+            # Get product details which include automatically generated mockup images
+            response = requests.get(
+                f"{self.base_url}/shops/{self.shop_id}/products/{product_id}.json",
                 headers=self.headers,
                 timeout=30
             )
             
+            logger.info(f"Product details response: {response.status_code}")
             if response.status_code == 200:
-                mockup_data = response.json()
-                # Return first mockup URL if available
-                if mockup_data and len(mockup_data) > 0:
-                    return {"mockup_url": mockup_data[0].get('src')}
+                product_data = response.json()
+                images = product_data.get('images', [])
+                
+                logger.info(f"Found {len(images)} product images")
+                
+                # Find the default front-facing mockup image
+                for image in images:
+                    if image.get('is_default', False) and image.get('position') == 'front':
+                        mockup_url = image.get('src')
+                        if mockup_url:
+                            logger.info(f"Found default front mockup: {mockup_url}")
+                            return {"mockup_url": mockup_url}
+                
+                # Fallback: use first available image
+                if images:
+                    mockup_url = images[0].get('src')
+                    if mockup_url:
+                        logger.info(f"Using first available mockup: {mockup_url}")
+                        return {"mockup_url": mockup_url}
+                
+                logger.warning("No mockup images found in product data")
+            else:
+                logger.warning(f"Failed to get product details: {response.status_code} - {response.text}")
             
             return {"mockup_url": None}
             
         except Exception as e:
-            logger.error(f"Error generating mockup: {e}")
+            logger.error(f"Error getting mockup images: {e}")
             return {"mockup_url": None}
     
     def _generate_purchase_url(self, product_id: str) -> str:

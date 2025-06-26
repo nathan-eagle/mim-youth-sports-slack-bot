@@ -20,8 +20,11 @@ class LogoProcessor:
             return {"success": False, "error": "Invalid URL provided"}
         
         try:
-            # Download with timeout and size limit
-            response = requests.get(url, timeout=10, stream=True)
+            # Download with timeout and size limit, including proper User-Agent
+            headers = {
+                'User-Agent': 'MiM Youth Sports Bot/1.0 (https://github.com/nathan-eagle/mim-youth-sports-slack-bot)'
+            }
+            response = requests.get(url, headers=headers, timeout=10, stream=True)
             response.raise_for_status()
             
             # Check content type

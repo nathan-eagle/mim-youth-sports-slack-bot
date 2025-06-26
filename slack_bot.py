@@ -10,6 +10,7 @@ from product_service import product_service
 from openai_service import openai_service
 from logo_processor import logo_processor
 from printify_service import printify_service
+from conversation_manager import conversation_manager
 
 # Load environment variables
 load_dotenv()
@@ -20,12 +21,9 @@ class SlackBot:
     def __init__(self):
         self.client = WebClient(token=os.getenv('SLACK_BOT_TOKEN'))
         self.signing_secret = os.getenv('SLACK_SIGNING_SECRET')
-        
-        # Conversation state management (in production, use Redis or database)
-        self.conversations = {}
     
     def handle_message(self, event: Dict) -> Dict:
-        """Handle incoming Slack message"""
+        """Handle incoming Slack message with improved error handling"""
         try:
             channel = event.get('channel')
             user = event.get('user')
@@ -35,110 +33,215 @@ class SlackBot:
             if event.get('bot_id') or not text:
                 return {"status": "ignored"}
             
-            # Get or create conversation state
-            conversation_key = f"{channel}_{user}"
-            conversation = self.conversations.get(conversation_key, {
-                "state": "initial",
-                "product_selected": None,
-                "logo_info": None,
-                "team_info": {}
-            })
+            # Check for duplicate events
+            if conversation_manager.is_duplicate_event(event):
+                return {"status": "duplicate"}
             
             logger.info(f"Processing message from {user} in {channel}: {text}")
+            logger.info(f"Conversation state: {conversation_manager.get_conversation_summary(channel, user)}")
+            
+            # Handle restart command
+            if text.lower().strip() in ['restart', 'reset', 'start over']:
+                conversation_manager.reset_conversation(channel, user)
+                self._send_message(channel, "Great! Let's start fresh. What type of merchandise would you like to create for your team? 🏆")
+                return {"status": "success"}
+            
+            # Get conversation state
+            conversation = conversation_manager.get_conversation(channel, user)
+            
+            # Check if user needs help due to errors
+            recovery_message = conversation_manager.get_recovery_message(channel, user)
+            if recovery_message and text.lower() not in ['help', 'restart', 'reset']:
+                self._send_message(channel, recovery_message)
+                return {"status": "recovery_suggested"}
             
             # Process message based on conversation state
-            if conversation["state"] == "initial":
-                response = self._handle_initial_message(text, conversation)
-            elif conversation["state"] == "awaiting_product_selection":
-                response = self._handle_product_selection(text, conversation)
-            elif conversation["state"] == "awaiting_logo":
-                response = self._handle_logo_request(text, conversation, event)
-            else:
-                response = self._handle_initial_message(text, conversation)
-            
-            # Update conversation state
-            self.conversations[conversation_key] = conversation
-            
-            # Send response to Slack
-            if response.get("message"):
-                self._send_message(channel, response["message"])
-            
-            if response.get("image_url"):
-                self._send_image_message(channel, response["image_url"], response.get("image_caption", ""))
-            
-            return {"status": "success"}
+            try:
+                if conversation["state"] == "initial":
+                    response = self._handle_initial_message(text, conversation, channel, user)
+                elif conversation["state"] == "awaiting_product_selection":
+                    response = self._handle_product_selection(text, conversation, channel, user)
+                elif conversation["state"] == "awaiting_logo":
+                    response = self._handle_logo_request(text, conversation, event, channel, user)
+                else:
+                    response = self._handle_initial_message(text, conversation, channel, user)
+                
+                # Send response to Slack
+                if response.get("message"):
+                    self._send_message(channel, response["message"])
+                
+                if response.get("image_url"):
+                    self._send_image_message(channel, response["image_url"], response.get("image_caption", ""))
+                
+                return {"status": "success"}
+                
+            except Exception as e:
+                # Record error in conversation state
+                error_msg = f"Processing error: {str(e)}"
+                conversation_manager.record_error(channel, user, error_msg)
+                
+                # Send user-friendly error message
+                self._send_error_message(channel, user, str(e))
+                
+                return {"status": "error", "error": str(e)}
             
         except Exception as e:
-            logger.error(f"Error handling message: {e}")
-            return {"status": "error", "error": str(e)}
+            logger.error(f"Critical error handling message: {e}")
+            
+            # Try to send generic error message
+            try:
+                if channel:
+                    self._send_message(channel, "Sorry, I'm having technical difficulties. Please try again in a moment! 🔧")
+            except:
+                pass
+            
+            return {"status": "critical_error", "error": str(e)}
     
     def handle_file_share(self, event: Dict) -> Dict:
-        """Handle file upload to Slack"""
+        """Handle file upload to Slack with improved error handling"""
         try:
             channel = event.get('channel')
             user = event.get('user')
             file_info = event.get('file', {})
             
+            # Check for duplicate events
+            if conversation_manager.is_duplicate_event(event):
+                return {"status": "duplicate"}
+            
+            logger.info(f"Processing file share from {user} in {channel}")
+            
             # Get conversation state
-            conversation_key = f"{channel}_{user}"
-            conversation = self.conversations.get(conversation_key, {})
+            conversation = conversation_manager.get_conversation(channel, user)
             
             if conversation.get("state") != "awaiting_logo":
                 self._send_message(channel, "Please start by telling me what product you'd like to customize!")
                 return {"status": "ignored"}
             
-            # Process the uploaded file
-            logo_result = logo_processor.process_slack_file(file_info, self.client)
-            
-            if not logo_result["success"]:
-                self._send_message(channel, f"Sorry, there was an issue with your logo: {logo_result['error']}")
-                return {"status": "error"}
-            
-            # Process the logo and create product
-            response = self._create_custom_product(conversation, logo_result)
-            
-            # Send response
-            if response.get("message"):
-                self._send_message(channel, response["message"])
-            
-            if response.get("image_url") and response.get("purchase_url"):
-                self._send_product_result(channel, response)
-            
-            # Clean up conversation state
-            conversation["state"] = "completed"
-            self.conversations[conversation_key] = conversation
-            
-            # Clean up temporary logo file
-            logo_processor.cleanup_logo(logo_result["file_path"])
-            
-            return {"status": "success"}
+            try:
+                # Process the uploaded file
+                logo_result = logo_processor.process_slack_file(file_info, self.client)
+                
+                if not logo_result["success"]:
+                    error_msg = f"File processing failed: {logo_result['error']}"
+                    conversation_manager.record_error(channel, user, error_msg)
+                    self._send_message(channel, f"Sorry, there was an issue with your logo: {logo_result['error']}")
+                    return {"status": "error"}
+                
+                # Process the logo and create product
+                response = self._create_custom_product(conversation, logo_result, channel, user)
+                
+                # Send response
+                if response.get("message"):
+                    self._send_message(channel, response["message"])
+                
+                if response.get("image_url") and response.get("purchase_url"):
+                    self._send_product_result(channel, response)
+                
+                # Update conversation state to completed
+                conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                
+                # Clean up temporary logo file
+                logo_processor.cleanup_logo(logo_result["file_path"])
+                
+                return {"status": "success"}
+                
+            except Exception as e:
+                # Record error and send user-friendly message
+                conversation_manager.record_error(channel, user, f"File share processing error: {str(e)}")
+                self._send_error_message(channel, user, str(e))
+                return {"status": "error", "error": str(e)}
             
         except Exception as e:
-            logger.error(f"Error handling file share: {e}")
-            return {"status": "error", "error": str(e)}
+            logger.error(f"Critical error handling file share: {e}")
+            
+            # Try to send generic error message
+            try:
+                if channel:
+                    self._send_message(channel, "Sorry, I'm having technical difficulties processing your file. Please try again! 🔧")
+            except:
+                pass
+            
+            return {"status": "critical_error", "error": str(e)}
     
-    def _handle_initial_message(self, text: str, conversation: Dict) -> Dict:
+    def _handle_initial_message(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
         """Handle initial parent message"""
-        # Use OpenAI to analyze the request
-        analysis = openai_service.analyze_parent_request(text)
-        
-        # Store team information
-        if analysis.get("sport_mentioned"):
-            conversation["team_info"]["sport"] = analysis["sport_mentioned"]
-        if analysis.get("team_mentioned"):
-            conversation["team_info"]["name"] = analysis["team_mentioned"]
-        
-        # Check if product type was specified
-        if analysis.get("product_specified") and analysis.get("product_type"):
-            # Find matching product
+        try:
+            # Use OpenAI to analyze the request
+            analysis = openai_service.analyze_parent_request(text)
+            
+            # Prepare updates for conversation state
+            updates = {}
+            
+            # Store team information
+            if analysis.get("sport_mentioned"):
+                if "team_info" not in conversation:
+                    conversation["team_info"] = {}
+                conversation["team_info"]["sport"] = analysis["sport_mentioned"]
+                updates["team_info"] = conversation["team_info"]
+            
+            if analysis.get("team_mentioned"):
+                if "team_info" not in conversation:
+                    conversation["team_info"] = {}
+                conversation["team_info"]["name"] = analysis["team_mentioned"]
+                updates["team_info"] = conversation["team_info"]
+            
+            # Check if product type was specified
+            if analysis.get("product_specified") and analysis.get("product_type"):
+                # Find matching product
+                product_match = product_service.find_product_by_intent(text)
+                if product_match:
+                    updates["product_selected"] = product_match
+                    updates["state"] = "awaiting_logo"
+                    
+                    # Update conversation state
+                    conversation_manager.update_conversation(channel, user, updates)
+                    
+                    # Generate logo request message
+                    team_context = ""
+                    if conversation["team_info"]:
+                        team_parts = []
+                        if conversation["team_info"].get("name"):
+                            team_parts.append(conversation["team_info"]["name"])
+                        if conversation["team_info"].get("sport"):
+                            team_parts.append(conversation["team_info"]["sport"])
+                        team_context = " ".join(team_parts)
+                    
+                    logo_message = openai_service.generate_logo_request_message(
+                        product_match["formatted"]["title"], 
+                        team_context
+                    )
+                    
+                    return {"message": logo_message}
+            
+            # Product not specified or not found - ask for clarification
+            updates["state"] = "awaiting_product_selection"
+            conversation_manager.update_conversation(channel, user, updates)
+            
+            suggestion_message = product_service.get_product_suggestions_text()
+            
+            return {"message": f"{analysis.get('response_message', 'Hi there!')}\n\n{suggestion_message}"}
+            
+        except Exception as e:
+            logger.error(f"Error in _handle_initial_message: {e}")
+            raise e
+    
+    def _handle_product_selection(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
+        """Handle product selection from parent"""
+        try:
+            # Try to find product based on selection
             product_match = product_service.find_product_by_intent(text)
+            
             if product_match:
-                conversation["product_selected"] = product_match
-                conversation["state"] = "awaiting_logo"
+                # Update conversation state
+                updates = {
+                    "product_selected": product_match,
+                    "state": "awaiting_logo"
+                }
+                conversation_manager.update_conversation(channel, user, updates)
                 
                 # Generate logo request message
                 team_context = ""
-                if conversation["team_info"]:
+                if conversation.get("team_info"):
                     team_parts = []
                     if conversation["team_info"].get("name"):
                         team_parts.append(conversation["team_info"]["name"])
@@ -152,97 +255,86 @@ class SlackBot:
                 )
                 
                 return {"message": logo_message}
-        
-        # Product not specified or not found - ask for clarification
-        conversation["state"] = "awaiting_product_selection"
-        suggestion_message = product_service.get_product_suggestions_text()
-        
-        return {"message": f"{analysis.get('response_message', 'Hi there!')}\n\n{suggestion_message}"}
+            else:
+                # Still unclear, show options again
+                suggestion_message = product_service.get_product_suggestions_text()
+                return {"message": f"I'm not sure which product you'd like. {suggestion_message}"}
+                
+        except Exception as e:
+            logger.error(f"Error in _handle_product_selection: {e}")
+            raise e
     
-    def _handle_product_selection(self, text: str, conversation: Dict) -> Dict:
-        """Handle product selection from parent"""
-        # Try to find product based on selection
-        product_match = product_service.find_product_by_intent(text)
-        
-        if product_match:
-            conversation["product_selected"] = product_match
-            conversation["state"] = "awaiting_logo"
-            
-            # Generate logo request message
-            team_context = ""
-            if conversation["team_info"]:
-                team_parts = []
-                if conversation["team_info"].get("name"):
-                    team_parts.append(conversation["team_info"]["name"])
-                if conversation["team_info"].get("sport"):
-                    team_parts.append(conversation["team_info"]["sport"])
-                team_context = " ".join(team_parts)
-            
-            logo_message = openai_service.generate_logo_request_message(
-                product_match["formatted"]["title"], 
-                team_context
-            )
-            
-            return {"message": logo_message}
-        else:
-            # Still unclear, show options again
-            suggestion_message = product_service.get_product_suggestions_text()
-            return {"message": f"I'm not sure which product you'd like. {suggestion_message}"}
-    
-    def _handle_logo_request(self, text: str, conversation: Dict, event: Dict) -> Dict:
+    def _handle_logo_request(self, text: str, conversation: Dict, event: Dict, channel: str, user: str) -> Dict:
         """Handle logo URL or other text when awaiting logo"""
-        # Check if text contains a URL (handle Slack's <url> format)
-        if "http" in text.lower():
-            # Extract URL - handle both plain URLs and Slack's <url> format
-            import re
-            # Match URLs with or without angle brackets
-            url_pattern = r'<?(https?://[^\s>]+)>?'
-            urls = re.findall(url_pattern, text)
+        try:
+            # Check if text contains a URL (handle Slack's <url> format)
+            if "http" in text.lower():
+                # Extract URL - handle both plain URLs and Slack's <url> format
+                import re
+                # Match URLs with or without angle brackets
+                url_pattern = r'<?(https?://[^\s>]+)>?'
+                urls = re.findall(url_pattern, text)
+                
+                if urls:
+                    url = urls[0]  # Take the first URL found
+                    
+                    # Process logo from URL
+                    logo_result = logo_processor.download_logo_from_url(url)
+                    
+                    if not logo_result["success"]:
+                        error_msg = f"Logo URL processing failed: {logo_result['error']}"
+                        conversation_manager.record_error(channel, user, error_msg)
+                        return {"message": f"Sorry, there was an issue with your logo URL: {logo_result['error']}. Please try uploading the image file directly or check the URL."}
+                    
+                    # Create custom product
+                    response = self._create_custom_product(conversation, logo_result, channel, user)
+                    
+                    # Clean up temporary file
+                    logo_processor.cleanup_logo(logo_result["file_path"])
+                    
+                    # Update conversation state to completed
+                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                    
+                    return response
             
-            if urls:
-                url = urls[0]  # Take the first URL found
-                
-                # Process logo from URL
-                logo_result = logo_processor.download_logo_from_url(url)
-                
-                if not logo_result["success"]:
-                    return {"message": f"Sorry, there was an issue with your logo URL: {logo_result['error']}. Please try uploading the image file directly or check the URL."}
-                
-                # Create custom product
-                response = self._create_custom_product(conversation, logo_result)
-                
-                # Clean up temporary file
-                logo_processor.cleanup_logo(logo_result["file_path"])
-                
-                conversation["state"] = "completed"
-                return response
-        
-        # Not a URL, remind about logo requirement
-        return {"message": "Please upload your team logo as an image file or provide a direct URL to the logo image. I'll use it to customize your selected product!"}
+            # Not a URL, remind about logo requirement
+            return {"message": "Please upload your team logo as an image file or provide a direct URL to the logo image. I'll use it to customize your selected product!"}
+            
+        except Exception as e:
+            logger.error(f"Error in _handle_logo_request: {e}")
+            raise e
     
-    def _create_custom_product(self, conversation: Dict, logo_result: Dict) -> Dict:
+    def _create_custom_product(self, conversation: Dict, logo_result: Dict, channel: str, user: str) -> Dict:
         """Create custom product with logo"""
         try:
             product_info = conversation["product_selected"]
             product_id = product_info["id"]
             
             # Upload logo to Printify
+            logger.info(f"Uploading logo for {channel}_{user}")
             logo_filename = logo_result.get("original_name", "team_logo.png")
             upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
             
             if not upload_result["success"]:
+                error_msg = f"Logo upload failed: {upload_result['error']}"
+                conversation_manager.record_error(channel, user, error_msg)
                 return {"message": f"Sorry, there was an issue uploading your logo: {upload_result['error']}"}
             
             # Create custom product
+            logger.info(f"Creating custom product for {channel}_{user} with logo {upload_result['image_id']}")
             product_result = printify_service.create_custom_product(
                 product_id, 
                 upload_result["image_id"]
             )
             
             if not product_result["success"]:
+                error_msg = f"Product creation failed: {product_result['error']}"
+                conversation_manager.record_error(channel, user, error_msg)
                 return {"message": f"Sorry, there was an issue creating your custom product: {product_result['error']}"}
             
-            # Format success response
+            # Success! Format response
+            logger.info(f"Successfully created product {product_result['product_id']} for {channel}_{user}")
+            
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
             
@@ -267,7 +359,25 @@ class SlackBot:
             
         except Exception as e:
             logger.error(f"Error creating custom product: {e}")
-            return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again!"}
+            conversation_manager.record_error(channel, user, f"Product creation exception: {str(e)}")
+            return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again or type 'restart' to begin fresh!"}
+    
+    def _send_error_message(self, channel: str, user: str, error: str):
+        """Send user-friendly error message"""
+        try:
+            # Check if user has had multiple errors
+            if conversation_manager.should_show_help(channel, user):
+                message = ("I'm having trouble helping you right now. Let me suggest a fresh start! "
+                          "Type 'restart' to begin again, or let me know specifically what you need help with. "
+                          "I'm here to create awesome team merchandise! 🏆")
+            else:
+                message = ("Oops! Something went wrong on my end. Please try again, "
+                          "or type 'restart' if you'd like to start fresh. 🔧")
+            
+            self._send_message(channel, message)
+            
+        except Exception as e:
+            logger.error(f"Error sending error message: {e}")
     
     def _send_message(self, channel: str, message: str):
         """Send text message to Slack"""
