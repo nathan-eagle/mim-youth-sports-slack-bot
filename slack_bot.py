@@ -11,6 +11,7 @@ from openai_service import openai_service
 from logo_processor import logo_processor
 from printify_service import printify_service
 from conversation_manager import conversation_manager
+from database_service import database_service
 
 # Load environment variables
 load_dotenv()
@@ -71,7 +72,7 @@ class SlackBot:
                 # Send response to Slack
                 if response.get("image_url") and response.get("purchase_url"):
                     # Send product result with image and purchase link
-                    self._send_product_result(channel, response)
+                    self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                 elif response.get("message"):
                     self._send_message(channel, response["message"])
                 elif response.get("image_url"):
@@ -131,7 +132,7 @@ class SlackBot:
                 # Upload logo to Printify for persistence
                 logger.info(f"Uploading logo to Printify for persistence: {channel}_{user}")
                 logo_filename = logo_result.get("original_name", "team_logo.png")
-                upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
+                upload_result = printify_service.upload_image_from_file(logo_result["file_path"], logo_filename)
                 
                 if not upload_result["success"]:
                     error_msg = f"Logo upload failed: {upload_result['error']}"
@@ -161,7 +162,7 @@ class SlackBot:
                     
                     # Send response with purchase link
                     if response.get("image_url") and response.get("purchase_url"):
-                        self._send_product_result(channel, response)
+                        self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                     elif response.get("message"):
                         self._send_message(channel, response["message"])
                     
@@ -334,7 +335,7 @@ class SlackBot:
                     # Upload to Printify for persistence
                     logger.info(f"Uploading URL logo to Printify for persistence: {channel}_{user}")
                     logo_filename = logo_result.get("original_name", "team_logo.png")
-                    upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
+                    upload_result = printify_service.upload_image_from_file(logo_result["file_path"], logo_filename)
                     
                     if not upload_result["success"]:
                         error_msg = f"Logo upload failed: {upload_result['error']}"
@@ -469,110 +470,170 @@ class SlackBot:
             raise e
     
     def _create_custom_product(self, conversation: Dict, logo_result: Dict, channel: str, user: str) -> Dict:
-        """Create custom product with logo"""
+        """Create custom product design with uploaded logo"""
         try:
             product_info = conversation["product_selected"]
-            product_id = product_info["id"]
+            team_info = conversation.get("team_info", {})
             
             # Upload logo to Printify
             logger.info(f"Uploading logo for {channel}_{user}")
             logo_filename = logo_result.get("original_name", "team_logo.png")
-            upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
+            upload_result = printify_service.upload_image_from_file(logo_result["file_path"], logo_filename)
             
             if not upload_result["success"]:
                 error_msg = f"Logo upload failed: {upload_result['error']}"
                 conversation_manager.record_error(channel, user, error_msg)
                 return {"message": f"Sorry, there was an issue uploading your logo: {upload_result['error']}"}
             
-            # Create custom product
-            logger.info(f"Creating custom product for {channel}_{user} with logo {upload_result['image_id']}")
-            product_result = printify_service.create_custom_product(
-                product_id, 
-                upload_result["image_id"]
+            # Get product blueprint details
+            available_products = printify_service.get_available_products()
+            selected_product = next((p for p in available_products if str(p['id']) == str(product_info['id'])), None)
+            
+            if not selected_product:
+                error_msg = "Selected product not found in catalog"
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"message": "Sorry, there was an issue finding the selected product. Please try again!"}
+            
+            # Get first available variant for mockup
+            variants = selected_product.get('variants', [])
+            if not variants:
+                error_msg = "No variants available for selected product"
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"message": "Sorry, this product doesn't have any available options. Please choose a different product!"}
+            
+            first_variant = variants[0]
+            
+            # Create product design for mockup
+            logger.info(f"Creating product design for {channel}_{user} with logo {upload_result['image_id']}")
+            design_result = printify_service.create_product_design(
+                blueprint_id=selected_product['blueprint_id'],
+                print_provider_id=selected_product['print_provider_id'],
+                variant_id=first_variant['id'],
+                image_id=upload_result["image_id"],
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
             )
             
-            if not product_result["success"]:
-                error_msg = f"Product creation failed: {product_result['error']}"
+            if not design_result["success"]:
+                error_msg = f"Design creation failed: {design_result['error']}"
                 conversation_manager.record_error(channel, user, error_msg)
-                return {"message": f"Sorry, there was an issue creating your custom product: {product_result['error']}"}
+                return {"message": f"Sorry, there was an issue creating your design: {design_result['error']}"}
+            
+            # Save design to database
+            design_data = {
+                "name": f"{team_info.get('name', 'Team')} {selected_product['title']}",
+                "description": f"Custom {selected_product['title']} with team logo",
+                "blueprint_id": selected_product['blueprint_id'],
+                "print_provider_id": selected_product['print_provider_id'],
+                "team_logo_image_id": upload_result["image_id"],
+                "mockup_image_url": design_result.get("mockup_url"),
+                "base_price": selected_product.get('base_price', 20.00),
+                "markup_percentage": 50.0,
+                "created_by": f"{channel}_{user}",
+                "team_info": team_info,
+                "product_type": selected_product.get('type', 'apparel')
+            }
+            
+            design_id = database_service.save_product_design(design_data)
+            
+            # Generate storefront URL
+            drop_url = database_service.generate_drop_url(design_id)
             
             # Success! Format response
-            logger.info(f"Successfully created product {product_result['product_id']} for {channel}_{user}")
+            logger.info(f"Successfully created design {design_id} for {channel}_{user}")
             
-            team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
+            success_message = f"🎉 Awesome! I've created a custom {selected_product['title']} design for {team_name}!\n\n"
+            success_message += "Your design drop is ready for purchase! 👇"
             
-            success_message = f"🎉 Awesome! I've created a custom {product_info['formatted']['title']} for {team_name}!\n\n"
-            success_message += f"*Product Details:*\n"
-            success_message += f"• {product_result['title']}\n"
-            success_message += f"• Color: {product_result['variant_info']['color']}\n"
-            success_message += f"• Size: {product_result['variant_info']['size']}\n\n"
-            
-            if product_result.get("mockup_url"):
-                success_message += "Check out your customized product below! 👇"
-                
-                return {
-                    "message": success_message,
-                    "image_url": product_result["mockup_url"],
-                    "purchase_url": product_result["purchase_url"],
-                    "product_title": product_result["title"]
-                }
-            else:
-                success_message += f"🛒 Ready to order? <{product_result['purchase_url']}|Click here to purchase>"
-                return {"message": success_message}
+            return {
+                "message": success_message,
+                "image_url": design_result.get("mockup_url"),
+                "purchase_url": drop_url,
+                "product_title": design_data["name"]
+            }
             
         except Exception as e:
-            logger.error(f"Error creating custom product: {e}")
-            conversation_manager.record_error(channel, user, f"Product creation exception: {str(e)}")
-            return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again or type 'restart' to begin fresh!"}
+            logger.error(f"Error creating custom product design: {e}")
+            conversation_manager.record_error(channel, user, f"Design creation exception: {str(e)}")
+            return {"message": "Sorry, there was an unexpected error creating your design. Please try again or type 'restart' to begin fresh!"}
     
     def _create_custom_product_with_stored_logo(self, conversation: Dict, logo_info: Dict, channel: str, user: str) -> Dict:
-        """Create custom product with logo stored in conversation state"""
+        """Create custom product design and save to database for drop"""
         try:
             product_info = conversation["product_selected"]
-            product_id = product_info["id"]
+            team_info = conversation.get("team_info", {})
             
-            # Create custom product
-            logger.info(f"Creating custom product for {channel}_{user} with stored logo")
-            product_result = printify_service.create_custom_product(
-                product_id, 
-                logo_info["printify_image_id"]
+            # Get product blueprint details
+            available_products = printify_service.get_available_products()
+            selected_product = next((p for p in available_products if str(p['id']) == str(product_info['id'])), None)
+            
+            if not selected_product:
+                error_msg = "Selected product not found in catalog"
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"message": "Sorry, there was an issue finding the selected product. Please try again!"}
+            
+            # Get first available variant for mockup
+            variants = selected_product.get('variants', [])
+            if not variants:
+                error_msg = "No variants available for selected product"
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"message": "Sorry, this product doesn't have any available options. Please choose a different product!"}
+            
+            first_variant = variants[0]
+            
+            # Create product design for mockup
+            logger.info(f"Creating product design for {channel}_{user} with stored logo")
+            design_result = printify_service.create_product_design(
+                blueprint_id=selected_product['blueprint_id'],
+                print_provider_id=selected_product['print_provider_id'],
+                variant_id=first_variant['id'],
+                image_id=logo_info["printify_image_id"],
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
             )
             
-            if not product_result["success"]:
-                error_msg = f"Product creation failed: {product_result['error']}"
+            if not design_result["success"]:
+                error_msg = f"Design creation failed: {design_result['error']}"
                 conversation_manager.record_error(channel, user, error_msg)
-                return {"message": f"Sorry, there was an issue creating your custom product: {product_result['error']}"}
+                return {"message": f"Sorry, there was an issue creating your design: {design_result['error']}"}
+            
+            # Save design to database
+            design_data = {
+                "name": f"{team_info.get('name', 'Team')} {selected_product['title']}",
+                "description": f"Custom {selected_product['title']} with team logo",
+                "blueprint_id": selected_product['blueprint_id'],
+                "print_provider_id": selected_product['print_provider_id'],
+                "team_logo_image_id": logo_info["printify_image_id"],
+                "mockup_image_url": design_result.get("mockup_url"),
+                "base_price": selected_product.get('base_price', 20.00),
+                "markup_percentage": 50.0,
+                "created_by": f"{channel}_{user}",
+                "team_info": team_info,
+                "product_type": selected_product.get('type', 'apparel')
+            }
+            
+            design_id = database_service.save_product_design(design_data)
+            
+            # Generate storefront URL
+            drop_url = database_service.generate_drop_url(design_id)
             
             # Success! Format response
-            logger.info(f"Successfully created product {product_result['product_id']} for {channel}_{user}")
+            logger.info(f"Successfully created design {design_id} for {channel}_{user}")
             
-            team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
+            success_message = f"🎉 Awesome! I've created a custom {selected_product['title']} design for {team_name}!\n\n"
+            success_message += "Your design drop is ready for purchase! 👇"
             
-            success_message = f"🎉 Awesome! I've created a custom {product_info['formatted']['title']} for {team_name}!\n\n"
-            success_message += f"*Product Details:*\n"
-            success_message += f"• {product_result['title']}\n"
-            success_message += f"• Color: {product_result['variant_info']['color']}\n"
-            success_message += f"• Size: {product_result['variant_info']['size']}\n\n"
-            
-            if product_result.get("mockup_url"):
-                success_message += "Check out your customized product below! 👇"
-                
-                return {
-                    "message": success_message,
-                    "image_url": product_result["mockup_url"],
-                    "purchase_url": product_result["purchase_url"],
-                    "product_title": product_result["title"]
-                }
-            else:
-                success_message += f"🛒 Ready to order? <{product_result['purchase_url']}|Click here to purchase>"
-                return {"message": success_message}
+            return {
+                "message": success_message,
+                "image_url": design_result.get("mockup_url"),
+                "purchase_url": drop_url,
+                "product_title": design_data["name"]
+            }
             
         except Exception as e:
-            logger.error(f"Error creating custom product with stored logo: {e}")
-            conversation_manager.record_error(channel, user, f"Product creation exception: {str(e)}")
-            return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again or type 'restart' to begin fresh!"}
+            logger.error(f"Error creating custom product design: {e}")
+            conversation_manager.record_error(channel, user, f"Design creation exception: {str(e)}")
+            return {"message": "Sorry, there was an unexpected error creating your design. Please try again or type 'restart' to begin fresh!"}
     
     def _send_error_message(self, channel: str, user: str, error: str):
         """Send user-friendly error message"""
@@ -631,38 +692,47 @@ class SlackBot:
         except SlackApiError as e:
             logger.error(f"Error sending image message: {e}")
     
-    def _send_product_result(self, channel: str, response: Dict):
-        """Send product result with image and purchase link"""
+    def _send_product_result(self, channel: str, image_url: str, purchase_url: str, product_name: str, publish_method: str = None):
+        """Send product creation result with drop link for purchase"""
         try:
-            blocks = [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": response["message"]
-                    }
-                },
-                {
-                    "type": "image",
-                    "image_url": response["image_url"],
-                    "alt_text": f"Custom {response['product_title']}"
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"🛒 *Ready to order?* <{response['purchase_url']}|Click here to purchase your custom {response['product_title']}>"
-                    }
-                }
-            ]
-            
+            # Create messaging for custom drop approach
+            success_message = f"""🎉 *Custom {product_name} Created Successfully!*
+
+✅ Your team logo has been applied to the product
+✅ High-quality mockup generated and ready to view
+✅ Product design saved and ready for purchase
+
+🛒 **Purchase your team gear here:** {purchase_url}
+
+Your custom design is ready! Click the link above to select sizes, quantities, and complete your order. We'll handle the rest! 🏆"""
+
+            # Send the image with the message
             self.client.chat_postMessage(
                 channel=channel,
-                blocks=blocks,
-                unfurl_links=False
+                text=success_message,
+                blocks=[
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": success_message
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "image_url": image_url,
+                        "alt_text": f"Preview of {product_name}"
+                    }
+                ]
             )
-        except SlackApiError as e:
+            
+        except Exception as e:
             logger.error(f"Error sending product result: {e}")
+            # Fallback message without image
+            self.client.chat_postMessage(
+                channel=channel,
+                text=f"🎉 Custom {product_name} created! Purchase here: {purchase_url}"
+            )
 
 # Global instance
 slack_bot = SlackBot() 
