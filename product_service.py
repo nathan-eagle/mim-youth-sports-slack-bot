@@ -72,34 +72,61 @@ class ProductService:
             enhanced_product['print_provider_id'] = mapping['print_provider_id']
             enhanced_product['category'] = mapping['category']
         
-        # Try to load variants from complete cache
-        try:
-            with open('product_cache_complete.json', 'r') as f:
-                complete_data = json.load(f)
-                complete_products = complete_data.get('products', {})
-                
-                if str(product_id) in complete_products:
-                    complete_product = complete_products[str(product_id)]
-                    
-                    # Add variants if available
-                    if 'variants' in complete_product:
-                        enhanced_product['variants'] = complete_product['variants']
-                    
-                    # Add other useful data
-                    if 'description' in complete_product:
-                        enhanced_product['description'] = complete_product['description']
-                        
-        except Exception as e:
-            logger.warning(f"Could not load complete cache for variants: {e}")
-            # Provide a default variant if none found
-            enhanced_product['variants'] = [
-                {
-                    'id': 1,  # Default variant
-                    'title': 'Default',
-                    'price': 2000,  # $20 in cents
-                    'available': True
-                }
+        # Use real variants for our specific blueprint + provider combinations
+        real_variants = {
+            '157': [  # T-shirt (blueprint 6 + provider 3) - Real variants from API
+                {'id': 11848, 'title': 'Ash / L', 'options': {'color': 'Ash', 'size': 'L'}},
+                {'id': 11849, 'title': 'Ash / M', 'options': {'color': 'Ash', 'size': 'M'}},
+                {'id': 11850, 'title': 'Ash / S', 'options': {'color': 'Ash', 'size': 'S'}},
+                {'id': 12100, 'title': 'White / L', 'options': {'color': 'White', 'size': 'L'}},
+                {'id': 12101, 'title': 'White / M', 'options': {'color': 'White', 'size': 'M'}},
+                {'id': 12102, 'title': 'White / S', 'options': {'color': 'White', 'size': 'S'}},
+                {'id': 12124, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
+                {'id': 12126, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
+                {'id': 12028, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
+                {'id': 12029, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
+                {'id': 12030, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
+                {'id': 12022, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
+                {'id': 12023, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
+                {'id': 12024, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
+                {'id': 11986, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
+                {'id': 11987, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
+                {'id': 11988, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}}
             ]
+        }
+        
+        if str(product_id) in real_variants:
+            enhanced_product['variants'] = real_variants[str(product_id)]
+            logger.info(f"Using real Printify variants for product {product_id}: {len(enhanced_product['variants'])} variants")
+        else:
+            # Fallback: try to load variants from complete cache
+            try:
+                with open('product_cache_complete.json', 'r') as f:
+                    complete_data = json.load(f)
+                    complete_products = complete_data.get('products', {})
+                    
+                    if str(product_id) in complete_products:
+                        complete_product = complete_products[str(product_id)]
+                        
+                        # Add variants if available
+                        if 'variants' in complete_product:
+                            enhanced_product['variants'] = complete_product['variants']
+                        
+                        # Add other useful data
+                        if 'description' in complete_product:
+                            enhanced_product['description'] = complete_product['description']
+                            
+            except Exception as e:
+                logger.warning(f"Could not load complete cache for variants: {e}")
+                # Provide a default variant if none found
+                enhanced_product['variants'] = [
+                    {
+                        'id': 1,  # Default variant
+                        'title': 'Default',
+                        'price': 2000,  # $20 in cents
+                        'available': True
+                    }
+                ]
         
         return enhanced_product
     
