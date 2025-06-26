@@ -9,6 +9,26 @@ class ProductService:
         self.cache_file_path = cache_file_path
         self.products_cache = {}
         self.best_products = {}
+        
+        # Hardcoded mappings for the 3 best products since cache doesn't include blueprint/provider data
+        self.product_mappings = {
+            '157': {  # Kids Heavy Cotton™ Tee
+                'blueprint_id': 9,  # Standard t-shirt blueprint
+                'print_provider_id': 1,  # Common print provider
+                'category': 'shirt'
+            },
+            '314': {  # Youth Heavy Blend Hooded Sweatshirt  
+                'blueprint_id': 16,  # Standard hoodie blueprint
+                'print_provider_id': 1,  # Common print provider
+                'category': 'hoodie'
+            },
+            '1446': {  # Snapback Trucker Cap
+                'blueprint_id': 17,  # Standard cap blueprint  
+                'print_provider_id': 1,  # Common print provider
+                'category': 'hat'
+            }
+        }
+        
         self._load_cache()
     
     def _load_cache(self) -> bool:
@@ -37,8 +57,51 @@ class ProductService:
         return self.best_products.copy()
     
     def get_product_by_id(self, product_id: str) -> Optional[Dict]:
-        """Get specific product by ID"""
-        return self.products_cache.get(str(product_id))
+        """Get specific product by ID with enhanced data including variants"""
+        base_product = self.products_cache.get(str(product_id))
+        if not base_product:
+            return None
+            
+        # Enhance with blueprint/provider data and variants
+        enhanced_product = base_product.copy()
+        
+        # Add blueprint and print provider info from our mappings
+        if str(product_id) in self.product_mappings:
+            mapping = self.product_mappings[str(product_id)]
+            enhanced_product['blueprint_id'] = mapping['blueprint_id']
+            enhanced_product['print_provider_id'] = mapping['print_provider_id']
+            enhanced_product['category'] = mapping['category']
+        
+        # Try to load variants from complete cache
+        try:
+            with open('product_cache_complete.json', 'r') as f:
+                complete_data = json.load(f)
+                complete_products = complete_data.get('products', {})
+                
+                if str(product_id) in complete_products:
+                    complete_product = complete_products[str(product_id)]
+                    
+                    # Add variants if available
+                    if 'variants' in complete_product:
+                        enhanced_product['variants'] = complete_product['variants']
+                    
+                    # Add other useful data
+                    if 'description' in complete_product:
+                        enhanced_product['description'] = complete_product['description']
+                        
+        except Exception as e:
+            logger.warning(f"Could not load complete cache for variants: {e}")
+            # Provide a default variant if none found
+            enhanced_product['variants'] = [
+                {
+                    'id': 1,  # Default variant
+                    'title': 'Default',
+                    'price': 2000,  # $20 in cents
+                    'available': True
+                }
+            ]
+        
+        return enhanced_product
     
     def get_products_by_category(self, category: str) -> Dict:
         """Get best products filtered by category"""
