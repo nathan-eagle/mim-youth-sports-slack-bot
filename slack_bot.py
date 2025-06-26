@@ -102,7 +102,7 @@ class SlackBot:
             return {"status": "critical_error", "error": str(e)}
     
     def handle_file_share(self, event: Dict) -> Dict:
-        """Handle file upload to Slack with simplified approach"""
+        """Handle file upload to Slack with logo persistence"""
         try:
             channel = event.get('channel')
             user = event.get('user')
@@ -117,16 +117,7 @@ class SlackBot:
             # Get conversation state
             conversation = conversation_manager.get_conversation(channel, user)
             
-            # SIMPLIFIED APPROACH: If no product selected, ask for product type
-            # Don't store the file - ask user to re-upload after product selection
-            if not conversation.get("product_selected"):
-                self._send_message(channel, "I see you've uploaded a logo! 📁 First, let me know what type of product you'd like to customize - shirt, hoodie, or hat? Then I'll ask you to upload your logo again so I can apply it to the right product.")
-                conversation_manager.update_conversation(channel, user, {
-                    "state": "awaiting_product_selection"
-                })
-                return {"status": "awaiting_product"}
-            
-            # Product is already selected, process the file immediately
+            # Process the uploaded file and upload to Printify for persistence
             try:
                 # Process the uploaded file
                 logo_result = logo_processor.process_slack_file(file_info, self.client)
@@ -137,20 +128,50 @@ class SlackBot:
                     self._send_message(channel, f"Sorry, there was an issue with your logo: {logo_result['error']}")
                     return {"status": "error"}
                 
-                # Process the logo and create product
-                response = self._create_custom_product(conversation, logo_result, channel, user)
+                # Upload logo to Printify for persistence
+                logger.info(f"Uploading logo to Printify for persistence: {channel}_{user}")
+                logo_filename = logo_result.get("original_name", "team_logo.png")
+                upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
                 
-                # Send response with purchase link
-                if response.get("image_url") and response.get("purchase_url"):
-                    self._send_product_result(channel, response)
-                elif response.get("message"):
-                    self._send_message(channel, response["message"])
+                if not upload_result["success"]:
+                    error_msg = f"Logo upload failed: {upload_result['error']}"
+                    conversation_manager.record_error(channel, user, error_msg)
+                    self._send_message(channel, f"Sorry, there was an issue uploading your logo: {upload_result['error']}")
+                    return {"status": "error"}
                 
-                # Update conversation state to completed
-                conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                # Store logo info in conversation for reuse
+                logo_info = {
+                    "printify_image_id": upload_result["image_id"],
+                    "preview_url": upload_result.get("preview_url"),
+                    "filename": logo_filename,
+                    "uploaded_at": conversation_manager._get_timestamp()
+                }
+                
+                # Update conversation with persistent logo
+                conversation_manager.update_conversation(channel, user, {
+                    "logo_info": logo_info
+                })
                 
                 # Clean up temporary logo file
                 logo_processor.cleanup_logo(logo_result["file_path"])
+                
+                # If product is already selected, create it immediately
+                if conversation.get("product_selected"):
+                    response = self._create_custom_product_with_stored_logo(conversation, logo_info, channel, user)
+                    
+                    # Send response with purchase link
+                    if response.get("image_url") and response.get("purchase_url"):
+                        self._send_product_result(channel, response)
+                    elif response.get("message"):
+                        self._send_message(channel, response["message"])
+                    
+                    # Update conversation state to completed
+                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                else:
+                    # Ask for product selection with logo ready
+                    suggestion_message = product_service.get_product_suggestions_text()
+                    self._send_message(channel, f"Great! I've got your logo ready. 🎨 Now, what type of product would you like to customize?\n\n{suggestion_message}")
+                    conversation_manager.update_conversation(channel, user, {"state": "awaiting_product_selection"})
                 
                 return {"status": "success"}
                 
@@ -248,22 +269,37 @@ class SlackBot:
                 }
                 conversation_manager.update_conversation(channel, user, updates)
                 
-                # Generate logo request message
-                team_context = ""
-                if conversation.get("team_info"):
-                    team_parts = []
-                    if conversation["team_info"].get("name"):
-                        team_parts.append(conversation["team_info"]["name"])
-                    if conversation["team_info"].get("sport"):
-                        team_parts.append(conversation["team_info"]["sport"])
-                    team_context = " ".join(team_parts)
-                
-                logo_message = openai_service.generate_logo_request_message(
-                    product_match["formatted"]["title"], 
-                    team_context
-                )
-                
-                return {"message": logo_message}
+                # Check if we already have a logo stored
+                stored_logo = conversation.get("logo_info")
+                if stored_logo and stored_logo.get("printify_image_id"):
+                    # Use stored logo to create product immediately
+                    logger.info(f"Using stored logo for product creation: {stored_logo['printify_image_id']}")
+                    
+                    # Get updated conversation with product selection
+                    updated_conversation = conversation_manager.get_conversation(channel, user)
+                    response = self._create_custom_product_with_stored_logo(updated_conversation, stored_logo, channel, user)
+                    
+                    # Update state to completed
+                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
+                    
+                    return response
+                else:
+                    # No stored logo, ask for logo upload
+                    team_context = ""
+                    if conversation.get("team_info"):
+                        team_parts = []
+                        if conversation["team_info"].get("name"):
+                            team_parts.append(conversation["team_info"]["name"])
+                        if conversation["team_info"].get("sport"):
+                            team_parts.append(conversation["team_info"]["sport"])
+                        team_context = " ".join(team_parts)
+                    
+                    logo_message = openai_service.generate_logo_request_message(
+                        product_match["formatted"]["title"], 
+                        team_context
+                    )
+                    
+                    return {"message": logo_message}
             else:
                 # Still unclear, show options again
                 suggestion_message = product_service.get_product_suggestions_text()
@@ -295,8 +331,29 @@ class SlackBot:
                         conversation_manager.record_error(channel, user, error_msg)
                         return {"message": f"Sorry, there was an issue with your logo URL: {logo_result['error']}. Please try uploading the image file directly or check the URL."}
                     
+                    # Upload to Printify for persistence
+                    logger.info(f"Uploading URL logo to Printify for persistence: {channel}_{user}")
+                    logo_filename = logo_result.get("original_name", "team_logo.png")
+                    upload_result = printify_service.upload_logo_image(logo_result["file_path"], logo_filename)
+                    
+                    if not upload_result["success"]:
+                        error_msg = f"Logo upload failed: {upload_result['error']}"
+                        conversation_manager.record_error(channel, user, error_msg)
+                        return {"message": f"Sorry, there was an issue uploading your logo: {upload_result['error']}"}
+                    
+                    # Store logo info for reuse
+                    logo_info = {
+                        "printify_image_id": upload_result["image_id"],
+                        "preview_url": upload_result.get("preview_url"),
+                        "filename": logo_filename,
+                        "uploaded_at": conversation_manager._get_timestamp(),
+                        "source": "url"
+                    }
+                    
+                    conversation_manager.update_conversation(channel, user, {"logo_info": logo_info})
+                    
                     # Create custom product
-                    response = self._create_custom_product(conversation, logo_result, channel, user)
+                    response = self._create_custom_product_with_stored_logo(conversation, logo_info, channel, user)
                     
                     # Clean up temporary file
                     logo_processor.cleanup_logo(logo_result["file_path"])
@@ -306,8 +363,8 @@ class SlackBot:
                     
                     return response
             
-            # Not a URL, remind about logo requirement
-            return {"message": "Please upload your team logo as an image file or provide a direct URL to the logo image. I'll use it to customize your selected product!"}
+            # Not a URL, remind about logo requirement (prefer URLs)
+            return {"message": "Please provide your team logo! For best results, share a direct URL link to your logo image (like from Google Drive, Dropbox, or any image hosting site). You can also upload an image file if needed."}
             
         except Exception as e:
             logger.error(f"Error in _handle_logo_request: {e}")
@@ -466,6 +523,54 @@ class SlackBot:
             
         except Exception as e:
             logger.error(f"Error creating custom product: {e}")
+            conversation_manager.record_error(channel, user, f"Product creation exception: {str(e)}")
+            return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again or type 'restart' to begin fresh!"}
+    
+    def _create_custom_product_with_stored_logo(self, conversation: Dict, logo_info: Dict, channel: str, user: str) -> Dict:
+        """Create custom product with logo stored in conversation state"""
+        try:
+            product_info = conversation["product_selected"]
+            product_id = product_info["id"]
+            
+            # Create custom product
+            logger.info(f"Creating custom product for {channel}_{user} with stored logo")
+            product_result = printify_service.create_custom_product(
+                product_id, 
+                logo_info["printify_image_id"]
+            )
+            
+            if not product_result["success"]:
+                error_msg = f"Product creation failed: {product_result['error']}"
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"message": f"Sorry, there was an issue creating your custom product: {product_result['error']}"}
+            
+            # Success! Format response
+            logger.info(f"Successfully created product {product_result['product_id']} for {channel}_{user}")
+            
+            team_info = conversation.get("team_info", {})
+            team_name = team_info.get("name", "your team")
+            
+            success_message = f"🎉 Awesome! I've created a custom {product_info['formatted']['title']} for {team_name}!\n\n"
+            success_message += f"*Product Details:*\n"
+            success_message += f"• {product_result['title']}\n"
+            success_message += f"• Color: {product_result['variant_info']['color']}\n"
+            success_message += f"• Size: {product_result['variant_info']['size']}\n\n"
+            
+            if product_result.get("mockup_url"):
+                success_message += "Check out your customized product below! 👇"
+                
+                return {
+                    "message": success_message,
+                    "image_url": product_result["mockup_url"],
+                    "purchase_url": product_result["purchase_url"],
+                    "product_title": product_result["title"]
+                }
+            else:
+                success_message += f"🛒 Ready to order? <{product_result['purchase_url']}|Click here to purchase>"
+                return {"message": success_message}
+            
+        except Exception as e:
+            logger.error(f"Error creating custom product with stored logo: {e}")
             conversation_manager.record_error(channel, user, f"Product creation exception: {str(e)}")
             return {"message": "Sorry, there was an unexpected error creating your custom product. Please try again or type 'restart' to begin fresh!"}
     

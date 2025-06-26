@@ -217,5 +217,9 @@ class ConversationManager:
         
         return None
 
+    def _get_timestamp(self) -> float:
+        """Get current timestamp for tracking"""
+        return time.time()
+
 # Global instance
 conversation_manager = ConversationManager() 

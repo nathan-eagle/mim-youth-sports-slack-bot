@@ -1,16 +1,21 @@
 {
   "conversations": {
     "test_channel_test_user": {
-      "state": "test",
+      "state": "awaiting_product_selection",
       "product_selected": null,
-      "logo_info": null,
+      "logo_info": {
+        "printify_image_id": "test_image_123",
+        "preview_url": "https://example.com/preview.jpg",
+        "filename": "test_logo.png",
+        "uploaded_at": 1750905087.3064399
+      },
       "team_info": {},
-      "created_at": 1750903434.079736,
-      "last_activity": 1750903434.0797682,
+      "created_at": 1750905087.306158,
+      "last_activity": 1750905087.306453,
       "error_count": 0,
       "last_error": null
     }
   },
   "processed_events": [],
-  "last_updated": 1750903434.07977
+  "last_updated": 1750905087.306453
 }
