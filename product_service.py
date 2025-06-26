@@ -92,6 +92,24 @@ class ProductService:
                 {'id': 11986, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
                 {'id': 11987, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
                 {'id': 11988, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}}
+            ],
+            '314': [  # Youth Heavy Blend Hooded Sweatshirt (blueprint 66 + provider 34) - Real variants from API
+                {'id': 65166, 'title': 'Black / M', 'options': {'color': 'Black', 'size': 'M'}},
+                {'id': 65167, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
+                {'id': 65168, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
+                {'id': 65169, 'title': 'Black / XL', 'options': {'color': 'Black', 'size': 'XL'}},
+                {'id': 65174, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
+                {'id': 65175, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}},
+                {'id': 65176, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
+                {'id': 65177, 'title': 'Navy / XL', 'options': {'color': 'Navy', 'size': 'XL'}},
+                {'id': 65182, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
+                {'id': 65183, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
+                {'id': 65184, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
+                {'id': 65185, 'title': 'Royal / XL', 'options': {'color': 'Royal', 'size': 'XL'}},
+                {'id': 65194, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
+                {'id': 65195, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
+                {'id': 65196, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
+                {'id': 65197, 'title': 'Red / XL', 'options': {'color': 'Red', 'size': 'XL'}}
             ]
         }
         

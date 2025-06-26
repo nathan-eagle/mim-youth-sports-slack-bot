@@ -251,6 +251,14 @@ class PrintifyService:
                             variant_id: int, image_id: str, product_title: str = None) -> Dict:
         """Create a product design for mockup generation (no full product creation)"""
         try:
+            # Get all available variants for this blueprint and print provider
+            all_variant_ids = self._get_all_variant_ids_for_blueprint(blueprint_id, print_provider_id)
+            
+            # If we couldn't get variants from API, use a fallback approach
+            if not all_variant_ids:
+                logger.warning(f"Could not get variants for blueprint {blueprint_id}, provider {print_provider_id}. Using single variant.")
+                all_variant_ids = [variant_id]
+            
             # Create temporary product for mockup generation
             design_data = {
                 "title": product_title or "Custom Team Product",
@@ -266,7 +274,7 @@ class PrintifyService:
                 ],
                 "print_areas": [
                     {
-                        "variant_ids": [variant_id],
+                        "variant_ids": all_variant_ids,  # Include ALL available variants
                         "placeholders": [
                             {
                                 "position": "front",
@@ -351,6 +359,27 @@ class PrintifyService:
             logger.error(f"Error getting product mockup: {e}")
             return {"mockup_url": None}
     
+    def _get_all_variant_ids_for_blueprint(self, blueprint_id: int, print_provider_id: int) -> List[int]:
+        """Get all available variant IDs for a specific blueprint and print provider combination"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/variants.json",
+                headers=self.headers
+            )
+            
+            if response.status_code == 200:
+                variants = response.json()
+                variant_ids = [variant['id'] for variant in variants if variant.get('available', True)]
+                logger.info(f"Found {len(variant_ids)} variants for blueprint {blueprint_id}, provider {print_provider_id}")
+                return variant_ids
+            else:
+                logger.warning(f"Failed to get variants: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Exception getting variants: {e}")
+            return []
+
     def _delete_temporary_product(self, product_id: str):
         """Delete temporary product after getting mockup"""
         try:
@@ -367,5 +396,11 @@ class PrintifyService:
         except Exception as e:
             logger.error(f"Error deleting temporary product: {e}")
 
-# Global instance
-printify_service = PrintifyService() 
+# Global instance (only create if environment variables are available)
+printify_service = None
+try:
+    if os.getenv('PRINTIFY_API_TOKEN') and os.getenv('PRINTIFY_SHOP_ID'):
+        printify_service = PrintifyService()
+except Exception:
+    # Will be None if env vars not available - that's ok for testing
+    pass 
