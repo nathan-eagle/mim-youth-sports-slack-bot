@@ -271,7 +271,7 @@ class DatabaseService:
             logger.error(f"Error getting order with items: {e}")
             return None
     
-    def generate_drop_url(self, design_id: str, base_domain: str = "https://drop.mimyouthsports.com") -> str:
+    def generate_drop_url(self, design_id: str, base_domain: str = "https://mim-drop.vercel.app") -> str:
         """Generate drop URL for a product design"""
         return f"{base_domain}/design/{design_id}"
 
