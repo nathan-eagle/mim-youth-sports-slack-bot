@@ -23,6 +23,9 @@ app = Flask(__name__)
 # Slack signing secret for request verification
 SLACK_SIGNING_SECRET = os.getenv('SLACK_SIGNING_SECRET')
 
+# Simple in-memory event deduplication (in production, use Redis)
+processed_events = set()
+
 def verify_slack_request(request_body, timestamp, signature):
     """Verify that request came from Slack"""
     if not SLACK_SIGNING_SECRET:
@@ -71,6 +74,18 @@ def slack_events():
             event = data.get('event', {})
             event_type = event.get('type')
             
+            # Event deduplication
+            event_id = data.get('event_id', '')
+            if event_id in processed_events:
+                logger.info(f"Skipping duplicate event: {event_id}")
+                return jsonify({"status": "ignored"})
+            
+            if event_id:
+                processed_events.add(event_id)
+                # Keep only recent 1000 events to prevent memory bloat
+                if len(processed_events) > 1000:
+                    processed_events.clear()
+            
             logger.info(f"Received event: {event_type}")
             
             if event_type == 'message':
@@ -83,7 +98,8 @@ def slack_events():
                 logger.info(f"Message handling result: {result}")
                 
             elif event_type == 'file_shared':
-                # Handle file upload
+                # Handle file upload - add channel info from parent data
+                event['channel'] = event.get('channel_id') or data.get('event', {}).get('channel')
                 result = slack_bot.handle_file_share(event)
                 logger.info(f"File share handling result: {result}")
             

@@ -191,17 +191,17 @@ class SlackBot:
     
     def _handle_logo_request(self, text: str, conversation: Dict, event: Dict) -> Dict:
         """Handle logo URL or other text when awaiting logo"""
-        # Check if text contains a URL
+        # Check if text contains a URL (handle Slack's <url> format)
         if "http" in text.lower():
-            # Extract URL (simple approach)
-            words = text.split()
-            url = None
-            for word in words:
-                if word.startswith("http"):
-                    url = word
-                    break
+            # Extract URL - handle both plain URLs and Slack's <url> format
+            import re
+            # Match URLs with or without angle brackets
+            url_pattern = r'<?(https?://[^\s>]+)>?'
+            urls = re.findall(url_pattern, text)
             
-            if url:
+            if urls:
+                url = urls[0]  # Take the first URL found
+                
                 # Process logo from URL
                 logo_result = logo_processor.download_logo_from_url(url)
                 
