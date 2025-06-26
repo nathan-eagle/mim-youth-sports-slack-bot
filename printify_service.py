@@ -251,6 +251,8 @@ class PrintifyService:
                             variant_id: int, image_id: str, product_title: str = None) -> Dict:
         """Create a product design for mockup generation (no full product creation)"""
         try:
+            logger.info(f"Creating design for blueprint {blueprint_id}, provider {print_provider_id}, variant {variant_id}")
+            
             # Get all available variants for this blueprint and print provider
             all_variant_ids = self._get_all_variant_ids_for_blueprint(blueprint_id, print_provider_id)
             
@@ -258,6 +260,8 @@ class PrintifyService:
             if not all_variant_ids:
                 logger.warning(f"Could not get variants for blueprint {blueprint_id}, provider {print_provider_id}. Using single variant.")
                 all_variant_ids = [variant_id]
+            
+            logger.info(f"Using variant IDs for print_areas: {all_variant_ids[:10]}{'...' if len(all_variant_ids) > 10 else ''}")
             
             # Create temporary product for mockup generation
             design_data = {
@@ -292,6 +296,9 @@ class PrintifyService:
                     }
                 ]
             }
+            
+            # Log the request payload for debugging
+            logger.info(f"Design data payload: blueprint_id={design_data['blueprint_id']}, print_provider_id={design_data['print_provider_id']}, variant_ids={design_data['print_areas'][0]['variant_ids'][:5]}...")
             
             # Create temporary product in Printify for mockup generation
             response = requests.post(
