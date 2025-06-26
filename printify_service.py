@@ -219,11 +219,11 @@ class PrintifyService:
             try:
                 with open('product_cache.json', 'r') as f:
                     cache_data = json.load(f)
-                    products = cache_data.get('products', [])
+                    products = cache_data.get('products', {})
                     
                     # Filter for best products and simplify for storefront
                     storefront_products = []
-                    for product in products:
+                    for product_id, product in products.items():
                         if 'best' in product.get('tags', []):
                             storefront_products.append({
                                 'id': product['id'],

@@ -386,8 +386,6 @@ class SlackBot:
             
             # Let LLM determine the best response based on user message and context
             try:
-                from openai_service import openai_service
-                
                 # Create a context-aware prompt for the LLM
                 context_prompt = f"""
                 The user just completed creating a custom {context_info['previous_product']} and now said: "{text}"
@@ -410,7 +408,7 @@ class SlackBot:
                 
                 # Check if user wants a different product
                 product_match = product_service.find_product_by_intent(text)
-                if product_match:
+                if product_match and product_match.get('id'):
                     # Start new product flow
                     updates = {
                         "product_selected": product_match,
@@ -452,7 +450,7 @@ class SlackBot:
                 # Check if they want another product
                 if any(word in text_lower for word in ["shirt", "hoodie", "hat", "different", "another", "instead"]):
                     product_match = product_service.find_product_by_intent(text)
-                    if product_match:
+                    if product_match and product_match.get('id') and product_match.get('formatted'):
                         conversation_manager.update_conversation(channel, user, {
                             "product_selected": product_match,
                             "state": "awaiting_logo"
@@ -485,14 +483,24 @@ class SlackBot:
                 conversation_manager.record_error(channel, user, error_msg)
                 return {"message": f"Sorry, there was an issue uploading your logo: {upload_result['error']}"}
             
-            # Get product blueprint details
-            available_products = printify_service.get_available_products()
-            selected_product = next((p for p in available_products if str(p['id']) == str(product_info['id'])), None)
+            # Get product blueprint details from product service
+            product_details = product_service.get_product_by_id(str(product_info['id']))
             
-            if not selected_product:
+            if not product_details:
                 error_msg = "Selected product not found in catalog"
                 conversation_manager.record_error(channel, user, error_msg)
                 return {"message": "Sorry, there was an issue finding the selected product. Please try again!"}
+            
+            # Convert to the format expected by create_product_design
+            selected_product = {
+                'id': product_info['id'],
+                'title': product_details.get('title', 'Custom Product'),
+                'blueprint_id': product_details.get('blueprint_id'),
+                'print_provider_id': product_details.get('print_provider_id'),
+                'variants': product_details.get('variants', []),
+                'type': product_details.get('category', 'apparel'),
+                'base_price': product_details.get('base_price', 20.00)
+            }
             
             # Get first available variant for mockup
             variants = selected_product.get('variants', [])
@@ -563,14 +571,24 @@ class SlackBot:
             product_info = conversation["product_selected"]
             team_info = conversation.get("team_info", {})
             
-            # Get product blueprint details
-            available_products = printify_service.get_available_products()
-            selected_product = next((p for p in available_products if str(p['id']) == str(product_info['id'])), None)
+            # Get product blueprint details from product service
+            product_details = product_service.get_product_by_id(str(product_info['id']))
             
-            if not selected_product:
+            if not product_details:
                 error_msg = "Selected product not found in catalog"
                 conversation_manager.record_error(channel, user, error_msg)
                 return {"message": "Sorry, there was an issue finding the selected product. Please try again!"}
+            
+            # Convert to the format expected by create_product_design
+            selected_product = {
+                'id': product_info['id'],
+                'title': product_details.get('title', 'Custom Product'),
+                'blueprint_id': product_details.get('blueprint_id'),
+                'print_provider_id': product_details.get('print_provider_id'),
+                'variants': product_details.get('variants', []),
+                'type': product_details.get('category', 'apparel'),
+                'base_price': product_details.get('base_price', 20.00)
+            }
             
             # Get first available variant for mockup
             variants = selected_product.get('variants', [])
