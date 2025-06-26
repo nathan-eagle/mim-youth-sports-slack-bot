@@ -162,6 +162,16 @@ class PrintifyService:
                     }
                 }
                 
+                # CRITICAL: Publish the product to make it purchasable
+                publish_result = self._publish_product(product_result.get('id'))
+                if publish_result.get('success'):
+                    logger.info(f"Successfully published product {product_result.get('id')}")
+                    # Update purchase URL with published product URL
+                    result["purchase_url"] = publish_result.get('purchase_url', result["purchase_url"])
+                else:
+                    logger.warning(f"Failed to publish product: {publish_result.get('error')}")
+                    # Continue anyway - product is created even if not published
+                
                 logger.info(f"Product creation result: {result}")
                 return result
             else:
@@ -328,10 +338,72 @@ class PrintifyService:
             return {"mockup_url": None}
     
     def _generate_purchase_url(self, product_id: str) -> str:
-        """Generate purchase URL for the product"""
-        # This would typically link to your Printify store
-        # For now, return a placeholder that could link to Printify's product page
+        """Generate purchase URL for product"""
         return f"https://printify.com/app/products/{product_id}"
+    
+    def _publish_product(self, product_id: str) -> Dict:
+        """Publish product to make it available for purchase"""
+        try:
+            publish_data = {
+                "title": True,  # Publish with title
+                "description": True,  # Publish with description
+                "images": True,  # Publish with images
+                "variants": True,  # Publish with variants
+                "tags": True,  # Publish with tags
+                "keyFeatures": True,  # Publish with key features
+                "shipping": True  # Publish with shipping info
+            }
+            
+            response = requests.post(
+                f"{self.base_url}/shops/{self.shop_id}/products/{product_id}/publish.json",
+                headers=self.headers,
+                json=publish_data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                publish_result = response.json()
+                logger.info(f"Successfully published product {product_id}")
+                
+                # Get the published product URL
+                published_url = self._get_published_product_url(product_id)
+                
+                return {
+                    "success": True,
+                    "external_id": publish_result.get('external_id'),
+                    "purchase_url": published_url
+                }
+            else:
+                logger.error(f"Failed to publish product: {response.status_code} - {response.text}")
+                return {"success": False, "error": f"Publish failed: {response.text}"}
+                
+        except Exception as e:
+            logger.error(f"Error publishing product: {e}")
+            return {"success": False, "error": "Failed to publish product"}
+    
+    def _get_published_product_url(self, product_id: str) -> str:
+        """Get the published product URL from store"""
+        try:
+            # Get product details to find external store URL
+            response = requests.get(
+                f"{self.base_url}/shops/{self.shop_id}/products/{product_id}.json",
+                headers=self.headers,
+                timeout=15
+            )
+            
+            if response.status_code == 200:
+                product_data = response.json()
+                external_id = product_data.get('external', {}).get('id')
+                if external_id:
+                    # This would be the actual store URL - format depends on your store platform
+                    return f"https://your-store.com/products/{external_id}"
+            
+            # Fallback to Printify product page
+            return f"https://printify.com/app/products/{product_id}"
+            
+        except Exception as e:
+            logger.warning(f"Could not get published URL: {e}")
+            return f"https://printify.com/app/products/{product_id}"
     
     def get_product_colors(self, product_id: str) -> List[str]:
         """Get available colors for a product"""

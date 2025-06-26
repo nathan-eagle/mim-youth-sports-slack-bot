@@ -121,5 +121,25 @@ class OpenAIService:
             logger.error(f"OpenAI API error: {e}")
             return f"Great choice on the {product_name}! Please upload your team logo (image file) or provide a URL link to your logo, and I'll customize it for you."
 
+    def get_contextual_response(self, context_prompt: str, user_message: str) -> str:
+        """Generate context-aware response using LLM intelligence"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": context_prompt},
+                    {"role": "user", "content": user_message}
+                ],
+                temperature=0.7,
+                max_tokens=200
+            )
+            
+            return response.choices[0].message.content.strip()
+            
+        except Exception as e:
+            logger.error(f"OpenAI contextual response error: {e}")
+            return "I'd be happy to help you with your team merchandise! What would you like to create next?"
+
 # Global instance
 openai_service = OpenAIService() 
