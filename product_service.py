@@ -100,7 +100,42 @@ class ProductService:
             'hat': ['hat', 'cap', 'snapback', 'trucker', 'beanie']
         }
         
-        # Look for category matches in user message
+        # Special handling for specific product requests
+        # Check for hoodie/sweatshirt first - map to product ID 314
+        hoodie_keywords = ['hoodie', 'sweatshirt', 'pullover', 'sweater', 'hooded', 'heavy blend']
+        if any(keyword in message_lower for keyword in hoodie_keywords):
+            # Return the Youth Heavy Blend Hooded Sweatshirt (ID: 314)
+            if '314' in self.best_products:
+                product = self.best_products['314']
+                return {
+                    'id': '314',
+                    'product': product,
+                    'formatted': self.format_product_for_slack('314', product)
+                }
+        
+        # Check for hat/cap requests - map to product ID 1446
+        hat_keywords = ['hat', 'cap', 'snapback', 'trucker', 'beanie']
+        if any(keyword in message_lower for keyword in hat_keywords):
+            if '1446' in self.best_products:
+                product = self.best_products['1446']
+                return {
+                    'id': '1446',
+                    'product': product,
+                    'formatted': self.format_product_for_slack('1446', product)
+                }
+        
+        # Check for shirt/tee requests - map to product ID 157
+        shirt_keywords = ['shirt', 'tee', 't-shirt', 'tshirt', 'top']
+        if any(keyword in message_lower for keyword in shirt_keywords):
+            if '157' in self.best_products:
+                product = self.best_products['157']
+                return {
+                    'id': '157',
+                    'product': product,
+                    'formatted': self.format_product_for_slack('157', product)
+                }
+        
+        # Fallback: Look for category matches in user message (old logic)
         for category, keywords in category_keywords.items():
             if any(keyword in message_lower for keyword in keywords):
                 matching_products = self.get_products_by_category(category)

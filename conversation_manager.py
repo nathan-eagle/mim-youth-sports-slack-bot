@@ -56,6 +56,14 @@ class ConversationManager:
             with open(self.state_file, 'w') as f:
                 json.dump(data, f, indent=2)
                 
+        except (OSError, PermissionError) as e:
+            # Handle read-only file system (common in serverless environments)
+            if "Read-only file system" in str(e) or "Permission denied" in str(e):
+                logger.warning(f"Cannot save conversation state - read-only file system. Continuing with in-memory state.")
+                # Continue with in-memory state only
+                pass
+            else:
+                logger.error(f"Could not save conversation state: {e}")
         except Exception as e:
             logger.error(f"Could not save conversation state: {e}")
     

@@ -71,10 +71,12 @@ class SlackBot:
                     response = self._handle_initial_message(text, conversation, channel, user)
                 
                 # Send response to Slack
-                if response.get("message"):
+                if response.get("image_url") and response.get("purchase_url"):
+                    # Send product result with image and purchase link
+                    self._send_product_result(channel, response)
+                elif response.get("message"):
                     self._send_message(channel, response["message"])
-                
-                if response.get("image_url"):
+                elif response.get("image_url"):
                     self._send_image_message(channel, response["image_url"], response.get("image_caption", ""))
                 
                 return {"status": "success"}
@@ -289,8 +291,11 @@ class SlackBot:
                     "state": "processing_with_logo"
                 })
                 
+                # Get the updated conversation to ensure we have the latest state
+                updated_conversation = conversation_manager.get_conversation(channel, user)
+                
                 # Get the pending file info
-                pending_file = conversation.get("pending_file")
+                pending_file = updated_conversation.get("pending_file")
                 if pending_file:
                     # Process the uploaded file
                     logo_result = logo_processor.process_slack_file(pending_file, self.client)
@@ -301,7 +306,7 @@ class SlackBot:
                         return {"message": f"Sorry, there was an issue with your logo: {logo_result['error']}"}
                     
                     # Create custom product
-                    response = self._create_custom_product(conversation, logo_result, channel, user)
+                    response = self._create_custom_product(updated_conversation, logo_result, channel, user)
                     
                     # Clean up temporary logo file
                     logo_processor.cleanup_logo(logo_result["file_path"])

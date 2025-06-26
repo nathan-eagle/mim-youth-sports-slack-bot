@@ -1,0 +1,16 @@
+{
+  "conversations": {
+    "test_channel_test_user": {
+      "state": "test",
+      "product_selected": null,
+      "logo_info": null,
+      "team_info": {},
+      "created_at": 1750903434.079736,
+      "last_activity": 1750903434.0797682,
+      "error_count": 0,
+      "last_error": null
+    }
+  },
+  "processed_events": [],
+  "last_updated": 1750903434.07977
+}
