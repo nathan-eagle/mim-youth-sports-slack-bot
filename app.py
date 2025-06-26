@@ -74,17 +74,21 @@ def slack_events():
             event = data.get('event', {})
             event_type = event.get('type')
             
-            # Event deduplication
+            # Event deduplication using both event_id and a hash of the event content
             event_id = data.get('event_id', '')
-            if event_id in processed_events:
-                logger.info(f"Skipping duplicate event: {event_id}")
+            event_hash = str(hash(str(event.get('ts', '')) + str(event.get('user', '')) + str(event.get('text', ''))))
+            
+            # Create composite key for deduplication
+            dedup_key = f"{event_id}_{event_hash}" if event_id else event_hash
+            
+            if dedup_key in processed_events:
+                logger.info(f"Skipping duplicate event: {dedup_key}")
                 return jsonify({"status": "ignored"})
             
-            if event_id:
-                processed_events.add(event_id)
-                # Keep only recent 1000 events to prevent memory bloat
-                if len(processed_events) > 1000:
-                    processed_events.clear()
+            processed_events.add(dedup_key)
+            # Keep only recent 1000 events to prevent memory bloat
+            if len(processed_events) > 1000:
+                processed_events.clear()
             
             logger.info(f"Received event: {event_type}")
             

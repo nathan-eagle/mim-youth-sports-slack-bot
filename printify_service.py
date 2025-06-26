@@ -177,38 +177,40 @@ class PrintifyService:
     def _get_print_areas(self, print_provider_id: str, blueprint_id: str, variant_id: str) -> List[Dict]:
         """Get available print areas for product variant"""
         try:
-            # Use the correct Printify API endpoint for print areas
+            # Try different API endpoint structures for print areas
+            # First try: without /variants/{variant_id}
             response = requests.get(
-                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/variants/{variant_id}/print_areas.json",
+                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/print_areas.json",
                 headers=self.headers,
                 timeout=15
             )
             
+            # If that fails, try with shipping method info
+            if response.status_code == 404:
+                logger.info(f"Trying alternative print areas endpoint for blueprint {blueprint_id}")
+                response = requests.get(
+                    f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/shipping.json",
+                    headers=self.headers,
+                    timeout=15
+                )
+            
             if response.status_code == 200:
                 print_areas_data = response.json()
-                # Return print areas array
-                return print_areas_data.get('print_areas', print_areas_data) if isinstance(print_areas_data, dict) else print_areas_data
+                logger.info(f"Print areas response: {print_areas_data}")
+                # Return print areas array - handle different response formats
+                if isinstance(print_areas_data, list):
+                    return print_areas_data
+                elif isinstance(print_areas_data, dict) and 'print_areas' in print_areas_data:
+                    return print_areas_data['print_areas']
+                else:
+                    return print_areas_data if print_areas_data else []
             else:
-                logger.warning(f"Failed to get print areas: {response.status_code} - {response.text}")
-                # Return a default print area if API fails
-                return [{
-                    "id": "default",
-                    "width": 300,
-                    "height": 300,
-                    "top": 0,
-                    "left": 0
-                }]
+                logger.error(f"Failed to get print areas: {response.status_code} - {response.text}")
+                return []
                 
         except Exception as e:
             logger.error(f"Error getting print areas: {e}")
-            # Return a default print area as fallback
-            return [{
-                "id": "default", 
-                "width": 300,
-                "height": 300,
-                "top": 0,
-                "left": 0
-            }]
+            return []
     
     def _build_product_data(self, blueprint: Dict, print_provider_id: str, variant: Dict, 
                           logo_image_id: str, print_area: Dict) -> Dict:
@@ -244,20 +246,13 @@ class PrintifyService:
                     "variant_ids": [variant.get('id')],
                     "placeholders": [
                         {
-                            "position": {
-                                "area_width": print_area_width,
-                                "area_height": print_area_height,
-                                "width": logo_width,
-                                "height": logo_height,
-                                "top": logo_y,
-                                "left": logo_x
-                            },
+                            "position": print_area.get('id', 'front'),  # Use print area ID as position string
                             "images": [
                                 {
                                     "id": logo_image_id,
-                                    "x": 0.0,
-                                    "y": 0.0,
-                                    "scale": 1.0,
+                                    "x": 0.5,  # Center horizontally (0.0 to 1.0)
+                                    "y": 0.5,  # Center vertically (0.0 to 1.0)
+                                    "scale": 0.6,  # 60% of available area
                                     "angle": 0
                                 }
                             ]
