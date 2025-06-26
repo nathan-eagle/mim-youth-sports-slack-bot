@@ -19,7 +19,7 @@ class ProductService:
             },
             '314': {  # Youth Heavy Blend Hooded Sweatshirt  
                 'blueprint_id': 314,      # Youth Heavy Blend Hooded Sweatshirt (Gildan 18500B)
-                'print_provider_id': 84,  # The Print Bar (default provider for this blueprint)
+                'print_provider_id': 249, # HFT71 Sp. z o.o (verified working provider)
                 'category': 'hoodie'
             },
             '1446': {  # Snapback Trucker Cap
@@ -93,27 +93,27 @@ class ProductService:
                 {'id': 11987, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
                 {'id': 11988, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}}
             ],
-            '314': [  # Youth Heavy Blend Hooded Sweatshirt (blueprint 314 + provider 84) - Real variants from API
-                {'id': 54634, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
-                {'id': 54635, 'title': 'Black / M', 'options': {'color': 'Black', 'size': 'M'}},
-                {'id': 54636, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
-                {'id': 54637, 'title': 'Black / XL', 'options': {'color': 'Black', 'size': 'XL'}},
-                {'id': 54638, 'title': 'Black / XS', 'options': {'color': 'Black', 'size': 'XS'}},
-                {'id': 54654, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}},
-                {'id': 54655, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
-                {'id': 54656, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
-                {'id': 54657, 'title': 'Navy / XL', 'options': {'color': 'Navy', 'size': 'XL'}},
-                {'id': 54658, 'title': 'Navy / XS', 'options': {'color': 'Navy', 'size': 'XS'}},
-                {'id': 54694, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
-                {'id': 54695, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
-                {'id': 54696, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
-                {'id': 54697, 'title': 'Royal / XL', 'options': {'color': 'Royal', 'size': 'XL'}},
-                {'id': 54698, 'title': 'Royal / XS', 'options': {'color': 'Royal', 'size': 'XS'}},
-                {'id': 54674, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
-                {'id': 54675, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
-                {'id': 54676, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
-                {'id': 54677, 'title': 'Red / XL', 'options': {'color': 'Red', 'size': 'XL'}},
-                {'id': 54678, 'title': 'Red / XS', 'options': {'color': 'Red', 'size': 'XS'}}
+            '314': [  # Youth Heavy Blend Hooded Sweatshirt (blueprint 314 + provider 249) - Real variants from API
+                {'id': 43880, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
+                {'id': 43899, 'title': 'Black / M', 'options': {'color': 'Black', 'size': 'M'}},
+                {'id': 43918, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
+                {'id': 43937, 'title': 'Black / XL', 'options': {'color': 'Black', 'size': 'XL'}},
+                {'id': 64304, 'title': 'Black / XS', 'options': {'color': 'Black', 'size': 'XS'}},
+                {'id': 43873, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}},
+                {'id': 43892, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
+                {'id': 43911, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
+                {'id': 43930, 'title': 'Navy / XL', 'options': {'color': 'Navy', 'size': 'XL'}},
+                {'id': 64296, 'title': 'Navy / XS', 'options': {'color': 'Navy', 'size': 'XS'}},
+                {'id': 43877, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
+                {'id': 43896, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
+                {'id': 43915, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
+                {'id': 43934, 'title': 'Royal / XL', 'options': {'color': 'Royal', 'size': 'XL'}},
+                {'id': 64300, 'title': 'Royal / XS', 'options': {'color': 'Royal', 'size': 'XS'}},
+                {'id': 43876, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
+                {'id': 43895, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
+                {'id': 43914, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
+                {'id': 43933, 'title': 'Red / XL', 'options': {'color': 'Red', 'size': 'XL'}},
+                {'id': 64299, 'title': 'Red / XS', 'options': {'color': 'Red', 'size': 'XS'}}
             ]
         }
         

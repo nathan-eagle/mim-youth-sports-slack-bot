@@ -375,12 +375,20 @@ class PrintifyService:
             )
             
             if response.status_code == 200:
-                variants = response.json()
-                variant_ids = [variant['id'] for variant in variants if variant.get('available', True)]
+                data = response.json()
+                
+                # Handle the response format: {id: X, title: Y, variants: [...]}
+                if 'variants' in data:
+                    variants = data['variants']
+                else:
+                    # Fallback if response is directly a list
+                    variants = data if isinstance(data, list) else []
+                
+                variant_ids = [variant['id'] for variant in variants if variant.get('id')]
                 logger.info(f"Found {len(variant_ids)} variants for blueprint {blueprint_id}, provider {print_provider_id}")
                 return variant_ids
             else:
-                logger.warning(f"Failed to get variants: {response.status_code}")
+                logger.warning(f"Failed to get variants: {response.status_code} - {response.text}")
                 return []
                 
         except Exception as e:
