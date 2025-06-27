@@ -114,6 +114,18 @@ class ProductService:
                 {'id': 43914, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
                 {'id': 43933, 'title': 'Red / XL', 'options': {'color': 'Red', 'size': 'XL'}},
                 {'id': 64299, 'title': 'Red / XS', 'options': {'color': 'Red', 'size': 'XS'}}
+            ],
+            '1221': [  # Dad Hat with Leather Patch (blueprint 1221 + provider 261) - Real variants from API
+                {'id': 93560, 'title': 'Black / Black patch / Rectangle / One size', 'options': {'color': 'Black / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93558, 'title': 'Black / Grey patch / Rectangle / One size', 'options': {'color': 'Black / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93562, 'title': 'Black / Light Brown / Rectangle / One size', 'options': {'color': 'Black / Light Brown', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93566, 'title': 'Black / Pink patch / Rectangle / One size', 'options': {'color': 'Black / Pink patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93584, 'title': 'Navy / Black patch / Rectangle / One size', 'options': {'color': 'Navy / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93586, 'title': 'Navy / Grey patch / Rectangle / One size', 'options': {'color': 'Navy / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93592, 'title': 'Red / Black patch / Rectangle / One size', 'options': {'color': 'Red / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93556, 'title': 'White / Light Brown patch / Rectangle / One size', 'options': {'color': 'White / Light Brown patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93564, 'title': 'White / Black patch / Rectangle / One size', 'options': {'color': 'White / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93600, 'title': 'White / Grey patch / Rectangle / One size', 'options': {'color': 'White / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}}
             ]
         }
         
