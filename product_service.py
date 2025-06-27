@@ -273,6 +273,239 @@ class ProductService:
                     }
         
         return None
+    
+    def get_available_colors_for_best_products(self) -> Dict:
+        """Get available colors for each of the 3 best products"""
+        colors_by_product = {}
+        
+        # Product IDs for our 3 best products
+        product_ids = ['157', '314', '1221']
+        
+        # Real variants data from our mappings
+        real_variants = {
+            '157': [  # T-shirt (blueprint 6 + provider 3) - Real variants from API
+                {'id': 11848, 'title': 'Ash / L', 'options': {'color': 'Ash', 'size': 'L'}},
+                {'id': 11849, 'title': 'Ash / M', 'options': {'color': 'Ash', 'size': 'M'}},
+                {'id': 11850, 'title': 'Ash / S', 'options': {'color': 'Ash', 'size': 'S'}},
+                {'id': 12100, 'title': 'White / L', 'options': {'color': 'White', 'size': 'L'}},
+                {'id': 12101, 'title': 'White / M', 'options': {'color': 'White', 'size': 'M'}},
+                {'id': 12102, 'title': 'White / S', 'options': {'color': 'White', 'size': 'S'}},
+                {'id': 12124, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
+                {'id': 12126, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
+                {'id': 12028, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
+                {'id': 12029, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
+                {'id': 12030, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
+                {'id': 12022, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
+                {'id': 12023, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
+                {'id': 12024, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
+                {'id': 11986, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
+                {'id': 11987, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
+                {'id': 11988, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}}
+            ],
+            '314': [  # Youth Heavy Blend Hooded Sweatshirt (blueprint 314 + provider 249) - Real variants from API
+                {'id': 43880, 'title': 'Black / S', 'options': {'color': 'Black', 'size': 'S'}},
+                {'id': 43899, 'title': 'Black / M', 'options': {'color': 'Black', 'size': 'M'}},
+                {'id': 43918, 'title': 'Black / L', 'options': {'color': 'Black', 'size': 'L'}},
+                {'id': 43937, 'title': 'Black / XL', 'options': {'color': 'Black', 'size': 'XL'}},
+                {'id': 64304, 'title': 'Black / XS', 'options': {'color': 'Black', 'size': 'XS'}},
+                {'id': 43873, 'title': 'Navy / S', 'options': {'color': 'Navy', 'size': 'S'}},
+                {'id': 43892, 'title': 'Navy / M', 'options': {'color': 'Navy', 'size': 'M'}},
+                {'id': 43911, 'title': 'Navy / L', 'options': {'color': 'Navy', 'size': 'L'}},
+                {'id': 43930, 'title': 'Navy / XL', 'options': {'color': 'Navy', 'size': 'XL'}},
+                {'id': 64296, 'title': 'Navy / XS', 'options': {'color': 'Navy', 'size': 'XS'}},
+                {'id': 43877, 'title': 'Royal / S', 'options': {'color': 'Royal', 'size': 'S'}},
+                {'id': 43896, 'title': 'Royal / M', 'options': {'color': 'Royal', 'size': 'M'}},
+                {'id': 43915, 'title': 'Royal / L', 'options': {'color': 'Royal', 'size': 'L'}},
+                {'id': 43934, 'title': 'Royal / XL', 'options': {'color': 'Royal', 'size': 'XL'}},
+                {'id': 64300, 'title': 'Royal / XS', 'options': {'color': 'Royal', 'size': 'XS'}},
+                {'id': 43876, 'title': 'Red / S', 'options': {'color': 'Red', 'size': 'S'}},
+                {'id': 43895, 'title': 'Red / M', 'options': {'color': 'Red', 'size': 'M'}},
+                {'id': 43914, 'title': 'Red / L', 'options': {'color': 'Red', 'size': 'L'}},
+                {'id': 43933, 'title': 'Red / XL', 'options': {'color': 'Red', 'size': 'XL'}},
+                {'id': 64299, 'title': 'Red / XS', 'options': {'color': 'Red', 'size': 'XS'}}
+            ],
+            '1221': [  # Dad Hat with Leather Patch (blueprint 1221 + provider 261) - Real variants from API
+                {'id': 93560, 'title': 'Black / Black patch / Rectangle / One size', 'options': {'color': 'Black / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93558, 'title': 'Black / Grey patch / Rectangle / One size', 'options': {'color': 'Black / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93562, 'title': 'Black / Light Brown / Rectangle / One size', 'options': {'color': 'Black / Light Brown', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93566, 'title': 'Black / Pink patch / Rectangle / One size', 'options': {'color': 'Black / Pink patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93584, 'title': 'Navy / Black patch / Rectangle / One size', 'options': {'color': 'Navy / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93586, 'title': 'Navy / Grey patch / Rectangle / One size', 'options': {'color': 'Navy / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93592, 'title': 'Red / Black patch / Rectangle / One size', 'options': {'color': 'Red / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93556, 'title': 'White / Light Brown patch / Rectangle / One size', 'options': {'color': 'White / Light Brown patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93564, 'title': 'White / Black patch / Rectangle / One size', 'options': {'color': 'White / Black patch', 'shape': 'Rectangle', 'size': 'One size'}},
+                {'id': 93600, 'title': 'White / Grey patch / Rectangle / One size', 'options': {'color': 'White / Grey patch', 'shape': 'Rectangle', 'size': 'One size'}}
+            ]
+        }
+        
+        for product_id in product_ids:
+            if product_id not in real_variants:
+                continue
+                
+            # Extract unique colors from variants
+            variants = real_variants[product_id]
+            colors = set()
+            
+            for variant in variants:
+                color = variant.get('options', {}).get('color')
+                if color:
+                    colors.add(color)
+            
+            colors_by_product[product_id] = sorted(list(colors))
+            
+        return colors_by_product
+    
+    def format_color_selection_message(self) -> str:
+        """Format a message showing color options for all products"""
+        colors_by_product = self.get_available_colors_for_best_products()
+        
+        if not colors_by_product:
+            return "🎨 *Choose colors for your products:*\n\nSorry, color options are currently unavailable."
+        
+        message_parts = ["🎨 *Choose colors for your products:*\n"]
+        
+        product_names = {
+            '157': 'T-shirt',
+            '314': 'Hoodie', 
+            '1221': 'Hat'
+        }
+        
+        for product_id, colors in colors_by_product.items():
+            product_name = product_names.get(product_id, f"Product {product_id}")
+            if colors:
+                # Limit to first 6 colors for display
+                display_colors = colors[:6]
+                color_text = ", ".join(display_colors)
+                if len(colors) > 6:
+                    color_text += f" (+{len(colors) - 6} more)"
+                    
+                message_parts.append(f"• *{product_name}:* {color_text}")
+        
+        message_parts.append("\n*Just tell me your color preferences!* For example:")
+        message_parts.append("• \"Black t-shirt, navy hoodie, white hat\"")
+        message_parts.append("• \"All black\" or \"All white\"")
+        message_parts.append("• \"Default colors\" (uses first available color for each)")
+        
+        return "\n".join(message_parts)
+    
+    def parse_color_preferences(self, user_input: str) -> Dict:
+        """Parse user color preferences and return selected variants for each product"""
+        user_input_lower = user_input.lower().strip()
+        
+        # Get available colors for each product
+        colors_by_product = self.get_available_colors_for_best_products()
+        
+        selected_variants = {}
+        product_names_map = {
+            'tshirt': '157', 't-shirt': '157', 'shirt': '157', 'tee': '157',
+            'hoodie': '314', 'sweatshirt': '314', 'pullover': '314',
+            'hat': '1221', 'cap': '1221'
+        }
+        
+        # Check for "default" or "default colors"
+        if 'default' in user_input_lower:
+            for product_id in ['157', '314', '1221']:
+                if product_id in colors_by_product and colors_by_product[product_id]:
+                    first_color = colors_by_product[product_id][0]
+                    selected_variants[product_id] = self._find_variant_by_color(product_id, first_color)
+            return selected_variants
+        
+        # Check for "all [color]" pattern
+        all_color_match = None
+        for color_name in ['black', 'white', 'navy', 'red', 'royal', 'ash']:
+            if f'all {color_name}' in user_input_lower:
+                all_color_match = color_name.title()
+                break
+        
+        if all_color_match:
+            for product_id in ['157', '314', '1221']:
+                variant = self._find_variant_by_color(product_id, all_color_match)
+                if variant:
+                    selected_variants[product_id] = variant
+            return selected_variants
+        
+        # Parse specific product color assignments
+        # Look for patterns like "black t-shirt", "navy hoodie", "white hat"
+        import re
+        
+        for product_name, product_id in product_names_map.items():
+            # Find mentions of this product in the input
+            pattern = rf'(\w+)\s+{re.escape(product_name)}'
+            matches = re.findall(pattern, user_input_lower)
+            
+            if matches:
+                # Try to match the color word before the product name
+                color_word = matches[0].strip()
+                colors = colors_by_product.get(product_id, [])
+                
+                for color in colors:
+                    color_simple = color.split('/')[0].strip().lower()  # Handle "Black / Black patch" -> "black"
+                    if color_simple == color_word:
+                        variant = self._find_variant_by_color(product_id, color)
+                        if variant:
+                            selected_variants[product_id] = variant
+                        break
+            elif product_name in user_input_lower:
+                # Fallback: look for any color words near the product name
+                colors = colors_by_product.get(product_id, [])
+                for color in colors:
+                    color_simple = color.split('/')[0].strip()  # Handle "Black / Black patch" -> "Black"
+                    if color_simple.lower() in user_input_lower:
+                        variant = self._find_variant_by_color(product_id, color)
+                        if variant:
+                            selected_variants[product_id] = variant
+                        break
+        
+        # If no specific assignments found, try to find colors for any unassigned products
+        if not selected_variants:
+            available_colors = set()
+            for colors in colors_by_product.values():
+                for color in colors:
+                    available_colors.add(color.split('/')[0].strip().lower())
+            
+            mentioned_colors = []
+            for color in available_colors:
+                if color in user_input_lower:
+                    mentioned_colors.append(color.title())
+            
+            # Assign first mentioned color to all products if possible
+            if mentioned_colors:
+                primary_color = mentioned_colors[0]
+                for product_id in ['157', '314', '1221']:
+                    variant = self._find_variant_by_color(product_id, primary_color)
+                    if variant:
+                        selected_variants[product_id] = variant
+        
+        # Fill in missing products with defaults
+        for product_id in ['157', '314', '1221']:
+            if product_id not in selected_variants:
+                if product_id in colors_by_product and colors_by_product[product_id]:
+                    first_color = colors_by_product[product_id][0]
+                    selected_variants[product_id] = self._find_variant_by_color(product_id, first_color)
+        
+        return selected_variants
+    
+    def _find_variant_by_color(self, product_id: str, color: str) -> Optional[Dict]:
+        """Find a variant for a product that matches the specified color"""
+        product_details = self.get_product_by_id(product_id)
+        if not product_details or 'variants' not in product_details:
+            return None
+            
+        variants = product_details['variants']
+        
+        # Try exact match first
+        for variant in variants:
+            variant_color = variant.get('options', {}).get('color', '')
+            if variant_color == color:
+                return variant
+        
+        # Try partial match (for hat colors like "Black / Black patch")
+        for variant in variants:
+            variant_color = variant.get('options', {}).get('color', '')
+            if variant_color.startswith(color) or color in variant_color:
+                return variant
+                
+        return None
 
 # Global instance
 product_service = ProductService() 

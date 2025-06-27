@@ -121,6 +121,7 @@ class ConversationManager:
                 "product_selected": None,
                 "logo_info": None,
                 "team_info": {},
+                "selected_variants": {},  # Store color selections for each product
                 "created_at": time.time(),
                 "last_activity": time.time(),
                 "error_count": 0,
@@ -170,6 +171,7 @@ class ConversationManager:
                 "product_selected": None,
                 "logo_info": None,
                 "team_info": {},
+                "selected_variants": {},  # Store color selections for each product
                 "created_at": time.time(),
                 "last_activity": time.time(),
                 "error_count": 0,

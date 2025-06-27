@@ -79,6 +79,8 @@ I'll create custom mockups of our 3 most popular youth sports products:
                         response = self._handle_product_selection(text, conversation, channel, user)
                     elif conversation["state"] == "awaiting_logo":
                         response = self._handle_logo_request(text, conversation, event, channel, user)
+                    elif conversation["state"] == "awaiting_color_selection":
+                        response = self._handle_color_selection(text, conversation, channel, user)
                     elif conversation["state"] == "completed":
                         response = self._handle_completed_conversation(text, conversation, channel, user)
                     else:
@@ -163,29 +165,18 @@ I'll create custom mockups of our 3 most popular youth sports products:
                     "uploaded_at": conversation_manager._get_timestamp()
                 }
                 
-                # Update conversation with persistent logo
+                # Update conversation with persistent logo and move to color selection
                 conversation_manager.update_conversation(channel, user, {
-                    "logo_info": logo_info
+                    "logo_info": logo_info,
+                    "state": "awaiting_color_selection"
                 })
                 
                 # Clean up temporary logo file
                 logo_processor.cleanup_logo(logo_result["file_path"])
                 
-                # If product is already selected, create it immediately
-                if conversation.get("product_selected"):
-                    response = self._create_custom_product_with_stored_logo(conversation, logo_info, channel, user)
-                    
-                    # Send response with purchase link
-                    if response.get("image_url") and response.get("purchase_url"):
-                        self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
-                    elif response.get("message"):
-                        self._send_message(channel, response["message"])
-                    
-                    # Update conversation state to completed
-                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
-                else:
-                    # Generate all 3 mockups in series for instant selection
-                    self._generate_all_mockups_in_series(conversation, logo_info, channel, user)
+                # Send color selection message
+                color_message = product_service.format_color_selection_message()
+                self._send_message(channel, color_message)
                 
                 return {"status": "success"}
                 
@@ -374,15 +365,19 @@ I'll create custom mockups of our 3 most popular youth sports products:
                         "source": "url"
                     }
                     
-                    conversation_manager.update_conversation(channel, user, {"logo_info": logo_info})
-                    
-                    # Generate all 3 mockups in series using the new method
-                    self._generate_all_mockups_in_series(conversation, logo_info, channel, user)
+                    # Update conversation with logo and move to color selection
+                    conversation_manager.update_conversation(channel, user, {
+                        "logo_info": logo_info,
+                        "state": "awaiting_color_selection"
+                    })
                     
                     # Clean up temporary file
                     logo_processor.cleanup_logo(logo_result["file_path"])
                     
-                    # No need to return anything - _generate_all_mockups_in_series handles all messaging
+                    # Send color selection message
+                    color_message = product_service.format_color_selection_message()
+                    self._send_message(channel, color_message)
+                    
                     return {"status": "success"}
             
             # Not a URL, remind about logo requirement (prefer URLs)
@@ -487,6 +482,48 @@ I'll create custom mockups of our 3 most popular youth sports products:
         except Exception as e:
             logger.error(f"Error in _handle_completed_conversation: {e}")
             raise e
+    
+    def _handle_color_selection(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
+        """Handle color selection input from user"""
+        try:
+            # Parse color preferences from user input
+            selected_variants = product_service.parse_color_preferences(text)
+            
+            if not selected_variants:
+                # No valid color selections found, show color options again
+                color_message = product_service.format_color_selection_message()
+                return {"message": f"I didn't quite understand your color preferences. Let me show you the options again:\n\n{color_message}"}
+            
+            # Store selected variants in conversation
+            conversation_manager.update_conversation(channel, user, {
+                "selected_variants": selected_variants,
+                "state": "creating_mockups"
+            })
+            
+            # Show confirmation of color selections
+            color_summary = []
+            product_names = {'157': 'T-shirt', '314': 'Hoodie', '1221': 'Hat'}
+            
+            for product_id, variant in selected_variants.items():
+                product_name = product_names.get(product_id, f"Product {product_id}")
+                color = variant.get('options', {}).get('color', 'Unknown')
+                color_summary.append(f"• *{product_name}:* {color}")
+            
+            confirmation_msg = f"🎨 Perfect! Creating your products in these colors:\n" + "\n".join(color_summary)
+            self._send_message(channel, confirmation_msg)
+            
+            # Get logo info and generate mockups with selected colors
+            logo_info = conversation.get("logo_info")
+            if logo_info:
+                self._generate_all_mockups_with_colors(conversation, logo_info, selected_variants, channel, user)
+            else:
+                return {"message": "Sorry, I can't find your logo information. Please upload your logo again."}
+            
+            return {"status": "success"}
+            
+        except Exception as e:
+            logger.error(f"Error in _handle_color_selection: {e}")
+            return {"message": "Sorry, there was an issue processing your color selection. Please try again or type 'default colors' to use standard colors."}
     
     def _create_custom_product(self, conversation: Dict, logo_result: Dict, channel: str, user: str) -> Dict:
         """Create custom product design with uploaded logo"""
@@ -659,6 +696,82 @@ I'll create custom mockups of our 3 most popular youth sports products:
             logger.error(f"Error in _generate_all_mockups_in_series: {e}")
             self._send_message(channel, "Sorry, had some issues creating the mockups. Please try uploading your logo again!")
     
+    def _generate_all_mockups_with_colors(self, conversation: Dict, logo_info: Dict, selected_variants: Dict, channel: str, user: str):
+        """Generate mockups for all 3 products using selected color variants"""
+        try:
+            team_info = conversation.get("team_info", {})
+            team_name = team_info.get("name", "your team")
+            
+            # Products in order: T-shirt, Hoodie, Hat
+            products_order = [
+                ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
+                ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
+                ("1221", "Dad Hat with Leather Patch")  # Hat third - faster dye-sublimation
+            ]
+            
+            for i, (product_id, product_name) in enumerate(products_order):
+                if product_id not in selected_variants:
+                    logger.warning(f"No selected variant for product {product_id}, skipping")
+                    continue
+                    
+                # Add delay between products to avoid rate limiting (except for first product)
+                if i > 0:
+                    import time
+                    # Longer delay for hat since it needs more time for mockup generation
+                    delay = 5 if "Cap" in product_name or "Hat" in product_name else 2
+                    time.sleep(delay)
+                    logger.info(f"Added {delay}-second delay before creating {product_name}")
+                    
+                try:
+                    # Create mockup for this product with selected variant
+                    product_info = {"id": product_id, "formatted": {"title": product_name}}
+                    selected_variant = selected_variants[product_id]
+                    
+                    response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
+                    
+                    if response.get("image_url") and response.get("purchase_url"):
+                        # Send this mockup immediately
+                        color = selected_variant.get('options', {}).get('color', 'Unknown')
+                        product_title_with_color = f"{response['product_title']} ({color})"
+                        self._send_product_result(channel, response["image_url"], response["purchase_url"], product_title_with_color, response.get("publish_method"))
+                        
+                        # Simple progress message (except for last item)
+                        if product_id != "1221":  # Not the last item (Dad Hat)
+                            next_product = "hoodie" if product_id == "157" else "hat"
+                            self._send_message(channel, f"⚡ Creating {next_product}...")
+                    
+                except Exception as e:
+                    logger.error(f"Error creating mockup for {product_name}: {e}")
+                    # Check if it's a rate limit issue
+                    if "rate" in str(e).lower() or "429" in str(e) or "too many" in str(e).lower():
+                        self._send_message(channel, f"⏱️ API rate limit hit - retrying {product_name} in a moment...")
+                        import time
+                        time.sleep(5)  # Longer delay for rate limit recovery
+                        # Retry once
+                        try:
+                            response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
+                            if response.get("image_url") and response.get("purchase_url"):
+                                color = selected_variant.get('options', {}).get('color', 'Unknown')
+                                product_title_with_color = f"{response['product_title']} ({color})"
+                                self._send_product_result(channel, response["image_url"], response["purchase_url"], product_title_with_color, response.get("publish_method"))
+                            else:
+                                self._send_message(channel, f"⚠️ {product_name} creation failed after retry - you can try uploading a new logo later")
+                        except Exception as retry_e:
+                            logger.error(f"Retry failed for {product_name}: {retry_e}")
+                            self._send_message(channel, f"⚠️ {product_name} temporarily unavailable - try uploading a new logo later")
+                    else:
+                        self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
+            
+            # Final message with more guidance
+            self._send_message(channel, "🎉 *All done!* Click any link above to order your team merchandise. Want a different design? Just upload a new logo!")
+            
+            # Update conversation state
+            conversation_manager.update_conversation(channel, user, {"state": "completed"})
+            
+        except Exception as e:
+            logger.error(f"Error in _generate_all_mockups_with_colors: {e}")
+            self._send_message(channel, "Sorry, had some issues creating the mockups. Please try uploading your logo again!")
+    
     def _create_single_mockup(self, conversation: Dict, logo_info: Dict, product_info: Dict, channel: str, user: str) -> Dict:
         """Create a single product mockup (extracted from _create_custom_product_with_stored_logo)"""
         try:
@@ -727,6 +840,75 @@ I'll create custom mockups of our 3 most popular youth sports products:
             
         except Exception as e:
             logger.error(f"Error creating single mockup: {e}")
+            return {"message": "Mockup creation failed"}
+    
+    def _create_single_mockup_with_variant(self, conversation: Dict, logo_info: Dict, product_info: Dict, selected_variant: Dict, channel: str, user: str) -> Dict:
+        """Create a single product mockup using the selected variant"""
+        try:
+            team_info = conversation.get("team_info", {})
+            
+            # Get product blueprint details
+            product_details = product_service.get_product_by_id(str(product_info['id']))
+            
+            if not product_details:
+                return {"message": "Product not found"}
+            
+            # Convert to expected format
+            selected_product = {
+                'id': product_info['id'],
+                'title': product_details.get('title', 'Custom Product'),
+                'blueprint_id': product_details.get('blueprint_id'),
+                'print_provider_id': product_details.get('print_provider_id'),
+                'variants': product_details.get('variants', []),
+                'type': product_details.get('category', 'apparel'),
+                'base_price': product_details.get('base_price', 20.00)
+            }
+            
+            # Use the selected variant instead of first available
+            if not selected_variant:
+                return {"message": "No variant selected"}
+            
+            # Create product design for mockup with selected variant
+            design_result = printify_service.create_product_design(
+                blueprint_id=selected_product['blueprint_id'],
+                print_provider_id=selected_product['print_provider_id'],
+                variant_id=selected_variant['id'],
+                image_id=logo_info["printify_image_id"],
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+            )
+            
+            if not design_result["success"]:
+                return {"message": f"Design creation failed: {design_result['error']}"}
+            
+            # Save design to database with variant information
+            variant_color = selected_variant.get('options', {}).get('color', 'Unknown')
+            design_data = {
+                "name": f"{team_info.get('name', 'Team')} {selected_product['title']}",
+                "description": f"Custom {selected_product['title']} with team logo in {variant_color}",
+                "blueprint_id": selected_product['blueprint_id'],
+                "print_provider_id": selected_product['print_provider_id'],
+                "team_logo_image_id": logo_info["printify_image_id"],
+                "mockup_image_url": design_result.get("mockup_url"),
+                "base_price": selected_product.get('base_price', 20.00),
+                "markup_percentage": 50.0,
+                "created_by": f"{channel}_{user}",
+                "team_info": team_info,
+                "product_type": selected_product.get('type', 'apparel'),
+                "default_variant_id": selected_variant['id'],  # Store the selected variant
+                "default_color": variant_color
+            }
+            
+            design_id = database_service.save_product_design(design_data)
+            drop_url = database_service.generate_drop_url(design_id)
+            
+            return {
+                "image_url": design_result.get("mockup_url"),
+                "purchase_url": drop_url,
+                "product_title": design_data["name"]
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creating single mockup with variant: {e}")
             return {"message": "Mockup creation failed"}
 
     def _create_custom_product_with_stored_logo(self, conversation: Dict, logo_info: Dict, channel: str, user: str) -> Dict:
