@@ -44,7 +44,19 @@ class SlackBot:
             # Handle restart command
             if text.lower().strip() in ['restart', 'reset', 'start over']:
                 conversation_manager.reset_conversation(channel, user)
-                self._send_message(channel, "Great! Let's start fresh. What type of merchandise would you like to create for your team? 🏆")
+                # Send the new service description message
+                service_msg = """Welcome to the team merchandise service! How can I assist you with customizing products for your child's sports team today?
+
+Here are our recommended products for youth sports teams:
+• Kids Heavy Cotton™ Tee (Shirt)
+  Available colors: Ash, Azalea, Black, Cardinal Red, Carolina Blue, Charcoal, Daisy, Dark Chocolate (+30 more)
+• Youth Heavy Blend Hooded Sweatshirt (Shirt)
+  Available colors: Black, Cardinal Red, Carolina Blue, Charcoal, Dark Heather, Forest Green, Gold, Graphite Heather (+12 more)  
+• Snapback Trucker Cap (Hat)
+  Available colors: Black, Brown, Caramel, Charcoal, Cranberry, Dark Heather Grey, Evergreen, Heather Grey (+8 more)
+
+🚀 **Quick Start**: Upload your team logo now and I'll create mockups of all 3 products instantly! You can then choose which ones to purchase. 📸"""
+                self._send_message(channel, service_msg)
                 return {"status": "success"}
             
             # Get conversation state
@@ -56,8 +68,12 @@ class SlackBot:
                 self._send_message(channel, recovery_message)
                 return {"status": "recovery_suggested"}
             
-            # Process message based on conversation state
-            try:
+            # Check for URL first - handle logo URLs from any state
+            if "http" in text.lower():
+                # Process logo URL regardless of current state
+                response = self._handle_logo_request(text, conversation, event, channel, user)
+            else:
+                # Process message based on conversation state
                 if conversation["state"] == "initial":
                     response = self._handle_initial_message(text, conversation, channel, user)
                 elif conversation["state"] == "awaiting_product_selection":
@@ -242,8 +258,8 @@ class SlackBot:
                     
                     return {"message": logo_message}
             
-            # Product not specified or not found - ask for clarification
-            updates["state"] = "awaiting_product_selection"
+            # Always set to awaiting_logo state for new optimized flow
+            updates["state"] = "awaiting_logo"
             conversation_manager.update_conversation(channel, user, updates)
             
             suggestion_message = product_service.get_product_suggestions_text()
@@ -364,16 +380,13 @@ Here are our recommended products for youth sports teams:
                     
                     conversation_manager.update_conversation(channel, user, {"logo_info": logo_info})
                     
-                    # Create custom product
-                    response = self._create_custom_product_with_stored_logo(conversation, logo_info, channel, user)
+                    # Generate all 3 mockups in series using the new method
+                    self._generate_all_mockups_in_series(conversation, logo_info, channel, user)
                     
                     # Clean up temporary file
                     logo_processor.cleanup_logo(logo_result["file_path"])
                     
-                    # Update conversation state to completed
-                    conversation_manager.update_conversation(channel, user, {"state": "completed"})
-                    
-                    return response
+                    return {"message": "Creating mockups..."}
             
             # Not a URL, remind about logo requirement (prefer URLs)
             return {"message": "Please provide your team logo! For best results, share a direct URL link to your logo image (like from Google Drive, Dropbox, or any image hosting site). You can also upload an image file if needed."}
