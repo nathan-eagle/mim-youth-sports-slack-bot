@@ -603,9 +603,15 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 ("1446", "Snapback Trucker Cap")  # Hat third
             ]
             
-            for product_id, product_name in products_order:
+            for i, (product_id, product_name) in enumerate(products_order):
                 if product_id not in best_products:
                     continue
+                    
+                # Add delay between products to avoid rate limiting (except for first product)
+                if i > 0:
+                    import time
+                    time.sleep(2)
+                    logger.info(f"Added 2-second delay before creating {product_name}")
                     
                 try:
                     # Create mockup for this product
@@ -623,7 +629,23 @@ I'll create custom mockups of our 3 most popular youth sports products:
                     
                 except Exception as e:
                     logger.error(f"Error creating mockup for {product_name}: {e}")
-                    self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
+                    # Check if it's a rate limit issue
+                    if "rate" in str(e).lower() or "429" in str(e) or "too many" in str(e).lower():
+                        self._send_message(channel, f"⏱️ API rate limit hit - retrying {product_name} in a moment...")
+                        import time
+                        time.sleep(5)  # Longer delay for rate limit recovery
+                        # Retry once
+                        try:
+                            response = self._create_single_mockup(conversation, logo_info, product_info, channel, user)
+                            if response.get("image_url") and response.get("purchase_url"):
+                                self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
+                            else:
+                                self._send_message(channel, f"⚠️ {product_name} creation failed after retry - you can try uploading a new logo later")
+                        except Exception as retry_e:
+                            logger.error(f"Retry failed for {product_name}: {retry_e}")
+                            self._send_message(channel, f"⚠️ {product_name} temporarily unavailable - try uploading a new logo later")
+                    else:
+                        self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
             # Final message with more guidance
             self._send_message(channel, "🎉 **All done!** Click any link above to pick sizes and colors. Want a different design? Just upload a new logo!")
@@ -676,12 +698,6 @@ I'll create custom mockups of our 3 most popular youth sports products:
             if not design_result["success"]:
                 return {"message": f"Design creation failed: {design_result['error']}"}
             
-            # Hat mockups take longer - add small delay for better success rate
-            if "Cap" in selected_product['title'] or "Hat" in selected_product['title']:
-                import time
-                # Brief delay to let hat mockup generate
-                time.sleep(3)
-                logger.info(f"Added delay for hat mockup generation: {selected_product['title']}")
             
             # Save design to database
             design_data = {
