@@ -388,7 +388,8 @@ Here are our recommended products for youth sports teams:
                     # Clean up temporary file
                     logo_processor.cleanup_logo(logo_result["file_path"])
                     
-                    return {"message": "Creating mockups..."}
+                    # No need to return anything - _generate_all_mockups_in_series handles all messaging
+                    return {"status": "success"}
             
             # Not a URL, remind about logo requirement (prefer URLs)
             return {"message": "Please provide your team logo! For best results, share a direct URL link to your logo image (like from Google Drive, Dropbox, or any image hosting site). You can also upload an image file if needed."}
