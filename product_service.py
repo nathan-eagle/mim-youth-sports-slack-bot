@@ -396,16 +396,27 @@ class ProductService:
         colors_by_product = self.get_available_colors_for_best_products()
         
         selected_variants = {}
-        product_names_map = {
-            'tshirt': '157', 't-shirt': '157', 'shirt': '157', 'tee': '157',
-            'hoodie': '314', 'sweatshirt': '314', 'pullover': '314',
-            'hat': '1221', 'cap': '1221'
-        }
+        # Process more specific names first to avoid conflicts (e.g., "sweatshirt" before "shirt")
+        product_names_map = [
+            ('sweatshirt', '314'), ('hoodie', '314'), ('pullover', '314'),  # Process these first
+            ('tshirt', '157'), ('t-shirt', '157'), ('shirt', '157'), ('tee', '157'),
+            ('hat', '1221'), ('cap', '1221')
+        ]
         
-        # Check for "default" or "default colors"
+        # Check for "default" or "default colors" - use predefined best defaults
         if 'default' in user_input_lower:
-            for product_id in ['157', '314', '1221']:
-                if product_id in colors_by_product and colors_by_product[product_id]:
+            default_colors = {
+                '157': 'Black',  # Kids Tee - Black is most popular
+                '314': 'Navy',   # Youth Hoodie - Navy is classic
+                '1221': 'White / Black patch'  # Dad Hat - White with black patch is clean
+            }
+            
+            for product_id, default_color in default_colors.items():
+                variant = self._find_variant_by_color(product_id, default_color)
+                if variant:
+                    selected_variants[product_id] = variant
+                elif product_id in colors_by_product and colors_by_product[product_id]:
+                    # Fallback to first available if default not found
                     first_color = colors_by_product[product_id][0]
                     selected_variants[product_id] = self._find_variant_by_color(product_id, first_color)
             return selected_variants
@@ -424,39 +435,205 @@ class ProductService:
                     selected_variants[product_id] = variant
             return selected_variants
         
-        # Parse specific product color assignments
-        # Look for patterns like "black t-shirt", "navy hoodie", "white hat"
+        # Parse specific product color assignments with improved logic
         import re
         
-        for product_name, product_id in product_names_map.items():
-            # Find mentions of this product in the input
-            pattern = rf'(\w+)\s+{re.escape(product_name)}'
+        # Enhanced parsing for multiple product+color combinations
+        # First, try to find specific color+product patterns in the input
+        # Simple approach: find all color+product pairs individually  
+        color_product_patterns = [
+            # Multi-word colors first (more specific)
+            r'\b(\w+\s+\w+)\s+(shirt|tee|t-shirt|tshirt)\b',
+            r'\b(\w+\s+\w+)\s+(hoodie|sweatshirt|pullover)\b',
+            r'\b(\w+\s+\w+)\s+(hat|cap)\b',
+            # Single word colors second
+            r'\b(\w+)\s+(shirt|tee|t-shirt|tshirt)\b',
+            r'\b(\w+)\s+(hoodie|sweatshirt|pullover)\b', 
+            r'\b(\w+)\s+(hat|cap)\b',
+        ]
+        
+        # Try to extract specific color+product pairs
+        specific_matches = []
+        for pattern in color_product_patterns:
             matches = re.findall(pattern, user_input_lower)
-            
-            if matches:
-                # Try to match the color word before the product name
-                color_word = matches[0].strip()
-                colors = colors_by_product.get(product_id, [])
+            for match in matches:
+                if isinstance(match, tuple) and len(match) >= 2:
+                    color_text = match[0].strip()
+                    product_text = match[1].strip() 
+                    
+                    
+                    # Map product text to product ID
+                    product_id = None
+                    for prod_name, prod_id in product_names_map:
+                        if prod_name == product_text:
+                            product_id = prod_id
+                            break
+                    
+                    if product_id and product_id not in [m[1] for m in specific_matches]:
+                        specific_matches.append((color_text, product_id))
+        
+        # Process specific matches first
+        for color_text, product_id in specific_matches:
+            colors = colors_by_product.get(product_id, [])
+            if not colors:
+                continue
                 
+            best_match = None
+            
+            # Color synonyms/mappings - only use for exact matches, not modified colors
+            color_synonyms = {
+                'blue': 'royal',  # Only for plain "blue", not "light blue", "dark blue" etc.
+            }
+            
+            # Check if this is a plain color or a modified color (light/dark prefix)
+            is_modified_color = any(prefix in color_text for prefix in ['light', 'dark', 'bright', 'pale'])
+            
+            # Try exact color match
+            for color in colors:
+                if color.lower() == color_text:
+                    best_match = color
+                    break
+            
+            # Try synonym match - only if it's not a modified color
+            if not best_match and not is_modified_color and color_text in color_synonyms:
+                synonym_color = color_synonyms[color_text]
                 for color in colors:
-                    color_simple = color.split('/')[0].strip().lower()  # Handle "Black / Black patch" -> "black"
-                    if color_simple == color_word:
-                        variant = self._find_variant_by_color(product_id, color)
-                        if variant:
-                            selected_variants[product_id] = variant
+                    if color.lower() == synonym_color:
+                        best_match = color
                         break
-            elif product_name in user_input_lower:
-                # Fallback: look for any color words near the product name
-                colors = colors_by_product.get(product_id, [])
+            
+            # Try partial match (e.g., "navy" -> "Navy / Black patch")  
+            if not best_match:
                 for color in colors:
-                    color_simple = color.split('/')[0].strip()  # Handle "Black / Black patch" -> "Black"
-                    if color_simple.lower() in user_input_lower:
-                        variant = self._find_variant_by_color(product_id, color)
-                        if variant:
-                            selected_variants[product_id] = variant
+                    color_start = color.split('/')[0].strip().lower()
+                    if color_start == color_text:
+                        best_match = color
                         break
+                        
+            # Try synonym partial match - only if it's not a modified color
+            if not best_match and not is_modified_color and color_text in color_synonyms:
+                synonym_color = color_synonyms[color_text]
+                for color in colors:
+                    color_start = color.split('/')[0].strip().lower()
+                    if color_start == synonym_color:
+                        best_match = color
+                        break
+            
+            # Apply the match
+            if best_match:
+                variant = self._find_variant_by_color(product_id, best_match)
+                if variant:
+                    selected_variants[product_id] = variant
+        
+        # Fall back to original logic for any unmatched products
+        import re
+        for product_name, product_id in product_names_map:
+            # Use word boundaries to avoid substring matches (e.g., "shirt" in "sweatshirt")
+            if not re.search(rf'\b{re.escape(product_name)}\b', user_input_lower):
+                continue
+            
+            # Skip if this product already has a color assigned
+            if product_id in selected_variants:
+                continue
+                
+            colors = colors_by_product.get(product_id, [])
+            if not colors:
+                continue
+            
+            # Method 1: Look for exact color matches in the full input
+            best_match = None
+            best_match_score = 0
+            
+            for color in colors:
+                color_lower = color.lower()
+                # Check if the full color name appears in the input
+                if color_lower in user_input_lower:
+                    # Calculate match quality (longer matches are better)
+                    match_score = len(color_lower)
+                    if match_score > best_match_score:
+                        best_match = color
+                        best_match_score = match_score
+            
+            # Method 2: Look for color words before product names  
+            if not best_match:
+                # Color synonyms for fallback matching
+                color_synonyms = {
+                    'blue': 'royal',  # Only for plain "blue", not "light blue", "dark blue" etc.
+                }
+                
+                # More flexible regex for color words before product
+                patterns = [
+                    rf'([a-z/\s]+?)\s+{re.escape(product_name)}',  # Multi-word colors
+                    rf'(\w+)\s+{re.escape(product_name)}'         # Single word colors
+                ]
+                
+                # Process patterns in order, but if we find a modified color that doesn't match, don't fall back to simpler patterns
+                found_modified_color = False
+                
+                for pattern in patterns:
+                    matches = re.findall(pattern, user_input_lower)
+                    if matches:
+                        color_phrase = matches[0].strip()
+                        
+                        # Check if this is a modified color (light/dark prefix) that shouldn't use synonyms
+                        is_modified_color = any(prefix in color_phrase for prefix in ['light', 'dark', 'bright', 'pale'])
+                        
+                        # If we found a modified color, remember it and don't process simpler patterns
+                        if is_modified_color:
+                            found_modified_color = True
+                        elif found_modified_color:
+                            # Skip simpler patterns if we already found a modified color that didn't match
+                            continue
+                        
+                        # Try exact match first
+                        for color in colors:
+                            if color.lower() == color_phrase:
+                                best_match = color
+                                break
+                        
+                        # Try synonym match only if not a modified color  
+                        if not best_match and not is_modified_color and color_phrase in color_synonyms:
+                            synonym_color = color_synonyms[color_phrase]
+                            for color in colors:
+                                if color.lower() == synonym_color:
+                                    best_match = color
+                                    break
+                        
+                        # Try partial match (e.g., "navy" -> "Navy / Black patch")
+                        if not best_match:
+                            for color in colors:
+                                color_start = color.split('/')[0].strip().lower()
+                                if color_start == color_phrase:
+                                    best_match = color
+                                    break
+                        
+                        # Try synonym partial match only if not a modified color
+                        if not best_match and not is_modified_color and color_phrase in color_synonyms:
+                            synonym_color = color_synonyms[color_phrase]
+                            for color in colors:
+                                color_start = color.split('/')[0].strip().lower()
+                                if color_start == synonym_color:
+                                    best_match = color
+                                    break
+                        
+                        if best_match:
+                            break
+                        elif is_modified_color:
+                            # If we found a modified color but no match, stop processing simpler patterns
+                            break
+            
+            # Method 3: LLM fallback for ambiguous cases
+            if not best_match:
+                best_match = self._llm_color_match(user_input_lower, product_name, colors)
+            
+            # Apply the best match found
+            if best_match:
+                variant = self._find_variant_by_color(product_id, best_match)
+                if variant:
+                    selected_variants[product_id] = variant
         
         # If no specific assignments found, try to find colors for any unassigned products
+        # This should only happen when user mentions colors but no specific products
         if not selected_variants:
             available_colors = set()
             for colors in colors_by_product.values():
@@ -468,20 +645,23 @@ class ProductService:
                 if color in user_input_lower:
                     mentioned_colors.append(color.title())
             
-            # Assign first mentioned color to all products if possible
-            if mentioned_colors:
+            # Only assign colors to all products if user mentions "all" or if it's a default request
+            if mentioned_colors and ('all' in user_input_lower or 'everything' in user_input_lower):
                 primary_color = mentioned_colors[0]
                 for product_id in ['157', '314', '1221']:
                     variant = self._find_variant_by_color(product_id, primary_color)
                     if variant:
                         selected_variants[product_id] = variant
         
-        # Fill in missing products with defaults
-        for product_id in ['157', '314', '1221']:
-            if product_id not in selected_variants:
-                if product_id in colors_by_product and colors_by_product[product_id]:
-                    first_color = colors_by_product[product_id][0]
-                    selected_variants[product_id] = self._find_variant_by_color(product_id, first_color)
+        # Only fill in missing products with defaults if user explicitly requested defaults
+        # or if they want "all" products
+        if ('default' in user_input_lower or 'all' in user_input_lower or 
+            'everything' in user_input_lower or 'complete' in user_input_lower):
+            for product_id in ['157', '314', '1221']:
+                if product_id not in selected_variants:
+                    if product_id in colors_by_product and colors_by_product[product_id]:
+                        first_color = colors_by_product[product_id][0]
+                        selected_variants[product_id] = self._find_variant_by_color(product_id, first_color)
         
         return selected_variants
     
@@ -506,6 +686,56 @@ class ProductService:
                 return variant
                 
         return None
+    
+    def _llm_color_match(self, user_input: str, product_name: str, available_colors: List[str]) -> Optional[str]:
+        """Use LLM to interpret ambiguous color requests"""
+        try:
+            # Import here to avoid circular dependencies
+            from openai_service import openai_service
+            
+            # Create a prompt for color interpretation
+            prompt = f"""
+            The user said: "{user_input}"
+            
+            They want to select a color for a {product_name}.
+            
+            Available colors for this {product_name}:
+            {', '.join(available_colors)}
+            
+            What color is the user most likely requesting for the {product_name}? 
+            
+            Return ONLY the exact color name from the available list, or "NONE" if unclear.
+            
+            Examples:
+            - If user says "red shirt" and Red is available, return "Red"
+            - If user says "navy/grey patch hat" and "Navy / Grey patch" is available, return "Navy / Grey patch"
+            - If unclear, return "NONE"
+            """
+            
+            response = openai_service.client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a color matching assistant. Be precise and only return exact color names from the provided list."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=50,
+                temperature=0.1
+            )
+            
+            result = response.choices[0].message.content.strip()
+            
+            # Validate the result is in our available colors
+            if result in available_colors:
+                logger.info(f"LLM matched '{user_input}' -> '{result}' for {product_name}")
+                return result
+            elif result != "NONE":
+                logger.warning(f"LLM returned invalid color '{result}' for {product_name}")
+            
+            return None
+            
+        except Exception as e:
+            logger.warning(f"LLM color matching failed: {e}")
+            return None
 
 # Global instance
 product_service = ProductService() 

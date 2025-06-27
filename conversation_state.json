@@ -1,21 +1,36 @@
 {
   "conversations": {
     "test_channel_test_user": {
-      "state": "awaiting_product_selection",
+      "state": "creating_mockups",
       "product_selected": null,
-      "logo_info": {
-        "printify_image_id": "test_image_123",
-        "preview_url": "https://example.com/preview.jpg",
-        "filename": "test_logo.png",
-        "uploaded_at": 1750905087.3064399
-      },
+      "logo_info": null,
       "team_info": {},
-      "created_at": 1750905087.306158,
-      "last_activity": 1750905087.306453,
+      "selected_variants": {
+        "157": {
+          "id": 12124,
+          "options": {
+            "color": "Black"
+          }
+        },
+        "314": {
+          "id": 43873,
+          "options": {
+            "color": "Navy"
+          }
+        },
+        "1221": {
+          "id": 93564,
+          "options": {
+            "color": "White / Black patch"
+          }
+        }
+      },
+      "created_at": 1751053217.607862,
+      "last_activity": 1751053217.607868,
       "error_count": 0,
       "last_error": null
     }
   },
   "processed_events": [],
-  "last_updated": 1750905087.306453
+  "last_updated": 1751053217.607869
 }
