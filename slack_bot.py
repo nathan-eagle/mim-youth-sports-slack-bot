@@ -1333,7 +1333,16 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                 if len(available_colors) > 6:
                     color_text += f" (+{len(available_colors) - 6} more)"
                 
-                alternatives_text = f"\n\n_💡 Also available in: {color_text}_\n_Want a different color? Just say '{available_colors[1].lower()} {product_name.split()[0].lower() if product_name else 'item'}' to create a new drop!_"
+                # Extract the actual product type from the product name
+                product_type = "item"  # default fallback
+                if "Tee" in product_name or "Heavy Cotton" in product_name:
+                    product_type = "t-shirt"
+                elif "Sweatshirt" in product_name or "Hoodie" in product_name:
+                    product_type = "hoodie"
+                elif "Hat" in product_name or "Cap" in product_name:
+                    product_type = "hat"
+                
+                alternatives_text = f"\n\n_💡 Also available in: {color_text}_\n_Want a different color? Just say '{available_colors[1].lower()} {product_type}' to create a new drop!_"
             else:
                 alternatives_text = ""
             
