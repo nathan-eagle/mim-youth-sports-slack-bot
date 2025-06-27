@@ -45,17 +45,14 @@ class SlackBot:
             if text.lower().strip() in ['restart', 'reset', 'start over']:
                 conversation_manager.reset_conversation(channel, user)
                 # Send the new service description message
-                service_msg = """Welcome to the team merchandise service! How can I assist you with customizing products for your child's sports team today?
+                service_msg = """Welcome to the team merchandise service! 🏆
 
-Here are our recommended products for youth sports teams:
-• Kids Heavy Cotton™ Tee (Shirt)
-  Available colors: Ash, Azalea, Black, Cardinal Red, Carolina Blue, Charcoal, Daisy, Dark Chocolate (+30 more)
-• Youth Heavy Blend Hooded Sweatshirt (Shirt)
-  Available colors: Black, Cardinal Red, Carolina Blue, Charcoal, Dark Heather, Forest Green, Gold, Graphite Heather (+12 more)  
-• Snapback Trucker Cap (Hat)
-  Available colors: Black, Brown, Caramel, Charcoal, Cranberry, Dark Heather Grey, Evergreen, Heather Grey (+8 more)
+I'll create custom mockups of our 3 most popular youth sports products:
+• **Kids Heavy Cotton Tee** (T-shirt)
+• **Youth Heavy Blend Hooded Sweatshirt** (Hoodie) 
+• **Snapback Trucker Cap** (Hat)
 
-🚀 **Quick Start**: Upload your team logo now and I'll create mockups of all 3 products instantly! You can then choose which ones to purchase. 📸"""
+📸 **Just upload your team logo** and I'll show you all 3 products with your design!"""
                 self._send_message(channel, service_msg)
                 return {"status": "success"}
             
@@ -267,17 +264,14 @@ Here are our recommended products for youth sports teams:
             suggestion_message = product_service.get_product_suggestions_text()
             
             # Service description with immediate logo request
-            service_description = """Welcome to the team merchandise service! How can I assist you with customizing products for your child's sports team today?
+            service_description = """Welcome to the team merchandise service! 🏆
 
-Here are our recommended products for youth sports teams:
-• Kids Heavy Cotton™ Tee (Shirt)
-  Available colors: Ash, Azalea, Black, Cardinal Red, Carolina Blue, Charcoal, Daisy, Dark Chocolate (+30 more)
-• Youth Heavy Blend Hooded Sweatshirt (Shirt)
-  Available colors: Black, Cardinal Red, Carolina Blue, Charcoal, Dark Heather, Forest Green, Gold, Graphite Heather (+12 more)  
-• Snapback Trucker Cap (Hat)
-  Available colors: Black, Brown, Caramel, Charcoal, Cranberry, Dark Heather Grey, Evergreen, Heather Grey (+8 more)
+I'll create custom mockups of our 3 most popular youth sports products:
+• **Kids Heavy Cotton Tee** (T-shirt)
+• **Youth Heavy Blend Hooded Sweatshirt** (Hoodie) 
+• **Snapback Trucker Cap** (Hat)
 
-🚀 **Quick Start**: Upload your team logo now and I'll create mockups of all 3 products instantly! You can then choose which ones to purchase. 📸"""
+📸 **Just upload your team logo** and I'll show you all 3 products with your design!"""
             
             return {"message": service_description}
             
@@ -599,7 +593,7 @@ Here are our recommended products for youth sports teams:
             team_name = team_info.get("name", "your team")
             
             # Send initial message
-            self._send_message(channel, f"🎨 Perfect! Creating custom mockups for {team_name}... Starting with the T-shirt!")
+            self._send_message(channel, f"🎨 Perfect! Creating mockups for {team_name}...")
             
             # Get the 3 best products in order: T-shirt, Hoodie, Hat
             best_products = product_service.get_best_products()
@@ -622,17 +616,17 @@ Here are our recommended products for youth sports teams:
                         # Send this mockup immediately
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                         
-                        # Add brief pause and next product message (except for last item)
+                        # Simple progress message (except for last item)
                         if product_id != "1446":  # Not the last item
                             next_product = "hoodie" if product_id == "157" else "hat"
-                            self._send_message(channel, f"⚡ Working on the {next_product} next...")
+                            self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
                     logger.error(f"Error creating mockup for {product_name}: {e}")
                     self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
-            # Final message
-            self._send_message(channel, "🎉 All done! Click any purchase link above to customize sizes, colors, and quantities. Need a different design? Just upload a new logo!")
+            # Final message with more guidance
+            self._send_message(channel, "🎉 **All done!** Click any link above to pick sizes and colors. Want a different design? Just upload a new logo!")
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
@@ -858,16 +852,19 @@ Here are our recommended products for youth sports teams:
     def _send_product_result(self, channel: str, image_url: str, purchase_url: str, product_name: str, publish_method: str = None):
         """Send product creation result with drop link for purchase"""
         try:
-            # Create messaging for custom drop approach
-            success_message = f"""🎉 *Custom {product_name} Created Successfully!*
+            # Simple, clean messaging for the new flow
+            if "Tee" in product_name:
+                # Add color info for the first product to guide users
+                success_message = f"""🎉 **{product_name}**
 
-✅ Your team logo has been applied to the product
-✅ High-quality mockup generated and ready to view
-✅ Product design saved and ready for purchase
+🛒 **[Shop this design]({purchase_url})**
 
-🛒 **Purchase your team gear here:** {purchase_url}
+*Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more!*"""
+            else:
+                # Simpler for subsequent products
+                success_message = f"""🎉 **{product_name}**
 
-Your custom design is ready! Click the link above to select sizes, quantities, and complete your order. We'll handle the rest! 🏆"""
+🛒 **[Shop this design]({purchase_url})**"""
 
             # Send the image with the message
             self.client.chat_postMessage(
@@ -894,7 +891,7 @@ Your custom design is ready! Click the link above to select sizes, quantities, a
             # Fallback message without image
             self.client.chat_postMessage(
                 channel=channel,
-                text=f"🎉 Custom {product_name} created! Purchase here: {purchase_url}"
+                text=f"🎉 **{product_name}** - [Shop this design]({purchase_url})"
             )
 
 # Global instance
