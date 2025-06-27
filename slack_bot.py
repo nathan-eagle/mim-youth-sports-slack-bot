@@ -68,22 +68,24 @@ Here are our recommended products for youth sports teams:
                 self._send_message(channel, recovery_message)
                 return {"status": "recovery_suggested"}
             
-            # Check for URL first - handle logo URLs from any state
-            if "http" in text.lower():
-                # Process logo URL regardless of current state
-                response = self._handle_logo_request(text, conversation, event, channel, user)
-            else:
-                # Process message based on conversation state
-                if conversation["state"] == "initial":
-                    response = self._handle_initial_message(text, conversation, channel, user)
-                elif conversation["state"] == "awaiting_product_selection":
-                    response = self._handle_product_selection(text, conversation, channel, user)
-                elif conversation["state"] == "awaiting_logo":
+            # Process message based on conversation state
+            try:
+                # Check for URL first - handle logo URLs from any state
+                if "http" in text.lower():
+                    # Process logo URL regardless of current state
                     response = self._handle_logo_request(text, conversation, event, channel, user)
-                elif conversation["state"] == "completed":
-                    response = self._handle_completed_conversation(text, conversation, channel, user)
                 else:
-                    response = self._handle_initial_message(text, conversation, channel, user)
+                    # Process message based on conversation state
+                    if conversation["state"] == "initial":
+                        response = self._handle_initial_message(text, conversation, channel, user)
+                    elif conversation["state"] == "awaiting_product_selection":
+                        response = self._handle_product_selection(text, conversation, channel, user)
+                    elif conversation["state"] == "awaiting_logo":
+                        response = self._handle_logo_request(text, conversation, event, channel, user)
+                    elif conversation["state"] == "completed":
+                        response = self._handle_completed_conversation(text, conversation, channel, user)
+                    else:
+                        response = self._handle_initial_message(text, conversation, channel, user)
                 
                 # Send response to Slack
                 if response.get("image_url") and response.get("purchase_url"):
