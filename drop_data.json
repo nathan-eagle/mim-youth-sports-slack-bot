@@ -1,0 +1,27 @@
+{
+  "product_designs": {
+    "50317984-183a-4dda-9b22-570fd53c1f7d": {
+      "id": "50317984-183a-4dda-9b22-570fd53c1f7d",
+      "name": "Blue Eagles Baseball Hats",
+      "description": "Custom baseball hats for Blue Eagles team",
+      "blueprint_id": "9",
+      "print_provider_id": "1",
+      "team_logo_image_id": "test_logo_123",
+      "mockup_image_url": "https://example.com/mockup.jpg",
+      "base_price": 25.0,
+      "markup_percentage": 60.0,
+      "created_at": "2025-06-26T12:08:17.951749",
+      "created_by": "slack_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Blue Eagles",
+        "sport": "Baseball",
+        "age_group": "Little League"
+      },
+      "product_type": "hats"
+    }
+  },
+  "customer_orders": {},
+  "order_items": {},
+  "shipping_addresses": {}
+}

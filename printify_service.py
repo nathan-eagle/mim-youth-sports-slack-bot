@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class PrintifyService:
     def __init__(self):
         self.api_token = os.getenv('PRINTIFY_API_TOKEN')
-        self.shop_id = os.getenv('PRINTIFY_SHOP_ID')
+        self.shop_id = os.getenv('PRINTIFY_SHOP_ID')  # Optional for catalog operations
         self.base_url = "https://api.printify.com/v1"
         self.headers = {
             "Authorization": f"Bearer {self.api_token}",
@@ -19,8 +19,12 @@ class PrintifyService:
             "User-Agent": "MiM-Youth-Sports-Bot/1.0"
         }
         
-        if not self.api_token or not self.shop_id:
-            raise ValueError("Missing required environment variables: PRINTIFY_API_TOKEN, PRINTIFY_SHOP_ID")
+        if not self.api_token:
+            raise ValueError("Missing required environment variable: PRINTIFY_API_TOKEN")
+        
+        # Shop ID only required for shop-specific operations
+        if not self.shop_id:
+            logger.warning("PRINTIFY_SHOP_ID not set - some operations may not be available")
 
     def upload_image(self, image_url: str, filename: str) -> Dict:
         """Upload an image to Printify and return the image ID"""
@@ -411,10 +415,89 @@ class PrintifyService:
         except Exception as e:
             logger.error(f"Error deleting temporary product: {e}")
 
-# Global instance (only create if environment variables are available)
+    def lookup_blueprint_details(self, search_title: str) -> Dict:
+        """Look up blueprint and provider details for a specific product title"""
+        try:
+            # Get all blueprints
+            response = requests.get(
+                f"{self.base_url}/catalog/blueprints.json",
+                headers=self.headers
+            )
+            
+            if response.status_code != 200:
+                return {"success": False, "error": f"Failed to get blueprints: {response.status_code}"}
+            
+            blueprints = response.json()
+            
+            # Find blueprint matching the search title
+            matching_blueprint = None
+            for blueprint in blueprints:
+                if search_title.lower() in blueprint.get('title', '').lower():
+                    matching_blueprint = blueprint
+                    break
+            
+            if not matching_blueprint:
+                return {"success": False, "error": f"No blueprint found matching '{search_title}'"}
+            
+            blueprint_id = matching_blueprint['id']
+            logger.info(f"Found blueprint: {blueprint_id} - {matching_blueprint['title']}")
+            
+            # Get print providers for this blueprint
+            response = requests.get(
+                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers.json",
+                headers=self.headers
+            )
+            
+            if response.status_code != 200:
+                return {"success": False, "error": f"Failed to get print providers: {response.status_code}"}
+            
+            providers = response.json()
+            
+            if not providers:
+                return {"success": False, "error": "No print providers available"}
+            
+            # Use the first available provider
+            provider = providers[0]
+            provider_id = provider['id']
+            
+            logger.info(f"Using print provider: {provider_id} - {provider.get('title', 'Unknown')}")
+            
+            # Get variants for this blueprint/provider combination
+            response = requests.get(
+                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{provider_id}/variants.json",
+                headers=self.headers
+            )
+            
+            if response.status_code != 200:
+                return {"success": False, "error": f"Failed to get variants: {response.status_code}"}
+            
+            variants = response.json()
+            
+            logger.info(f"Found {len(variants) if isinstance(variants, list) else 'unknown count'} variants for blueprint {blueprint_id}")
+            
+            # Ensure variants is a list and get sample variant safely
+            sample_variant = None
+            if isinstance(variants, list) and len(variants) > 0:
+                sample_variant = variants[0]
+            
+            return {
+                "success": True,
+                "blueprint_id": blueprint_id,
+                "print_provider_id": provider_id,
+                "blueprint_title": matching_blueprint['title'],
+                "provider_title": provider.get('title', 'Unknown'),
+                "variants": variants,
+                "sample_variant": sample_variant
+            }
+            
+        except Exception as e:
+            logger.error(f"Exception looking up blueprint details: {e}")
+            return {"success": False, "error": str(e)}
+
+# Global instance (only create if API token is available)
 printify_service = None
 try:
-    if os.getenv('PRINTIFY_API_TOKEN') and os.getenv('PRINTIFY_SHOP_ID'):
+    if os.getenv('PRINTIFY_API_TOKEN'):
         printify_service = PrintifyService()
 except Exception:
     # Will be None if env vars not available - that's ok for testing

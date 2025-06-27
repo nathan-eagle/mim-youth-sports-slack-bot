@@ -370,7 +370,7 @@ def apply_bulk_discounts(total_quantity):
 ```bash
 # Existing
 PRINTIFY_API_TOKEN=xxx
-PRINTIFY_SHOP_ID=xxx
+# PRINTIFY_SHOP_ID not needed for custom storefront
 OPENAI_API_KEY=xxx
 SLACK_BOT_TOKEN=xxx
 

@@ -50,7 +50,7 @@ class SlackBot:
 I'll create custom mockups of our 3 most popular youth sports products:
 • *Kids Heavy Cotton Tee* (T-shirt)
 • *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
-• *Snapback Trucker Cap* (Hat)
+• *Dad Hat with Leather Patch* (Hat)
 
 📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
                 self._send_message(channel, service_msg)
@@ -269,7 +269,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
 I'll create custom mockups of our 3 most popular youth sports products:
 • *Kids Heavy Cotton Tee* (T-shirt)
 • *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
-• *Snapback Trucker Cap* (Hat)
+• *Dad Hat with Leather Patch* (Hat)
 
 📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
             
@@ -600,7 +600,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
             products_order = [
                 ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
                 ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
-                ("1446", "Snapback Trucker Cap")  # Hat third
+                ("1221", "Dad Hat with Leather Patch")  # Hat third - faster dye-sublimation
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -625,7 +625,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                         
                         # Simple progress message (except for last item)
-                        if product_id != "1446":  # Not the last item
+                        if product_id != "1221":  # Not the last item (Dad Hat)
                             next_product = "hoodie" if product_id == "157" else "hat"
                             self._send_message(channel, f"⚡ Creating {next_product}...")
                     

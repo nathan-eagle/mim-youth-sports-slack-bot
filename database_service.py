@@ -195,6 +195,14 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"Error updating Printify order ID: {e}")
             return False
+
+    def get_order_by_id(self, order_id: str) -> dict:
+        """Get order details by order ID"""
+        try:
+            return self.data["customer_orders"].get(order_id)
+        except Exception as e:
+            logger.error(f"Error getting order {order_id}: {e}")
+            return None
     
     def add_order_item(self, order_id: str, item_data: Dict) -> str:
         """Add an item to an order"""

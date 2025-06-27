@@ -33,7 +33,7 @@ OPENAI_API_KEY=your-openai-api-key-here
 
 # Printify Configuration
 PRINTIFY_API_TOKEN=your-printify-api-token-here
-PRINTIFY_SHOP_ID=your-printify-shop-id-here
+# PRINTIFY_SHOP_ID not needed for custom storefront architecture
 
 # Flask Configuration (optional)
 FLASK_ENV=development

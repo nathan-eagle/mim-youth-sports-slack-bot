@@ -22,9 +22,9 @@ class ProductService:
                 'print_provider_id': 249, # HFT71 Sp. z o.o (verified working provider)
                 'category': 'hoodie'
             },
-            '1446': {  # Snapback Trucker Cap
-                'blueprint_id': 1446,     # Snapback Trucker Cap (Yupoong 6606)
-                'print_provider_id': 217, # Fulfill Engine (default provider)
+            '1221': {  # Dad Hat with Leather Patch (Rectangle)
+                'blueprint_id': 1221,     # Dad Hat with Leather Patch (Rectangle)
+                'print_provider_id': 261, # Fancy Fanny (dye-sublimation - faster than embroidery)
                 'category': 'hat'
             }
         }
