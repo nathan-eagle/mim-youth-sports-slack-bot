@@ -48,11 +48,11 @@ class SlackBot:
                 service_msg = """Welcome to the team merchandise service! 🏆
 
 I'll create custom mockups of our 3 most popular youth sports products:
-• **Kids Heavy Cotton Tee** (T-shirt)
-• **Youth Heavy Blend Hooded Sweatshirt** (Hoodie) 
-• **Snapback Trucker Cap** (Hat)
+• *Kids Heavy Cotton Tee* (T-shirt)
+• *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
+• *Snapback Trucker Cap* (Hat)
 
-📸 **Just upload your team logo** and I'll show you all 3 products with your design!"""
+📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
                 self._send_message(channel, service_msg)
                 return {"status": "success"}
             
@@ -267,11 +267,11 @@ I'll create custom mockups of our 3 most popular youth sports products:
             service_description = """Welcome to the team merchandise service! 🏆
 
 I'll create custom mockups of our 3 most popular youth sports products:
-• **Kids Heavy Cotton Tee** (T-shirt)
-• **Youth Heavy Blend Hooded Sweatshirt** (Hoodie) 
-• **Snapback Trucker Cap** (Hat)
+• *Kids Heavy Cotton Tee* (T-shirt)
+• *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
+• *Snapback Trucker Cap* (Hat)
 
-📸 **Just upload your team logo** and I'll show you all 3 products with your design!"""
+📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
             
             return {"message": service_description}
             
@@ -650,7 +650,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                         self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
             # Final message with more guidance
-            self._send_message(channel, "🎉 **All done!** Click any link above to pick sizes and colors. Want a different design? Just upload a new logo!")
+            self._send_message(channel, "🎉 *All done!* Click any link above to pick sizes and colors. Want a different design? Just upload a new logo!")
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
@@ -877,19 +877,19 @@ I'll create custom mockups of our 3 most popular youth sports products:
     def _send_product_result(self, channel: str, image_url: str, purchase_url: str, product_name: str, publish_method: str = None):
         """Send product creation result with drop link for purchase"""
         try:
-            # Simple, clean messaging for the new flow
+            # Simple, clean messaging for the new flow (using proper Slack formatting)
             if "Tee" in product_name:
                 # Add color info for the first product to guide users
-                success_message = f"""🎉 **{product_name}**
+                success_message = f"""🎉 *{product_name}*
 
-🛒 **Shop this design:** {purchase_url}
+🛒 <{purchase_url}|*Shop this design*>
 
-*Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more!*"""
+_Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more!_"""
             else:
                 # Simpler for subsequent products
-                success_message = f"""🎉 **{product_name}**
+                success_message = f"""🎉 *{product_name}*
 
-🛒 **Shop this design:** {purchase_url}"""
+🛒 <{purchase_url}|*Shop this design*>"""
 
             # Send the image with the message
             self.client.chat_postMessage(
@@ -915,9 +915,9 @@ I'll create custom mockups of our 3 most popular youth sports products:
             logger.error(f"Error sending product result with image: {e}")
             # Fallback message without image (common for hat mockups that aren't ready yet)
             if "Cap" in product_name or "Hat" in product_name:
-                fallback_msg = f"🎉 **{product_name}**\n\n🛒 **Shop this design:** {purchase_url}\n\n*Mockup image is generating and will appear on the product page shortly!*"
+                fallback_msg = f"🎉 *{product_name}*\n\n🛒 <{purchase_url}|*Shop this design*>\n\n_Mockup image is generating and will appear on the product page shortly!_"
             else:
-                fallback_msg = f"🎉 **{product_name}**\n\n🛒 **Shop this design:** {purchase_url}"
+                fallback_msg = f"🎉 *{product_name}*\n\n🛒 <{purchase_url}|*Shop this design*>"
                 
             self.client.chat_postMessage(
                 channel=channel,
