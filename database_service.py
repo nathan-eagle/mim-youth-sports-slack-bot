@@ -85,7 +85,9 @@ class DatabaseService:
                 "created_by": design_data.get("created_by", "slack_user"),
                 "status": "active",
                 "team_info": design_data.get("team_info", {}),
-                "product_type": design_data.get("product_type", "apparel")
+                "product_type": design_data.get("product_type", "apparel"),
+                "default_variant_id": design_data.get("default_variant_id"),  # Selected color variant
+                "default_color": design_data.get("default_color")  # Selected color name
             }
             
             if self.supabase:
