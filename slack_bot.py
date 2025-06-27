@@ -169,10 +169,8 @@ class SlackBot:
                     # Update conversation state to completed
                     conversation_manager.update_conversation(channel, user, {"state": "completed"})
                 else:
-                    # Ask for product selection with logo ready
-                    suggestion_message = product_service.get_product_suggestions_text()
-                    self._send_message(channel, f"Great! I've got your logo ready. 🎨 Now, what type of product would you like to customize?\n\n{suggestion_message}")
-                    conversation_manager.update_conversation(channel, user, {"state": "awaiting_product_selection"})
+                    # Generate all 3 mockups in series for instant selection
+                    self._generate_all_mockups_in_series(conversation, logo_info, channel, user)
                 
                 return {"status": "success"}
                 
@@ -250,7 +248,20 @@ class SlackBot:
             
             suggestion_message = product_service.get_product_suggestions_text()
             
-            return {"message": f"{analysis.get('response_message', 'Hi there!')}\n\n{suggestion_message}"}
+            # Service description with immediate logo request
+            service_description = """Welcome to the team merchandise service! How can I assist you with customizing products for your child's sports team today?
+
+Here are our recommended products for youth sports teams:
+• Kids Heavy Cotton™ Tee (Shirt)
+  Available colors: Ash, Azalea, Black, Cardinal Red, Carolina Blue, Charcoal, Daisy, Dark Chocolate (+30 more)
+• Youth Heavy Blend Hooded Sweatshirt (Shirt)
+  Available colors: Black, Cardinal Red, Carolina Blue, Charcoal, Dark Heather, Forest Green, Gold, Graphite Heather (+12 more)  
+• Snapback Trucker Cap (Hat)
+  Available colors: Black, Brown, Caramel, Charcoal, Cranberry, Dark Heather Grey, Evergreen, Heather Grey (+8 more)
+
+🚀 **Quick Start**: Upload your team logo now and I'll create mockups of all 3 products instantly! You can then choose which ones to purchase. 📸"""
+            
+            return {"message": service_description}
             
         except Exception as e:
             logger.error(f"Error in _handle_initial_message: {e}")
@@ -565,6 +576,124 @@ class SlackBot:
             conversation_manager.record_error(channel, user, f"Design creation exception: {str(e)}")
             return {"message": "Sorry, there was an unexpected error creating your design. Please try again or type 'restart' to begin fresh!"}
     
+    def _generate_all_mockups_in_series(self, conversation: Dict, logo_info: Dict, channel: str, user: str):
+        """Generate mockups for all 3 products in series, showing each as it completes"""
+        try:
+            team_info = conversation.get("team_info", {})
+            team_name = team_info.get("name", "your team")
+            
+            # Send initial message
+            self._send_message(channel, f"🎨 Perfect! Creating custom mockups for {team_name}... Starting with the T-shirt!")
+            
+            # Get the 3 best products in order: T-shirt, Hoodie, Hat
+            best_products = product_service.get_best_products()
+            products_order = [
+                ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
+                ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
+                ("1446", "Snapback Trucker Cap")  # Hat third
+            ]
+            
+            for product_id, product_name in products_order:
+                if product_id not in best_products:
+                    continue
+                    
+                try:
+                    # Create mockup for this product
+                    product_info = {"id": product_id, "formatted": {"title": product_name}}
+                    response = self._create_single_mockup(conversation, logo_info, product_info, channel, user)
+                    
+                    if response.get("image_url") and response.get("purchase_url"):
+                        # Send this mockup immediately
+                        self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
+                        
+                        # Add brief pause and next product message (except for last item)
+                        if product_id != "1446":  # Not the last item
+                            next_product = "hoodie" if product_id == "157" else "hat"
+                            self._send_message(channel, f"⚡ Working on the {next_product} next...")
+                    
+                except Exception as e:
+                    logger.error(f"Error creating mockup for {product_name}: {e}")
+                    self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
+            
+            # Final message
+            self._send_message(channel, "🎉 All done! Click any purchase link above to customize sizes, colors, and quantities. Need a different design? Just upload a new logo!")
+            
+            # Update conversation state
+            conversation_manager.update_conversation(channel, user, {"state": "completed"})
+            
+        except Exception as e:
+            logger.error(f"Error in _generate_all_mockups_in_series: {e}")
+            self._send_message(channel, "Sorry, had some issues creating the mockups. Please try uploading your logo again!")
+    
+    def _create_single_mockup(self, conversation: Dict, logo_info: Dict, product_info: Dict, channel: str, user: str) -> Dict:
+        """Create a single product mockup (extracted from _create_custom_product_with_stored_logo)"""
+        try:
+            team_info = conversation.get("team_info", {})
+            
+            # Get product blueprint details
+            product_details = product_service.get_product_by_id(str(product_info['id']))
+            
+            if not product_details:
+                return {"message": "Product not found"}
+            
+            # Convert to expected format
+            selected_product = {
+                'id': product_info['id'],
+                'title': product_details.get('title', 'Custom Product'),
+                'blueprint_id': product_details.get('blueprint_id'),
+                'print_provider_id': product_details.get('print_provider_id'),
+                'variants': product_details.get('variants', []),
+                'type': product_details.get('category', 'apparel'),
+                'base_price': product_details.get('base_price', 20.00)
+            }
+            
+            # Get first available variant for mockup
+            variants = selected_product.get('variants', [])
+            if not variants:
+                return {"message": "No variants available"}
+            
+            first_variant = variants[0]
+            
+            # Create product design for mockup
+            design_result = printify_service.create_product_design(
+                blueprint_id=selected_product['blueprint_id'],
+                print_provider_id=selected_product['print_provider_id'],
+                variant_id=first_variant['id'],
+                image_id=logo_info["printify_image_id"],
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+            )
+            
+            if not design_result["success"]:
+                return {"message": f"Design creation failed: {design_result['error']}"}
+            
+            # Save design to database
+            design_data = {
+                "name": f"{team_info.get('name', 'Team')} {selected_product['title']}",
+                "description": f"Custom {selected_product['title']} with team logo",
+                "blueprint_id": selected_product['blueprint_id'],
+                "print_provider_id": selected_product['print_provider_id'],
+                "team_logo_image_id": logo_info["printify_image_id"],
+                "mockup_image_url": design_result.get("mockup_url"),
+                "base_price": selected_product.get('base_price', 20.00),
+                "markup_percentage": 50.0,
+                "created_by": f"{channel}_{user}",
+                "team_info": team_info,
+                "product_type": selected_product.get('type', 'apparel')
+            }
+            
+            design_id = database_service.save_product_design(design_data)
+            drop_url = database_service.generate_drop_url(design_id)
+            
+            return {
+                "image_url": design_result.get("mockup_url"),
+                "purchase_url": drop_url,
+                "product_title": design_data["name"]
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creating single mockup: {e}")
+            return {"message": "Mockup creation failed"}
+
     def _create_custom_product_with_stored_logo(self, conversation: Dict, logo_info: Dict, channel: str, user: str) -> Dict:
         """Create custom product design and save to database for drop"""
         try:
