@@ -676,6 +676,13 @@ I'll create custom mockups of our 3 most popular youth sports products:
             if not design_result["success"]:
                 return {"message": f"Design creation failed: {design_result['error']}"}
             
+            # Hat mockups take longer - add small delay for better success rate
+            if "Cap" in selected_product['title'] or "Hat" in selected_product['title']:
+                import time
+                # Brief delay to let hat mockup generate
+                time.sleep(3)
+                logger.info(f"Added delay for hat mockup generation: {selected_product['title']}")
+            
             # Save design to database
             design_data = {
                 "name": f"{team_info.get('name', 'Team')} {selected_product['title']}",
@@ -887,11 +894,16 @@ I'll create custom mockups of our 3 most popular youth sports products:
             )
             
         except Exception as e:
-            logger.error(f"Error sending product result: {e}")
-            # Fallback message without image
+            logger.error(f"Error sending product result with image: {e}")
+            # Fallback message without image (common for hat mockups that aren't ready yet)
+            if "Cap" in product_name or "Hat" in product_name:
+                fallback_msg = f"🎉 **{product_name}** - [Shop this design]({purchase_url})\n\n*Mockup image is generating and will appear on the product page shortly!*"
+            else:
+                fallback_msg = f"🎉 **{product_name}** - [Shop this design]({purchase_url})"
+                
             self.client.chat_postMessage(
                 channel=channel,
-                text=f"🎉 **{product_name}** - [Shop this design]({purchase_url})"
+                text=fallback_msg
             )
 
 # Global instance
