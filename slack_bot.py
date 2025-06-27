@@ -610,8 +610,10 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 # Add delay between products to avoid rate limiting (except for first product)
                 if i > 0:
                     import time
-                    time.sleep(2)
-                    logger.info(f"Added 2-second delay before creating {product_name}")
+                    # Longer delay for hat since it needs more time for mockup generation
+                    delay = 5 if "Cap" in product_name or "Hat" in product_name else 2
+                    time.sleep(delay)
+                    logger.info(f"Added {delay}-second delay before creating {product_name}")
                     
                 try:
                     # Create mockup for this product
@@ -880,14 +882,14 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 # Add color info for the first product to guide users
                 success_message = f"""🎉 **{product_name}**
 
-🛒 **[Shop this design]({purchase_url})**
+🛒 **Shop this design:** {purchase_url}
 
 *Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more!*"""
             else:
                 # Simpler for subsequent products
                 success_message = f"""🎉 **{product_name}**
 
-🛒 **[Shop this design]({purchase_url})**"""
+🛒 **Shop this design:** {purchase_url}"""
 
             # Send the image with the message
             self.client.chat_postMessage(
@@ -913,9 +915,9 @@ I'll create custom mockups of our 3 most popular youth sports products:
             logger.error(f"Error sending product result with image: {e}")
             # Fallback message without image (common for hat mockups that aren't ready yet)
             if "Cap" in product_name or "Hat" in product_name:
-                fallback_msg = f"🎉 **{product_name}** - [Shop this design]({purchase_url})\n\n*Mockup image is generating and will appear on the product page shortly!*"
+                fallback_msg = f"🎉 **{product_name}**\n\n🛒 **Shop this design:** {purchase_url}\n\n*Mockup image is generating and will appear on the product page shortly!*"
             else:
-                fallback_msg = f"🎉 **{product_name}** - [Shop this design]({purchase_url})"
+                fallback_msg = f"🎉 **{product_name}**\n\n🛒 **Shop this design:** {purchase_url}"
                 
             self.client.chat_postMessage(
                 channel=channel,
