@@ -125,3 +125,11 @@ Required environment variables:
 - Markup strategy built into pricing (typically 50-100% on Printify base prices)
 - Bulk discount logic for team orders (10+ items get discounts)
 - All orders flow through custom storefront, NOT Printify's publishing system
+
+## Claude Code Configuration
+
+### Switching Billing from API to Claude.ai
+When asked to switch billing from API to Claude.ai:
+1. Edit the file `~/.claude/settings.json`
+2. Comment out the line that starts with `"apiKeyHelper": "~/.claude/anthropic_key.sh"`
+3. This allows Claude Code to use web-based authentication instead of API key
