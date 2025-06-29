@@ -628,7 +628,8 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 print_provider_id=selected_product['print_provider_id'],
                 variant_id=first_variant['id'],
                 image_id=upload_result["image_id"],
-                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                database_service=database_service
             )
             
             if not design_result["success"]:
@@ -642,6 +643,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 "description": f"Custom {selected_product['title']} with team logo",
                 "blueprint_id": selected_product['blueprint_id'],
                 "print_provider_id": selected_product['print_provider_id'],
+                "printify_product_id": design_result.get("product_id"),
                 "team_logo_image_id": upload_result["image_id"],
                 "mockup_image_url": design_result.get("mockup_url"),
                 "base_price": selected_product.get('base_price', 20.00),
@@ -1023,7 +1025,8 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 print_provider_id=selected_product['print_provider_id'],
                 variant_id=first_variant['id'],
                 image_id=logo_info["printify_image_id"],
-                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                database_service=database_service
             )
             
             if not design_result["success"]:
@@ -1036,6 +1039,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 "description": f"Custom {selected_product['title']} with team logo",
                 "blueprint_id": selected_product['blueprint_id'],
                 "print_provider_id": selected_product['print_provider_id'],
+                "printify_product_id": design_result.get("product_id"),
                 "team_logo_image_id": logo_info["printify_image_id"],
                 "mockup_image_url": design_result.get("mockup_url"),
                 "base_price": selected_product.get('base_price', 20.00),
@@ -1090,7 +1094,8 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 print_provider_id=selected_product['print_provider_id'],
                 variant_id=selected_variant['id'],
                 image_id=logo_info["printify_image_id"],
-                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                database_service=database_service
             )
             
             if not design_result["success"]:
@@ -1103,6 +1108,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 "description": f"Custom {selected_product['title']} with team logo in {variant_color}",
                 "blueprint_id": selected_product['blueprint_id'],
                 "print_provider_id": selected_product['print_provider_id'],
+                "printify_product_id": design_result.get("product_id"),
                 "team_logo_image_id": logo_info["printify_image_id"],
                 "mockup_image_url": design_result.get("mockup_url"),
                 "base_price": selected_product.get('base_price', 20.00),
@@ -1168,7 +1174,8 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 print_provider_id=selected_product['print_provider_id'],
                 variant_id=first_variant['id'],
                 image_id=logo_info["printify_image_id"],
-                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}"
+                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                database_service=database_service
             )
             
             if not design_result["success"]:
@@ -1182,6 +1189,7 @@ I'll create custom mockups of our 3 most popular youth sports products:
                 "description": f"Custom {selected_product['title']} with team logo",
                 "blueprint_id": selected_product['blueprint_id'],
                 "print_provider_id": selected_product['print_provider_id'],
+                "printify_product_id": design_result.get("product_id"),
                 "team_logo_image_id": logo_info["printify_image_id"],
                 "mockup_image_url": design_result.get("mockup_url"),
                 "base_price": selected_product.get('base_price', 20.00),

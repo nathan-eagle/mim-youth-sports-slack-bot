@@ -252,10 +252,34 @@ class PrintifyService:
             return []
 
     def create_product_design(self, blueprint_id: int, print_provider_id: int, 
-                            variant_id: int, image_id: str, product_title: str = None) -> Dict:
-        """Create a product design for mockup generation (no full product creation)"""
+                            variant_id: int, image_id: str, product_title: str = None, 
+                            database_service=None) -> Dict:
+        """Create a product design for mockup generation, reusing existing products when possible"""
         try:
             logger.info(f"Creating design for blueprint {blueprint_id}, provider {print_provider_id}, variant {variant_id}")
+            
+            # Check for existing product design to reuse
+            if database_service:
+                existing_design = database_service.find_existing_product_design(
+                    blueprint_id, print_provider_id, image_id
+                )
+                if existing_design and existing_design.get("printify_product_id"):
+                    logger.info(f"Reusing existing product: {existing_design['printify_product_id']}")
+                    
+                    # Get fresh mockup from existing product
+                    mockup_result = self._get_product_mockup(existing_design["printify_product_id"])
+                    
+                    return {
+                        "success": True,
+                        "mockup_url": mockup_result.get("mockup_url"),
+                        "product_id": existing_design["printify_product_id"],
+                        "product_title": existing_design.get("name", "Custom Team Product"),
+                        "blueprint_id": blueprint_id,
+                        "print_provider_id": print_provider_id,
+                        "variant_id": variant_id,
+                        "image_id": image_id,
+                        "reused_existing": True
+                    }
             
             # Get all available variants for this blueprint and print provider
             all_variant_ids = self._get_all_variant_ids_for_blueprint(blueprint_id, print_provider_id)
@@ -267,7 +291,7 @@ class PrintifyService:
             
             logger.info(f"Using variant IDs for print_areas: {all_variant_ids[:10]}{'...' if len(all_variant_ids) > 10 else ''}")
             
-            # Create temporary product for mockup generation
+            # Create permanent product for stable mockup URLs
             design_data = {
                 "title": product_title or "Custom Team Product",
                 "description": "Custom youth sports team merchandise with uploaded logo",
@@ -304,7 +328,7 @@ class PrintifyService:
             # Log the request payload for debugging
             logger.info(f"Design data payload: blueprint_id={design_data['blueprint_id']}, print_provider_id={design_data['print_provider_id']}, variant_ids={design_data['print_areas'][0]['variant_ids'][:5]}...")
             
-            # Create temporary product in Printify for mockup generation
+            # Create permanent product in Printify for stable mockup URLs
             response = requests.post(
                 f"{self.base_url}/shops/{self.shop_id}/products.json",
                 headers=self.headers,
@@ -315,22 +339,23 @@ class PrintifyService:
                 product_result = response.json()
                 product_id = product_result.get('id')
                 
-                logger.info(f"Created temporary product for mockup: {product_id}")
+                logger.info(f"Created permanent product for stable mockups: {product_id}")
                 
                 # Generate mockup from the created product
                 mockup_result = self._get_product_mockup(product_id)
                 
-                # Delete the temporary product (we only needed it for mockup)
-                self._delete_temporary_product(product_id)
+                # Keep the product for stable mockup URLs (don't delete)
                 
                 return {
                     "success": True,
                     "mockup_url": mockup_result.get("mockup_url"),
+                    "product_id": product_id,
                     "product_title": design_data["title"],
                     "blueprint_id": blueprint_id,
                     "print_provider_id": print_provider_id,
                     "variant_id": variant_id,
-                    "image_id": image_id
+                    "image_id": image_id,
+                    "reused_existing": False
                 }
             else:
                 logger.error(f"Failed to create design: {response.status_code} - {response.text}")

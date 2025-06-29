@@ -77,6 +77,7 @@ class DatabaseService:
                 "description": design_data.get("description", "Custom youth sports team merchandise"),
                 "blueprint_id": design_data["blueprint_id"],
                 "print_provider_id": design_data["print_provider_id"],
+                "printify_product_id": design_data.get("printify_product_id"),  # Store Printify product ID
                 "team_logo_image_id": design_data["team_logo_image_id"],
                 "mockup_image_url": design_data.get("mockup_image_url"),
                 "base_price": design_data.get("base_price", 20.00),
@@ -109,6 +110,31 @@ class DatabaseService:
             logger.error(f"Error saving product design: {e}")
             raise e
     
+    def find_existing_product_design(self, blueprint_id: int, print_provider_id: int, team_logo_image_id: str) -> Optional[Dict]:
+        """Find existing product design with same logo and blueprint"""
+        try:
+            if self.supabase:
+                # Query Supabase for existing design
+                result = self.supabase.table("product_designs").select("*").eq("blueprint_id", blueprint_id).eq("print_provider_id", print_provider_id).eq("team_logo_image_id", team_logo_image_id).eq("status", "active").execute()
+                if result.data and len(result.data) > 0:
+                    logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}")
+                    return result.data[0]
+            else:
+                # Search JSON file
+                for design_id, design in self.data["product_designs"].items():
+                    if (design.get("blueprint_id") == blueprint_id and 
+                        design.get("print_provider_id") == print_provider_id and 
+                        design.get("team_logo_image_id") == team_logo_image_id and
+                        design.get("status") == "active"):
+                        logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}")
+                        return design
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error finding existing product design: {e}")
+            return None
+
     def get_product_design(self, design_id: str) -> Optional[Dict]:
         """Get a product design by ID"""
         try:
