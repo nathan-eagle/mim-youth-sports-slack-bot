@@ -152,3 +152,7 @@ class ProductService:
         
         validation['valid'] = len(validation['errors']) == 0
         return validation
+
+
+# Global instance for backward compatibility
+product_service = ProductService()
