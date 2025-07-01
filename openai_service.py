@@ -258,5 +258,63 @@ class OpenAIService:
                 "logo_color_analysis": "Unable to analyze due to error"
             }
 
+    def analyze_product_request(self, user_request: str, available_products: list) -> Dict:
+        """Use AI to analyze user's product request and match it to available products"""
+        
+        system_prompt = f"""You are an expert product analyst for youth sports merchandise.
+        
+        A parent is requesting a specific product type for their team merchandise.
+        
+        Your job is to:
+        1. Analyze the user's product request 
+        2. Match their request to the best available product from the list
+        3. Consider product names, descriptions, and user intent
+        4. Provide reasoning for your choice
+        
+        Available products:
+        {chr(10).join([f"- ID: {p['id']}, Name: {p['title']}, Category: {p.get('category', 'unknown')}" for p in available_products])}
+        
+        Consider these guidelines:
+        - Match based on product type (shirt, hoodie, etc.)
+        - Pay attention to specific product features mentioned (jersey, heavy cotton, softstyle, midweight, fleece, etc.)
+        - Consider synonyms (sweatshirt = hoodie, tee = shirt, etc.)
+        - Choose the most specific match when possible
+        - Default to popular options if request is vague
+        
+        Respond in JSON format:
+        {{
+            "best_product_match": "product_id",
+            "confidence": "high|medium|low",
+            "reasoning": "brief explanation of why this product was chosen",
+            "product_type_detected": "shirt|hoodie|other"
+        }}"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"User's product request: '{user_request}'"}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            logger.info(f"AI product analysis result: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"OpenAI product analysis error: {e}")
+            # Fallback to first available product
+            fallback_product = available_products[0] if available_products else None
+            return {
+                "best_product_match": fallback_product['id'] if fallback_product else "12",
+                "confidence": "low",
+                "reasoning": "AI analysis failed, using fallback product",
+                "product_type_detected": "unknown"
+            }
+
 # Global instance
 openai_service = OpenAIService() 

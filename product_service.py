@@ -176,6 +176,50 @@ class ProductService:
         validation['valid'] = len(validation['errors']) == 0
         return validation
     
+    def find_product_by_intent_ai(self, text: str) -> Optional[Dict]:
+        """Use AI to find the best product match based on user intent"""
+        from openai_service import openai_service
+        
+        try:
+            # Get all available products
+            all_products = []
+            for product_id, product_data in self.products_cache.items():
+                all_products.append({
+                    'id': product_id,
+                    'title': product_data.get('title', ''),
+                    'category': product_data.get('category', 'unknown')
+                })
+            
+            if not all_products:
+                logger.error("No products available for AI analysis")
+                return None
+            
+            # Use AI to analyze the request and find best match
+            ai_result = openai_service.analyze_product_request(text, all_products)
+            best_product_id = ai_result.get('best_product_match')
+            
+            if best_product_id and best_product_id in self.products_cache:
+                product_data = self.products_cache[best_product_id]
+                logger.info(f"AI selected product {best_product_id} ({product_data.get('title')}): {ai_result.get('reasoning')}")
+                
+                return {
+                    'id': best_product_id,
+                    'product': product_data,
+                    'formatted': {
+                        'title': product_data.get('title'),
+                        'category': product_data.get('category')
+                    },
+                    'ai_confidence': ai_result.get('confidence', 'medium'),
+                    'ai_reasoning': ai_result.get('reasoning', '')
+                }
+            else:
+                logger.warning(f"AI selected invalid product ID: {best_product_id}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"AI product selection failed: {e}")
+            return self.find_product_by_intent(text)  # Fallback to old method
+
     def find_product_by_intent(self, text: str) -> Optional[Dict]:
         """Find a product based on user intent/text"""
         text_lower = text.lower()
@@ -195,6 +239,7 @@ class ProductService:
             'sweatshirt': 'hoodie',
             'hooded': 'hoodie',
             'college': '92',  # College Hoodie
+            'midweight': '1525',  # Midweight Softstyle Fleece Hoodie
             'fleece': '1525',  # Midweight Softstyle Fleece Hoodie
             'supply': '499'  # Supply Hoodie
         }
@@ -279,26 +324,16 @@ class ProductService:
         from openai_service import openai_service
         
         selected_variants = []
-        text_lower = text.lower()
         
-        # Extract product type from request
-        product_keywords = {
-            'jersey': '12',  # Unisex Jersey Short Sleeve Tee
-            't-shirt': '6',  # Unisex Heavy Cotton Tee
-            'tshirt': '6',
-            'shirt': '6',
-            'hoodie': '92',  # Unisex College Hoodie
-            'sweatshirt': '92'
-        }
+        # Use AI to determine which product(s) the user is requesting
+        product_match = self.find_product_by_intent_ai(text)
         
-        # Find which product they're requesting
         target_products = []
-        for keyword, product_id in product_keywords.items():
-            if keyword in text_lower:
-                target_products.append(product_id)
-        
-        # If no specific product mentioned, try all main products
-        if not target_products:
+        if product_match:
+            # User specified a specific product
+            target_products = [product_match['id']]
+        else:
+            # No specific product mentioned, try main products
             target_products = ['12', '6', '92']  # Jersey, Heavy Cotton, Hoodie
         
         # For each target product, use AI to find best color match
@@ -367,14 +402,22 @@ class ProductService:
             'purple': ['Purple', 'Royal Purple']
         }
         
-        # Product keywords
+        # Product keywords mapping to all available products
         product_keywords = {
             'jersey': '12',  # Unisex Jersey Short Sleeve Tee
             't-shirt': '6',  # Unisex Heavy Cotton Tee
             'tshirt': '6',
-            'shirt': '6',
-            'hoodie': '92',  # Unisex College Hoodie
-            'sweatshirt': '92'
+            'shirt': '6', 
+            'heavy cotton': '6',  # Unisex Heavy Cotton Tee
+            'softstyle': '145',  # Unisex Softstyle T-Shirt
+            'hoodie': '92',  # Unisex College Hoodie (default)
+            'college hoodie': '92',  # Unisex College Hoodie
+            'supply hoodie': '499',  # Unisex Supply Hoodie
+            'midweight': '1525',  # Unisex Midweight Softstyle Fleece Hoodie
+            'midweight hoodie': '1525',
+            'fleece hoodie': '1525',
+            'softstyle fleece': '1525',
+            'sweatshirt': '92'  # Default to College Hoodie
         }
         
         # Prioritize exact color matches for specific products

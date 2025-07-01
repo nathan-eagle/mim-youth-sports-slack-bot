@@ -233,7 +233,7 @@ I'll create custom mockups of our top youth sports products:
             # Check if product type was specified
             if analysis.get("product_specified") and analysis.get("product_type"):
                 # Find matching product
-                product_match = product_service.find_product_by_intent(text)
+                product_match = product_service.find_product_by_intent_ai(text)
                 if product_match:
                     updates["product_selected"] = product_match
                     updates["state"] = "awaiting_logo"
@@ -455,7 +455,7 @@ I'll create custom mockups of our top youth sports products:
                 llm_response = openai_service.get_contextual_response(context_prompt, text)
                 
                 # Check if user wants a different product (but no logo uploaded for new flow)
-                product_match = product_service.find_product_by_intent(text)
+                product_match = product_service.find_product_by_intent_ai(text)
                 if product_match and product_match.get('id'):
                     # Check if they have existing logo to use
                     if logo_info and logo_info.get("printify_image_id"):
@@ -475,7 +475,7 @@ I'll create custom mockups of our top youth sports products:
                         default_color = default_variants.get(product_id, 'Black')
                         selected_variant = product_service._find_variant_by_color(product_id, default_color)
                         
-                        if selected_variant and product_match.get('formatted'):
+                        if selected_variant and product_match and product_match.get('formatted'):
                             product_info = {"id": product_id, "formatted": {"title": product_match['formatted']['title']}}
                             response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
                             
@@ -527,7 +527,7 @@ I'll create custom mockups of our top youth sports products:
                 
                 # Check if they want another product
                 if any(word in text_lower for word in ["shirt", "hoodie", "hat", "different", "another", "instead"]):
-                    product_match = product_service.find_product_by_intent(text)
+                    product_match = product_service.find_product_by_intent_ai(text)
                     if product_match and product_match.get('id') and product_match.get('formatted'):
                         # Use existing logo if available
                         if logo_info and logo_info.get("printify_image_id"):
@@ -1479,7 +1479,10 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
             products_to_analyze = {
                 '12': 'Unisex Jersey Short Sleeve Tee',
                 '92': 'Unisex College Hoodie', 
-                '6': 'Unisex Heavy Cotton Tee'
+                '6': 'Unisex Heavy Cotton Tee',
+                '145': 'Unisex Softstyle T-Shirt',
+                '499': 'Unisex Supply Hoodie',
+                '1525': 'Unisex Midweight Softstyle Fleece Hoodie'
             }
             
             ai_defaults = {}
