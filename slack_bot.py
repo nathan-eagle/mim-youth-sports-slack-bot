@@ -691,12 +691,12 @@ I'll create custom mockups of our top youth sports products:
             # Send initial message
             self._send_message(channel, f"🎨 Perfect! Creating mockups for {team_name}...")
             
-            # Get the best products from our cache - use Jersey Tee, College Hoodie, Classic Dad Cap
+            # Get the best products from our cache - use Jersey Tee, College Hoodie, Heavy Cotton Tee
             best_products = product_service.get_best_products()
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
-                ("92", "Unisex College Hoodie"),  # College Hoodie
-                ("1447", "Classic Dad Cap")   # Classic Dad Cap
+                ("92", "Unisex College Hoodie"),  # College Hoodie  
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee (hats don't have blueprint_ids)
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -721,8 +721,8 @@ I'll create custom mockups of our top youth sports products:
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                         
                         # Simple progress message (except for last item)
-                        if product_id != "1447":  # Not the last item (Classic Dad Cap)
-                            next_product = "hoodie" if product_id == "12" else "hat"
+                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
+                            next_product = "hoodie" if product_id == "12" else "t-shirt"
                             self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
@@ -746,7 +746,7 @@ I'll create custom mockups of our top youth sports products:
                         self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
             # Final message with more guidance
-            self._send_message(channel, "🎉 *All done!* Click any link above to pick sizes and colors. Want different colors? Just say 'red t-shirt' or 'black hat'!")
+            self._send_message(channel, "🎉 *All done!* Click any link above to pick sizes and colors. Want different colors? Just say 'red t-shirt' or 'black hoodie'!")
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
@@ -761,11 +761,11 @@ I'll create custom mockups of our top youth sports products:
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
             
-            # Products in order: Jersey Tee, College Hoodie, Classic Dad Cap
+            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
                 ("92", "Unisex College Hoodie"),  # College Hoodie
-                ("1447", "Classic Dad Cap")   # Classic Dad Cap
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -795,8 +795,8 @@ I'll create custom mockups of our top youth sports products:
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], product_title_with_color, response.get("publish_method"))
                         
                         # Simple progress message (except for last item)
-                        if product_id != "1447":  # Not the last item (Classic Dad Cap)
-                            next_product = "hoodie" if product_id == "12" else "hat"
+                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
+                            next_product = "hoodie" if product_id == "12" else "t-shirt"
                             self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
@@ -844,14 +844,14 @@ I'll create custom mockups of our top youth sports products:
             default_variants = {
                 '12': 'Black',   # Unisex Jersey Short Sleeve Tee - Black is most popular
                 '92': 'Navy',    # Unisex College Hoodie - Navy is classic  
-                '1447': 'Black'  # Classic Dad Cap - Black is classic
+                '6': 'Black'     # Unisex Heavy Cotton Tee - Black is most popular
             }
             
-            # Products in order: Jersey Tee, College Hoodie, Classic Dad Cap
+            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
                 ("92", "Unisex College Hoodie"),  # College Hoodie
-                ("1447", "Classic Dad Cap")   # Classic Dad Cap
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -939,7 +939,7 @@ I'll create custom mockups of our top youth sports products:
                         self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
             # Final message with color change guidance
-            self._send_message(channel, "🎉 *All done!* Click any link above to order. Want different colors? Just say something like 'red t-shirt' or 'black hat' to create new drops!")
+            self._send_message(channel, "🎉 *All done!* Click any link above to order. Want different colors? Just say something like 'red t-shirt' or 'black hoodie' to create new drops!")
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
