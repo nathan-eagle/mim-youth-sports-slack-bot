@@ -389,6 +389,10 @@ class PrintifyService:
                         if variant_id in variant_ids and image.get('position') == 'front':
                             logger.info(f"Found variant-specific mockup for variant {variant_id}")
                             return {"mockup_url": image.get('src')}
+                    
+                    # If no specific variant image found, this product doesn't support this variant
+                    logger.warning(f"Product {product_id} does not support variant {variant_id}")
+                    return {"mockup_url": None}
                 
                 # Find the default front-facing mockup image
                 for image in images:
