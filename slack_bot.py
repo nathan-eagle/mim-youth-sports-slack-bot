@@ -761,11 +761,11 @@ I'll create custom mockups of our top youth sports products:
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
             
-            # Products in order: T-shirt, Hoodie, Hat
+            # Products in order: T-shirt, Hoodie, T-shirt
             products_order = [
-                ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
-                ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
-                ("1221", "Dad Hat with Leather Patch")  # Hat third - faster dye-sublimation
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
+                ("92", "Unisex College Hoodie"),  # Top hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -842,16 +842,16 @@ I'll create custom mockups of our top youth sports products:
             
             # Default colors for the 3 best products
             default_variants = {
-                '157': 'Black',  # Kids Heavy Cotton™ Tee - Black is most popular
-                '314': 'Navy',   # Youth Heavy Blend Hooded Sweatshirt - Navy is classic  
-                '1221': 'White / Black patch'  # Dad Hat with Leather Patch - White with black patch is clean
+                '12': 'Black',   # Unisex Jersey Short Sleeve Tee - Black is most popular
+                '92': 'Navy',    # Unisex College Hoodie - Navy is classic  
+                '6': 'Black'     # Unisex Heavy Cotton Tee - Black is most popular
             }
             
-            # Products in order: T-shirt, Hoodie, Hat
+            # Products in order: T-shirt, Hoodie, T-shirt
             products_order = [
-                ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
-                ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
-                ("1221", "Dad Hat with Leather Patch")  # Hat third - faster dye-sublimation
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
+                ("92", "Unisex College Hoodie"),  # Top hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -898,8 +898,8 @@ I'll create custom mockups of our top youth sports products:
                             self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
                             
                             # Simple progress message (except for last item)
-                            if product_id != "1221":  # Not the last item (Dad Hat)
-                                next_product = "hoodie" if product_id == "157" else "hat"
+                            if product_id != "6":  # Not the last item (Heavy Cotton Tee)
+                                next_product = "hoodie" if product_id == "12" else "t-shirt"
                                 self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
@@ -930,7 +930,7 @@ I'll create custom mockups of our top youth sports products:
                         self._send_message(channel, f"Had trouble with the {product_name}, but continuing with other products...")
             
             # Final message with color change guidance
-            self._send_message(channel, "🎉 *All done!* Click any link above to order. Want different colors? Just say something like 'red t-shirt' or 'black hat' to create new drops!")
+            self._send_message(channel, "🎉 *All done!* Click any link above to order. Want different colors? Just say something like 'red t-shirt' or 'black hoodie' to create new drops!")
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
@@ -946,9 +946,12 @@ I'll create custom mockups of our top youth sports products:
             
             # Product name mapping for display
             product_names = {
-                '157': 'Kids Heavy Cotton™ Tee',
-                '314': 'Youth Heavy Blend Hooded Sweatshirt',
-                '1221': 'Dad Hat with Leather Patch'
+                '12': 'Unisex Jersey Short Sleeve Tee',
+                '6': 'Unisex Heavy Cotton Tee',
+                '145': 'Unisex Softstyle T-Shirt',
+                '92': 'Unisex College Hoodie',
+                '1525': 'Unisex Midweight Softstyle Fleece Hoodie',
+                '499': 'Unisex Supply Hoodie'
             }
             
             # Create mockups for each requested color variant
