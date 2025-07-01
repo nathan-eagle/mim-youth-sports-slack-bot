@@ -1,0 +1,14 @@
+{
+  "confirmBeforeEdit": false,
+  "confirmBeforeWrite": false,
+  "confirmBeforeBash": false,
+  "allow": [
+    "WebFetch",
+    "WebSearch",
+    "Bash(*)",
+    "Edit(*)",
+    "Write(*)"
+  ],
+  "defaultMode": "full",
+  "verbose": false
+}
