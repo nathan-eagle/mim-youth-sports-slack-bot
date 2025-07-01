@@ -253,13 +253,13 @@ class PrintifyService:
 
     def create_product_design(self, blueprint_id: int, print_provider_id: int, 
                             variant_id: int, image_id: str, product_title: str = None, 
-                            database_service=None) -> Dict:
+                            database_service=None, force_new_product: bool = False) -> Dict:
         """Create a product design for mockup generation, reusing existing products when possible"""
         try:
             logger.info(f"Creating design for blueprint {blueprint_id}, provider {print_provider_id}, variant {variant_id}")
             
-            # Check for existing product design to reuse (include variant_id for color-specific matches)
-            if database_service:
+            # Check for existing product design to reuse (unless force_new_product is True)
+            if database_service and not force_new_product:
                 existing_design = database_service.find_existing_product_design(
                     blueprint_id, print_provider_id, image_id, variant_id
                 )
@@ -280,6 +280,9 @@ class PrintifyService:
                         "image_id": image_id,
                         "reused_existing": True
                     }
+            
+            if force_new_product:
+                logger.info(f"Forcing creation of new product for variant {variant_id} to ensure correct color mockup")
             
             # For mockup generation, use only the specific variant instead of all variants
             # This avoids the validation error where not all variants support the same print areas

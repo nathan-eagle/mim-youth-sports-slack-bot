@@ -1111,13 +1111,17 @@ I'll create custom mockups of our top youth sports products:
                 return {"message": "No variant selected"}
             
             # Create product design for mockup with selected variant
+            # Force new product creation for color-specific requests to ensure correct mockup images
+            force_new = selected_variant.get('id') != selected_product.get('variants', [{}])[0].get('id') if selected_product.get('variants') else True
+            
             design_result = printify_service.create_product_design(
                 blueprint_id=selected_product['blueprint_id'],
                 print_provider_id=selected_product['print_provider_id'],
                 variant_id=selected_variant['id'],
                 image_id=logo_info["printify_image_id"],
                 product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
-                database_service=database_service
+                database_service=database_service,
+                force_new_product=True  # Always force new products for variant-specific requests
             )
             
             if not design_result["success"]:

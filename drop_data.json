@@ -19,6 +19,27 @@
         "age_group": "Little League"
       },
       "product_type": "hats"
+    },
+    "5ca4dcbc-d2be-4c43-b303-0660cf0ff9b4": {
+      "id": "5ca4dcbc-d2be-4c43-b303-0660cf0ff9b4",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "6864162ddc1c5f6b050eb4c1",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/6864162ddc1c5f6b050eb4c1/18398/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:09:04.852726",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18395,
+      "default_color": "Unknown"
     }
   },
   "customer_orders": {},
