@@ -1,11 +1,11 @@
 {
   "version": "3.0-top3",
-  "last_update": "2025-06-17T17:15:01.759384",
+  "last_update": "2025-07-01T12:13:00.634401",
   "optimization_info": {
     "source": "product_cache_with_top_api.json",
     "original_products": 1105,
-    "optimized_products": 6,
-    "categories_included": 2,
+    "optimized_products": 8,
+    "categories_included": 3,
     "space_reduction": "99.5%",
     "selection_criteria": "top_3_per_category_by_popularity"
   },
@@ -19,6 +19,11 @@
       "total_available": 3,
       "top3_selected": 3,
       "avg_popularity": 155.79
+    },
+    "hat": {
+      "total_available": 18,
+      "top3_selected": 2,
+      "avg_popularity": 150.0
     }
   },
   "providers": {
@@ -106367,6 +106372,810 @@
       ],
       "blueprint_id": null,
       "print_areas": []
+    },
+    "1447": {
+      "id": 1447,
+      "title": "Classic Dad Cap",
+      "description": "Introducing the classic dad cap, a timeless accessory crafted for both style and comfort. Made from 100% cotton (Green Camo variant: 65% polyester / 35% cotton), this cap offers a soft and breathable feel that's perfect for all-day wear. Its unstructured design and low-profile fit give it a laid-back vibe, while the antique brass buckle closure adds a touch of vintage charm. The matching undervisor and four-row stitching on the visor provide subtle yet stylish details. With six panels and a Permacurv\u00ae visor, this cap offers a perfect blend of durability and classic aesthetics.<div>.:100% cotton (Green Camo is 65% polyester, 35% cotton)</div><br /><div>.:Closure: Self-fabric hideaway strap with antique brass buckle and grommet</div><br /><div>.:Sewn-in label</div><br /><div>.:Brand sticker on the visor</div>",
+      "category": "hat",
+      "tags": [
+        "classic"
+      ],
+      "variants": [
+        {
+          "id": 105372,
+          "title": "Black / One size",
+          "color": "Black",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105373,
+          "title": "Dark Grey / One size",
+          "color": "Dark Grey",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105374,
+          "title": "Green Camo / One size",
+          "color": "Green Camo",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105375,
+          "title": "Khaki / One size",
+          "color": "Khaki",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105376,
+          "title": "Light Blue / One size",
+          "color": "Light Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105377,
+          "title": "Navy / One size",
+          "color": "Navy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105378,
+          "title": "Pink / One size",
+          "color": "Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105380,
+          "title": "Stone / One size",
+          "color": "Stone",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105381,
+          "title": "White / One size",
+          "color": "White",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105372,
+          "title": "Black / One size",
+          "color": "Black",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105373,
+          "title": "Dark Grey / One size",
+          "color": "Dark Grey",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105375,
+          "title": "Khaki / One size",
+          "color": "Khaki",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105378,
+          "title": "Pink / One size",
+          "color": "Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105379,
+          "title": "Spruce / One size",
+          "color": "Spruce",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105380,
+          "title": "Stone / One size",
+          "color": "Stone",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105372,
+          "title": "Black / One size",
+          "color": "Black",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105373,
+          "title": "Dark Grey / One size",
+          "color": "Dark Grey",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105374,
+          "title": "Green Camo / One size",
+          "color": "Green Camo",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105375,
+          "title": "Khaki / One size",
+          "color": "Khaki",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105376,
+          "title": "Light Blue / One size",
+          "color": "Light Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105377,
+          "title": "Navy / One size",
+          "color": "Navy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105378,
+          "title": "Pink / One size",
+          "color": "Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105379,
+          "title": "Spruce / One size",
+          "color": "Spruce",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105380,
+          "title": "Stone / One size",
+          "color": "Stone",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 105381,
+          "title": "White / One size",
+          "color": "White",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 117642,
+          "title": "Cranberry / One size",
+          "color": "Cranberry",
+          "size": "One size",
+          "price": null,
+          "available": true
+        }
+      ],
+      "print_providers": [
+        {
+          "id": 87,
+          "title": "Print Logistic"
+        },
+        {
+          "id": 217,
+          "title": "Fulfill Engine"
+        },
+        {
+          "id": 99,
+          "title": "Printify Choice"
+        }
+      ],
+      "images": [],
+      "created_at": "2025-06-17T17:09:51.550923",
+      "available": true
+    },
+    "1583": {
+      "id": 1583,
+      "title": "Surf Cap",
+      "description": "<p>Gear up with the Surf Cap, crafted from lightweight, quick-dry 100% recycled nylon. This mid-profile, unstructured snapback features a single front panel and a practical plastic snapback closure, making it ideal as versatile outdoor wear.</p><div>.:Material: Lightweight 100% recycled nylon</div><br /><div>.:Mid profile - plastic unstructured snapback</div><br /><div>.:One size fits all</div><br /><div>.:Quick-dry fabric</div><br /><div>.:Adjustable plastic fastener</div><br /><div>.:Matching color under the brim</div><br /><div>.:Tear-out AS Colour label</div>",
+      "category": "hat",
+      "tags": [
+        "surf"
+      ],
+      "variants": [
+        {
+          "id": 110436,
+          "title": "One size / Army",
+          "color": "Army",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110437,
+          "title": "One size / Atlantic",
+          "color": "Atlantic",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110438,
+          "title": "One size / Black",
+          "color": "Black",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110439,
+          "title": "One size / Bone",
+          "color": "Bone",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110440,
+          "title": "One size / Bright Royal",
+          "color": "Bright Royal",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110441,
+          "title": "One size / Burgundy",
+          "color": "Burgundy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110442,
+          "title": "One size / Butter",
+          "color": "Butter",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110443,
+          "title": "One size / Carolina Blue",
+          "color": "Carolina Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110444,
+          "title": "One size / Charity Pink",
+          "color": "Charity Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110470,
+          "title": "One size / Khaki",
+          "color": "Khaki",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110471,
+          "title": "One size / Citrus",
+          "color": "Citrus",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110472,
+          "title": "One size / Clay",
+          "color": "Clay",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110474,
+          "title": "One size / Cobalt",
+          "color": "Cobalt",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110475,
+          "title": "One size / Ecru",
+          "color": "Ecru",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110476,
+          "title": "One size / Eucalyptus",
+          "color": "Eucalyptus",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110477,
+          "title": "One size / Fire",
+          "color": "Fire",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110478,
+          "title": "One size / Hazy Pink",
+          "color": "Hazy Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110479,
+          "title": "One size / Lapis",
+          "color": "Lapis",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110480,
+          "title": "One size / Lime",
+          "color": "Lime",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110481,
+          "title": "One size / Midnight Blue",
+          "color": "Midnight Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110482,
+          "title": "One size / Mineral",
+          "color": "Mineral",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110483,
+          "title": "One size / Mint",
+          "color": "Mint",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110484,
+          "title": "One size / Navy",
+          "color": "Navy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110485,
+          "title": "One size / Orchid",
+          "color": "Orchid",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110486,
+          "title": "One size / Petrol Blue",
+          "color": "Petrol Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110487,
+          "title": "One size / Pine Green",
+          "color": "Pine Green",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110488,
+          "title": "One size / Powder",
+          "color": "Powder",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110489,
+          "title": "One size / Red",
+          "color": "Red",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110490,
+          "title": "One size / Smoke",
+          "color": "Smoke",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110491,
+          "title": "One size / Storm",
+          "color": "Storm",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110492,
+          "title": "One size / Sunset",
+          "color": "Sunset",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110493,
+          "title": "One size / Taupe",
+          "color": "Taupe",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110494,
+          "title": "One size / Walnut",
+          "color": "Walnut",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110495,
+          "title": "One size / White",
+          "color": "White",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110436,
+          "title": "Army / One size",
+          "color": "Army",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110437,
+          "title": "Atlantic / One size",
+          "color": "Atlantic",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110438,
+          "title": "Black / One size",
+          "color": "Black",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110439,
+          "title": "Bone / One size",
+          "color": "Bone",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110440,
+          "title": "Bright Royal / One size",
+          "color": "Bright Royal",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110441,
+          "title": "Burgundy / One size",
+          "color": "Burgundy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110442,
+          "title": "Butter / One size",
+          "color": "Butter",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110443,
+          "title": "Carolina Blue / One size",
+          "color": "Carolina Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110444,
+          "title": "Charity Pink / One size",
+          "color": "Charity Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110470,
+          "title": "Khaki / One size",
+          "color": "Khaki",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110471,
+          "title": "Citrus / One size",
+          "color": "Citrus",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110472,
+          "title": "Clay / One size",
+          "color": "Clay",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110474,
+          "title": "Cobalt / One size",
+          "color": "Cobalt",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110475,
+          "title": "Ecru / One size",
+          "color": "Ecru",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110476,
+          "title": "Eucalyptus / One size",
+          "color": "Eucalyptus",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110477,
+          "title": "One size / Fire",
+          "color": "Fire",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110478,
+          "title": "Hazy Pink / One size",
+          "color": "Hazy Pink",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110479,
+          "title": "Lapis / One size",
+          "color": "Lapis",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110480,
+          "title": "Lime / One size",
+          "color": "Lime",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110481,
+          "title": "Midnight Blue / One size",
+          "color": "Midnight Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110482,
+          "title": "Mineral / One size",
+          "color": "Mineral",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110483,
+          "title": "Mint / One size",
+          "color": "Mint",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110484,
+          "title": "Navy / One size",
+          "color": "Navy",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110485,
+          "title": "Orchid / One size",
+          "color": "Orchid",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110486,
+          "title": "Petrol Blue / One size",
+          "color": "Petrol Blue",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110487,
+          "title": "Pine Green / One size",
+          "color": "Pine Green",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110488,
+          "title": "Powder / One size",
+          "color": "Powder",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110489,
+          "title": "Red / One size",
+          "color": "Red",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110490,
+          "title": "Smoke / One size",
+          "color": "Smoke",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110491,
+          "title": "Storm / One size",
+          "color": "Storm",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110492,
+          "title": "Sunset / One size",
+          "color": "Sunset",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110493,
+          "title": "Taupe / One size",
+          "color": "Taupe",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110494,
+          "title": "Walnut / One size",
+          "color": "Walnut",
+          "size": "One size",
+          "price": null,
+          "available": true
+        },
+        {
+          "id": 110495,
+          "title": "White / One size",
+          "color": "White",
+          "size": "One size",
+          "price": null,
+          "available": true
+        }
+      ],
+      "print_providers": [
+        {
+          "id": 217,
+          "title": "Fulfill Engine"
+        },
+        {
+          "id": 99,
+          "title": "Printify Choice"
+        }
+      ],
+      "images": [],
+      "created_at": "2025-06-17T17:11:57.363826",
+      "available": true
     }
   }
 }
