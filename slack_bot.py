@@ -611,7 +611,7 @@ I'll create custom mockups of our top youth sports products:
                 'id': product_info['id'],
                 'title': product_details.get('title', 'Custom Product'),
                 'blueprint_id': product_details.get('blueprint_id'),
-                'print_provider_id': product_details.get('print_provider_id'),
+                'print_provider_id': product_details.get('print_provider_id') or product_details.get('primary_print_provider_id'),
                 'variants': product_details.get('variants', []),
                 'type': product_details.get('category', 'apparel'),
                 'base_price': product_details.get('base_price', 20.00)
@@ -1014,7 +1014,7 @@ I'll create custom mockups of our top youth sports products:
                 'id': product_info['id'],
                 'title': product_details.get('title', 'Custom Product'),
                 'blueprint_id': product_details.get('blueprint_id'),
-                'print_provider_id': product_details.get('print_provider_id'),
+                'print_provider_id': product_details.get('print_provider_id') or product_details.get('primary_print_provider_id'),
                 'variants': product_details.get('variants', []),
                 'type': product_details.get('category', 'apparel'),
                 'base_price': product_details.get('base_price', 20.00)
@@ -1086,7 +1086,7 @@ I'll create custom mockups of our top youth sports products:
                 'id': product_info['id'],
                 'title': product_details.get('title', 'Custom Product'),
                 'blueprint_id': product_details.get('blueprint_id'),
-                'print_provider_id': product_details.get('print_provider_id'),
+                'print_provider_id': product_details.get('print_provider_id') or product_details.get('primary_print_provider_id'),
                 'variants': product_details.get('variants', []),
                 'type': product_details.get('category', 'apparel'),
                 'base_price': product_details.get('base_price', 20.00)
@@ -1160,7 +1160,7 @@ I'll create custom mockups of our top youth sports products:
                 'id': product_info['id'],
                 'title': product_details.get('title', 'Custom Product'),
                 'blueprint_id': product_details.get('blueprint_id'),
-                'print_provider_id': product_details.get('print_provider_id'),
+                'print_provider_id': product_details.get('print_provider_id') or product_details.get('primary_print_provider_id'),
                 'variants': product_details.get('variants', []),
                 'type': product_details.get('category', 'apparel'),
                 'base_price': product_details.get('base_price', 20.00)
