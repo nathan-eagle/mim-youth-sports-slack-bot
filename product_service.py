@@ -275,10 +275,93 @@ class ProductService:
         return colors_by_product
     
     def parse_color_preferences(self, text: str) -> List[Dict]:
-        """Parse color preferences from text (backward compatibility)"""
-        # Simple implementation - return empty list for now
-        # This method was used for advanced color selection flows
-        return []
+        """Parse color preferences from text"""
+        import re
+        
+        selected_variants = []
+        text_lower = text.lower()
+        
+        # Color mappings and synonyms
+        color_mappings = {
+            'light blue': ['Light Blue', 'Carolina Blue', 'Baby Blue', 'Sky Blue'],
+            'blue': ['Royal Blue', 'Navy Blue', 'Blue', 'Dark Blue'],
+            'red': ['Red', 'Cardinal Red', 'Fire Red', 'Cherry Red'],
+            'black': ['Black', 'Jet Black'],
+            'white': ['White', 'Arctic White', 'Solid White Blend'],
+            'gray': ['Sport Grey', 'Athletic Heather', 'Heather Grey'],
+            'grey': ['Sport Grey', 'Athletic Heather', 'Heather Grey'],
+            'green': ['Forest Green', 'Kelly Green', 'Irish Green'],
+            'navy': ['Navy', 'Oxford Navy', 'Heather Midnight Navy'],
+            'purple': ['Purple', 'Royal Purple']
+        }
+        
+        # Product keywords
+        product_keywords = {
+            'jersey': '12',  # Unisex Jersey Short Sleeve Tee
+            't-shirt': '6',  # Unisex Heavy Cotton Tee
+            'tshirt': '6',
+            'shirt': '6',
+            'hoodie': '92',  # Unisex College Hoodie
+            'sweatshirt': '92'
+        }
+        
+        # Prioritize exact color matches for specific products
+        priority_matches = []
+        fallback_matches = []
+        found_combinations = set()  # Prevent duplicates
+        
+        for color_key, color_options in color_mappings.items():
+            if color_key in text_lower:
+                for product_key, product_id in product_keywords.items():
+                    if product_key in text_lower:
+                        # Skip if we already found this combination
+                        combo_key = f"{product_id}_{color_key}"
+                        if combo_key in found_combinations:
+                            continue
+                        found_combinations.add(combo_key)
+                        
+                        # Find the best matching color variant for this product
+                        product_colors = self.get_colors_for_product(product_id)
+                        
+                        # Try to find exact match first
+                        best_color = None
+                        is_exact_match = False
+                        for color_option in color_options:
+                            if color_option in product_colors:
+                                best_color = color_option
+                                is_exact_match = True
+                                break
+                        
+                        # If no exact match, try fuzzy matching
+                        if not best_color:
+                            for color_option in color_options:
+                                for available_color in product_colors:
+                                    if color_option.lower() in available_color.lower() or available_color.lower() in color_option.lower():
+                                        best_color = available_color
+                                        break
+                                if best_color:
+                                    break
+                        
+                        if best_color:
+                            variant = self._find_variant_by_color(product_id, best_color)
+                            if variant:
+                                match_info = {
+                                    'product_id': product_id,
+                                    'color': best_color,
+                                    'variant': variant,
+                                    'product_name': self.get_product_by_id(product_id).get('title', 'Unknown Product')
+                                }
+                                
+                                # Prioritize exact color matches
+                                if is_exact_match:
+                                    priority_matches.append(match_info)
+                                else:
+                                    fallback_matches.append(match_info)
+        
+        # Return priority matches first, then fallbacks
+        selected_variants = priority_matches + fallback_matches
+        
+        return selected_variants
     
     def format_color_selection_message(self) -> str:
         """Format color selection message (backward compatibility)"""

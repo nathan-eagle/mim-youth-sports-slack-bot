@@ -26,6 +26,21 @@ class PrintifyAPIRefresh:
         if not self.api_token:
             raise ValueError("PRINTIFY_API_TOKEN not found in environment variables")
     
+    def get_shops(self):
+        """Get all shops for this account"""
+        try:
+            response = requests.get(f"{self.base_url}/shops.json", headers=self.headers)
+            if response.status_code == 200:
+                shops = response.json()
+                logger.info(f"Retrieved {len(shops)} shops from Printify")
+                return shops
+            else:
+                logger.error(f"Failed to get shops: {response.status_code} - {response.text}")
+                return []
+        except Exception as e:
+            logger.error(f"Exception getting shops: {e}")
+            return []
+    
     def get_all_blueprints(self):
         """Get all available blueprints from Printify"""
         try:
@@ -92,6 +107,27 @@ class PrintifyAPIRefresh:
     def refresh_product_cache(self):
         """Refresh our product cache with live Printify data"""
         print("🔄 Refreshing product cache with live Printify data...")
+        
+        # First, get shop information
+        shops = self.get_shops()
+        if shops:
+            print(f"🏪 Found {len(shops)} shop(s):")
+            for shop in shops:
+                shop_id = shop.get('id')
+                shop_title = shop.get('title', 'Untitled Shop')
+                print(f"   Shop ID: {shop_id} - {shop_title}")
+            
+            # Use the first shop ID as default
+            default_shop_id = shops[0].get('id') if shops else None
+            if default_shop_id:
+                print(f"✅ Will use Shop ID: {default_shop_id} for operations")
+                self.shop_id = default_shop_id
+            else:
+                print("❌ No valid shop ID found")
+                return False
+        else:
+            print("❌ No shops found for this account")
+            return False
         
         # Target products we want to update (from our current cache)
         target_products = {
@@ -236,7 +272,8 @@ class PrintifyAPIRefresh:
                 "optimized_products": len(updated_products), 
                 "categories_included": len(categories),
                 "selection_criteria": "live_api_refresh",
-                "api_refresh_date": datetime.now().isoformat()
+                "api_refresh_date": datetime.now().isoformat(),
+                "shop_id": getattr(self, 'shop_id', None)
             }
             
             # Save main cache

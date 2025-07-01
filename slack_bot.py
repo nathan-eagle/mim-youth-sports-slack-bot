@@ -966,7 +966,9 @@ I'll create custom mockups of our top youth sports products:
             }
             
             # Create mockups for each requested color variant
-            for product_id, selected_variant in selected_variants.items():
+            for variant_info in selected_variants:
+                product_id = variant_info.get('product_id')
+                selected_variant = variant_info.get('variant')
                 if product_id not in product_names:
                     continue
                     
@@ -978,7 +980,7 @@ I'll create custom mockups of our top youth sports products:
                     
                     if response.get("image_url") and response.get("purchase_url"):
                         # Send this mockup immediately with color info
-                        color = selected_variant.get('options', {}).get('color', 'Unknown')
+                        color = variant_info.get('color', 'Unknown')
                         product_title_with_color = f"{response['product_title']} ({color})"
                         
                         # Get available color alternatives for description
@@ -988,6 +990,7 @@ I'll create custom mockups of our top youth sports products:
                         # Send product with color alternatives info
                         self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
                     else:
+                        color = variant_info.get('color', 'Unknown')
                         self._send_message(channel, f"Sorry, had trouble creating the {product_name} in {color}. Please try again!")
                         
                 except Exception as e:
