@@ -284,11 +284,16 @@ class PrintifyService:
             if force_new_product:
                 logger.info(f"Forcing creation of new product for variant {variant_id} to ensure correct color mockup")
             
-            # For mockup generation, use only the specific variant instead of all variants
-            # This avoids the validation error where not all variants support the same print areas
-            all_variant_ids = [variant_id]
+            # Get popular color variants for this blueprint/provider combination
+            # Limited to 100 variants due to Printify API constraint
+            all_variant_ids = self._get_popular_variant_ids_for_blueprint(blueprint_id, print_provider_id, variant_id)
             
-            logger.info(f"Using single variant ID for print_areas: {all_variant_ids}")
+            # If we couldn't get variants, fall back to the specific variant
+            if not all_variant_ids:
+                all_variant_ids = [variant_id]
+                logger.warning(f"Could not get variants, using single variant: {variant_id}")
+            
+            logger.info(f"Using {len(all_variant_ids)} variant IDs for print_areas: {all_variant_ids[:5]}..." if len(all_variant_ids) > 5 else f"Using {len(all_variant_ids)} variant IDs: {all_variant_ids}")
             
             # Create permanent product for stable mockup URLs
             design_data = {
@@ -298,10 +303,11 @@ class PrintifyService:
                 "print_provider_id": print_provider_id,
                 "variants": [
                     {
-                        "id": variant_id,
-                        "price": 2000,  # Temporary price for mockup
+                        "id": vid,
+                        "price": 2000,  # Temporary price for mockup  
                         "is_enabled": True
                     }
+                    for vid in all_variant_ids  # ✅ Include ALL variants for mockup generation
                 ],
                 "print_areas": [
                     {
@@ -364,8 +370,8 @@ class PrintifyService:
             logger.error(f"Exception creating product design: {e}")
             return {"success": False, "error": str(e)}
     
-    def _get_product_mockup(self, product_id: str) -> Dict:
-        """Get mockup images from a created product"""
+    def _get_product_mockup(self, product_id: str, variant_id: int = None) -> Dict:
+        """Get mockup images from a created product, optionally for a specific variant"""
         try:
             response = requests.get(
                 f"{self.base_url}/shops/{self.shop_id}/products/{product_id}.json",
@@ -376,12 +382,25 @@ class PrintifyService:
                 product_data = response.json()
                 images = product_data.get('images', [])
                 
+                # If specific variant requested, look for variant-specific mockup
+                if variant_id is not None:
+                    for image in images:
+                        variant_ids = image.get('variant_ids', [])
+                        if variant_id in variant_ids and image.get('position') == 'front':
+                            logger.info(f"Found variant-specific mockup for variant {variant_id}")
+                            return {"mockup_url": image.get('src')}
+                
                 # Find the default front-facing mockup image
                 for image in images:
                     if image.get('is_default', False) and image.get('position') == 'front':
                         return {"mockup_url": image.get('src')}
                 
-                # Fallback: use first available image
+                # Fallback: use first available front image
+                for image in images:
+                    if image.get('position') == 'front':
+                        return {"mockup_url": image.get('src')}
+                
+                # Last fallback: use first available image
                 if images:
                     return {"mockup_url": images[0].get('src')}
                 
@@ -393,6 +412,10 @@ class PrintifyService:
         except Exception as e:
             logger.error(f"Error getting product mockup: {e}")
             return {"mockup_url": None}
+    
+    def get_variant_mockup(self, product_id: str, variant_id: int) -> Dict:
+        """Get mockup image URL for a specific color variant of an existing product"""
+        return self._get_product_mockup(product_id, variant_id)
     
     def _get_all_variant_ids_for_blueprint(self, blueprint_id: int, print_provider_id: int) -> List[int]:
         """Get all available variant IDs for a specific blueprint and print provider combination"""
@@ -421,6 +444,89 @@ class PrintifyService:
                 
         except Exception as e:
             logger.error(f"Exception getting variants: {e}")
+            return []
+    
+    def _get_popular_variant_ids_for_blueprint(self, blueprint_id: int, print_provider_id: int, requested_variant_id: int) -> List[int]:
+        """Get popular color variants (up to 100) for a specific blueprint and print provider"""
+        try:
+            response = requests.get(
+                f"{self.base_url}/catalog/blueprints/{blueprint_id}/print_providers/{print_provider_id}/variants.json",
+                headers=self.headers
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # Handle the response format
+                if 'variants' in data:
+                    all_variants = data['variants']
+                else:
+                    all_variants = data if isinstance(data, list) else []
+                
+                # Define popular colors in priority order
+                popular_colors = [
+                    'black', 'white', 'navy', 'royal', 'red', 'blue', 
+                    'light blue', 'carolina blue', 'gray', 'grey', 'green',
+                    'purple', 'yellow', 'orange', 'pink', 'maroon'
+                ]
+                
+                # Popular sizes in priority order
+                popular_sizes = ['s', 'm', 'l', 'xl', 'xxl', 'xs', 'xxxl', '2xl', '3xl', '4xl', '5xl']
+                
+                selected_variants = []
+                
+                # Always include the requested variant first
+                requested_variant = next((v for v in all_variants if v.get('id') == requested_variant_id), None)
+                if requested_variant:
+                    selected_variants.append(requested_variant['id'])
+                
+                # Select variants by color priority, then size priority
+                for color in popular_colors:
+                    color_variants = []
+                    
+                    for variant in all_variants:
+                        title = variant.get('title', '').lower()
+                        if color in title and variant.get('id') not in selected_variants:
+                            color_variants.append(variant)
+                    
+                    # For each color, prioritize by size
+                    for size in popular_sizes:
+                        size_matches = [v for v in color_variants if size in v.get('title', '').lower()]
+                        for variant in size_matches:
+                            if len(selected_variants) < 100:
+                                selected_variants.append(variant['id'])
+                                color_variants.remove(variant)
+                            else:
+                                break
+                        if len(selected_variants) >= 100:
+                            break
+                    
+                    # Add remaining color variants if space available
+                    for variant in color_variants:
+                        if len(selected_variants) < 100:
+                            selected_variants.append(variant['id'])
+                        else:
+                            break
+                    
+                    if len(selected_variants) >= 100:
+                        break
+                
+                # Fill remaining slots with any available variants
+                for variant in all_variants:
+                    if len(selected_variants) < 100 and variant.get('id') not in selected_variants:
+                        selected_variants.append(variant['id'])
+                    else:
+                        break
+                
+                logger.info(f"Selected {len(selected_variants)} popular variants from {len(all_variants)} total variants")
+                return selected_variants
+                
+            else:
+                logger.warning(f"Failed to get variants: {response.status_code} - {response.text}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Exception getting popular variants: {e}")
             return []
 
     def _delete_temporary_product(self, product_id: str):

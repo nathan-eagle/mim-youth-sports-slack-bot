@@ -118,6 +118,7 @@ class DatabaseService:
                 query = self.supabase.table("product_designs").select("*").eq("blueprint_id", blueprint_id).eq("print_provider_id", print_provider_id).eq("team_logo_image_id", team_logo_image_id).eq("status", "active")
                 
                 # Include variant_id in search if provided (for color-specific requests)
+                # Note: When variant_id is None, we find the master product regardless of variant
                 if variant_id is not None:
                     query = query.eq("default_variant_id", variant_id)
                 

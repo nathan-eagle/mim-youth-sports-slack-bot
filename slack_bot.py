@@ -1110,19 +1110,42 @@ I'll create custom mockups of our top youth sports products:
             if not selected_variant:
                 return {"message": "No variant selected"}
             
-            # Create product design for mockup with selected variant
-            # Force new product creation for color-specific requests to ensure correct mockup images
-            force_new = selected_variant.get('id') != selected_product.get('variants', [{}])[0].get('id') if selected_product.get('variants') else True
-            
-            design_result = printify_service.create_product_design(
-                blueprint_id=selected_product['blueprint_id'],
-                print_provider_id=selected_product['print_provider_id'],
-                variant_id=selected_variant['id'],
-                image_id=logo_info["printify_image_id"],
-                product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
-                database_service=database_service,
-                force_new_product=True  # Always force new products for variant-specific requests
+            # Check if we already have a master product for this logo/blueprint combination
+            existing_design = database_service.find_existing_product_design(
+                selected_product['blueprint_id'], 
+                selected_product['print_provider_id'], 
+                logo_info["printify_image_id"]
             )
+            
+            if existing_design and existing_design.get("printify_product_id"):
+                # Use existing product and get variant-specific mockup
+                product_id = existing_design["printify_product_id"]
+                logger.info(f"Using existing master product {product_id} for variant {selected_variant['id']}")
+                
+                mockup_result = printify_service.get_variant_mockup(product_id, selected_variant['id'])
+                
+                design_result = {
+                    "success": True,
+                    "mockup_url": mockup_result.get("mockup_url"),
+                    "product_id": product_id,
+                    "product_title": f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                    "blueprint_id": selected_product['blueprint_id'],
+                    "print_provider_id": selected_product['print_provider_id'],
+                    "variant_id": selected_variant['id'],
+                    "image_id": logo_info["printify_image_id"],
+                    "reused_existing": True
+                }
+            else:
+                # Create new master product with all variants
+                design_result = printify_service.create_product_design(
+                    blueprint_id=selected_product['blueprint_id'],
+                    print_provider_id=selected_product['print_provider_id'],
+                    variant_id=selected_variant['id'],
+                    image_id=logo_info["printify_image_id"],
+                    product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
+                    database_service=database_service,
+                    force_new_product=False
+                )
             
             if not design_result["success"]:
                 return {"message": f"Design creation failed: {design_result['error']}"}
