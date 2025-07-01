@@ -691,12 +691,12 @@ I'll create custom mockups of our top youth sports products:
             # Send initial message
             self._send_message(channel, f"🎨 Perfect! Creating mockups for {team_name}...")
             
-            # Get the best products from our cache - use the top 3 most popular
+            # Get the best products from our cache - use Jersey Tee, College Hoodie, Heavy Cotton Tee
             best_products = product_service.get_best_products()
             products_order = [
-                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
-                ("92", "Unisex College Hoodie"),  # Top hoodie
-                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
+                ("92", "Unisex College Hoodie"),  # College Hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee (since no Dad Hat in cache)
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -761,11 +761,11 @@ I'll create custom mockups of our top youth sports products:
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
             
-            # Products in order: T-shirt, Hoodie, T-shirt
+            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
             products_order = [
-                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
-                ("92", "Unisex College Hoodie"),  # Top hoodie
-                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
+                ("92", "Unisex College Hoodie"),  # College Hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -847,11 +847,11 @@ I'll create custom mockups of our top youth sports products:
                 '6': 'Black'     # Unisex Heavy Cotton Tee - Black is most popular
             }
             
-            # Products in order: T-shirt, Hoodie, T-shirt
+            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
             products_order = [
-                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
-                ("92", "Unisex College Hoodie"),  # Top hoodie
-                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
+                ("92", "Unisex College Hoodie"),  # College Hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -1343,8 +1343,9 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
         try:
             # Format available colors for display (limit to avoid message being too long)
             if available_colors:
-                # Limit to first 6 colors for readability
-                display_colors = available_colors[:6]
+                # Get recommended colors (team essentials + primary colors)
+                recommended_colors = self._get_recommended_colors(available_colors)
+                display_colors = recommended_colors[:6]  # Limit to 6 for readability
                 color_text = ", ".join(display_colors)
                 if len(available_colors) > 6:
                     color_text += f" (+{len(available_colors) - 6} more)"
@@ -1391,6 +1392,37 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
             logger.error(f"Error sending product result with alternatives: {e}")
             # Fallback to regular product result
             self._send_product_result(channel, image_url, purchase_url, product_name, publish_method)
+    
+    def _get_recommended_colors(self, available_colors: List[str]) -> List[str]:
+        """Get recommended colors prioritizing team essentials and primary colors"""
+        # Priority order for team colors
+        priority_colors = [
+            'Black', 'White', 'Navy', 'Royal Blue', 'Red', 'Cardinal', 
+            'Athletic Heather', 'Sport Grey', 'Forest Green', 'Purple',
+            'Maroon', 'Orange', 'Yellow', 'Pink', 'Brown'
+        ]
+        
+        recommended = []
+        available_lower = [color.lower() for color in available_colors]
+        
+        # First, add priority colors that are available
+        for priority in priority_colors:
+            for i, color_lower in enumerate(available_lower):
+                if priority.lower() in color_lower:
+                    recommended.append(available_colors[i])
+                    break
+            if len(recommended) >= 6:
+                break
+        
+        # If we don't have 6 yet, add other available colors
+        if len(recommended) < 6:
+            for color in available_colors:
+                if color not in recommended:
+                    recommended.append(color)
+                    if len(recommended) >= 6:
+                        break
+        
+        return recommended
 
 # Global instance
 slack_bot = SlackBot() 
