@@ -202,5 +202,61 @@ class OpenAIService:
                 "logo_colors_considered": "Unable to analyze due to error"
             }
 
+    def get_logo_inspired_colors(self, logo_url: str, available_colors: list, product_name: str) -> Dict:
+        """Use AI to select top 6 colors that would look best with the logo for a specific product"""
+        
+        system_prompt = f"""You are an expert color consultant for youth sports merchandise.
+        
+        A team has uploaded a logo and wants to see the best color options for their {product_name}.
+        
+        Your job is to:
+        1. Analyze the logo's color palette and overall aesthetic
+        2. Select the top 6 colors from available options that would look best with this logo
+        3. Consider both colors that match the logo and complementary colors that would look good
+        4. Prioritize colors that are popular for youth sports teams
+        
+        Logo URL: {logo_url}
+        Available colors for {product_name}: {', '.join(available_colors)}
+        
+        Consider these guidelines:
+        - Include colors that directly match prominent logo colors
+        - Include complementary colors that work well with the logo
+        - Consider classic sports colors (navy, black, white, red, royal blue)
+        - Think about what a parent would want for their kid's team
+        - Prioritize versatile colors that work for both boys and girls
+        
+        Respond in JSON format:
+        {{
+            "top_6_colors": ["color1", "color2", "color3", "color4", "color5", "color6"],
+            "reasoning": "brief explanation of color selection strategy",
+            "logo_color_analysis": "brief description of the logo's color palette"
+        }}"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"Please select the top 6 colors for {product_name} that would work best with this logo."}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            logger.info(f"AI logo-inspired colors for {product_name}: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"OpenAI logo color analysis error: {e}")
+            # Fallback to first 6 available colors
+            fallback_colors = available_colors[:6] if len(available_colors) >= 6 else available_colors
+            return {
+                "top_6_colors": fallback_colors,
+                "reasoning": "AI analysis failed, using fallback colors",
+                "logo_color_analysis": "Unable to analyze due to error"
+            }
+
 # Global instance
 openai_service = OpenAIService() 

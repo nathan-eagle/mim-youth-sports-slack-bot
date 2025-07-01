@@ -44,10 +44,12 @@ class SlackBot:
             # Handle restart command
             if text.lower().strip() in ['restart', 'reset', 'start over']:
                 conversation_manager.reset_conversation(channel, user)
-                # Send the new service description message
-                # Get actual product suggestions from our cache
-                product_suggestions = product_service.get_product_suggestions_text()
                 
+                # Automatically use default logo and create initial drops
+                default_logo_url = "https://static.wixstatic.com/media/d072b4_a933c375e992435ea9f972afc685cff9~mv2.png/v1/fill/w_190,h_190,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/MiM%20Color%20Logo.png"
+                
+                # Send welcome message
+                product_suggestions = product_service.get_product_suggestions_text()
                 service_msg = f"""Welcome to the team merchandise service! 🏆
 
 I'll create custom mockups of our top youth sports products:
@@ -56,7 +58,11 @@ I'll create custom mockups of our top youth sports products:
 
 📸 *Just upload your team logo* and I'll show you these products with your design!"""
                 self._send_message(channel, service_msg)
-                return {"status": "success"}
+                
+                # Automatically process the default logo
+                logger.info("Auto-processing default logo for restart")
+                return self._handle_logo_request(default_logo_url, conversation_manager.get_conversation(channel, user), event, channel, user)
+                
             
             # Get conversation state
             conversation = conversation_manager.get_conversation(channel, user)
@@ -478,7 +484,7 @@ I'll create custom mockups of our top youth sports products:
                                 product_title_with_color = f"{response['product_title']} ({color})"
                                 colors_by_product = product_service.get_available_colors_for_best_products()
                                 available_colors = colors_by_product.get(product_id, [])
-                                self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
+                                self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"), logo_info.get("url"))
                                 return {"status": "success"}
                     else:
                         # Start new product flow - need logo
@@ -911,7 +917,7 @@ I'll create custom mockups of our top youth sports products:
                             available_colors = colors_by_product.get(product_id, [])
                             
                             # Send product with color alternatives info
-                            self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
+                            self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"), logo_info.get("url"))
                             
                             # Simple progress message (except for last item)
                             if product_id != "6":  # Not the last item (Heavy Cotton Tee)
@@ -936,7 +942,7 @@ I'll create custom mockups of our top youth sports products:
                                     product_title_with_color = f"{response['product_title']} ({color})"
                                     colors_by_product = product_service.get_available_colors_for_best_products()
                                     available_colors = colors_by_product.get(product_id, [])
-                                    self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
+                                    self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"), logo_info.get("url"))
                                 else:
                                     self._send_message(channel, f"⚠️ {product_name} creation failed after retry - try a different logo later")
                         except Exception as retry_e:
@@ -995,7 +1001,7 @@ I'll create custom mockups of our top youth sports products:
                         available_colors = colors_by_product.get(product_id, [])
                         
                         # Send product with color alternatives info
-                        self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"))
+                        self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"), logo_info.get("url"))
                     else:
                         color = variant_info.get('color', 'Unknown')
                         self._send_message(channel, f"Sorry, had trouble creating the {product_name} in {color}. Please try again!")
@@ -1402,13 +1408,16 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                 text=fallback_msg
             )
     
-    def _send_product_result_with_alternatives(self, channel: str, image_url: str, purchase_url: str, product_name: str, available_colors: List, publish_method: str = None):
+    def _send_product_result_with_alternatives(self, channel: str, image_url: str, purchase_url: str, product_name: str, available_colors: List, publish_method: str = None, logo_url: str = None):
         """Send product result with color alternatives information"""
         try:
             # Format available colors for display (limit to avoid message being too long)
             if available_colors:
-                # Get recommended colors (team essentials + primary colors)
-                recommended_colors = self._get_recommended_colors(available_colors)
+                # Get AI-recommended colors based on logo or fallback to standard recommendation
+                if logo_url:
+                    recommended_colors = self._get_logo_inspired_colors(available_colors, product_name, logo_url)
+                else:
+                    recommended_colors = self._get_recommended_colors(available_colors)
                 display_colors = recommended_colors[:6]  # Limit to 6 for readability
                 color_text = ", ".join(display_colors)
                 if len(available_colors) > 6:
@@ -1457,6 +1466,32 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
             # Fallback to regular product result
             self._send_product_result(channel, image_url, purchase_url, product_name, publish_method)
     
+    def _get_logo_inspired_colors(self, available_colors: List[str], product_name: str, logo_url: str) -> List[str]:
+        """Get AI-recommended colors based on logo analysis"""
+        try:
+            ai_result = openai_service.get_logo_inspired_colors(logo_url, available_colors, product_name)
+            recommended_colors = ai_result.get('top_6_colors', [])
+            
+            # Validate that recommended colors are actually available
+            valid_colors = []
+            for color in recommended_colors:
+                if color in available_colors:
+                    valid_colors.append(color)
+            
+            # If we don't have enough valid colors, fill with fallback
+            if len(valid_colors) < 6:
+                fallback_colors = self._get_recommended_colors(available_colors)
+                for color in fallback_colors:
+                    if color not in valid_colors and len(valid_colors) < 6:
+                        valid_colors.append(color)
+            
+            logger.info(f"AI-selected colors for {product_name}: {valid_colors[:6]}")
+            return valid_colors[:6]
+            
+        except Exception as e:
+            logger.error(f"AI color recommendation failed: {e}")
+            return self._get_recommended_colors(available_colors)
+
     def _get_recommended_colors(self, available_colors: List[str]) -> List[str]:
         """Get recommended colors prioritizing team essentials and primary colors"""
         # Priority order for team colors
