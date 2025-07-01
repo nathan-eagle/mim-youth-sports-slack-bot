@@ -258,10 +258,10 @@ class PrintifyService:
         try:
             logger.info(f"Creating design for blueprint {blueprint_id}, provider {print_provider_id}, variant {variant_id}")
             
-            # Check for existing product design to reuse
+            # Check for existing product design to reuse (include variant_id for color-specific matches)
             if database_service:
                 existing_design = database_service.find_existing_product_design(
-                    blueprint_id, print_provider_id, image_id
+                    blueprint_id, print_provider_id, image_id, variant_id
                 )
                 if existing_design and existing_design.get("printify_product_id"):
                     logger.info(f"Reusing existing product: {existing_design['printify_product_id']}")

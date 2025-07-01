@@ -1,36 +1,5 @@
 {
-  "conversations": {
-    "test_channel_test_user": {
-      "state": "creating_mockups",
-      "product_selected": null,
-      "logo_info": null,
-      "team_info": {},
-      "selected_variants": {
-        "157": {
-          "id": 12124,
-          "options": {
-            "color": "Black"
-          }
-        },
-        "314": {
-          "id": 43873,
-          "options": {
-            "color": "Navy"
-          }
-        },
-        "1221": {
-          "id": 93564,
-          "options": {
-            "color": "White / Black patch"
-          }
-        }
-      },
-      "created_at": 1751053217.607862,
-      "last_activity": 1751053217.607868,
-      "error_count": 0,
-      "last_error": null
-    }
-  },
+  "conversations": {},
   "processed_events": [],
-  "last_updated": 1751053217.607869
+  "last_updated": 1751389096.546279
 }

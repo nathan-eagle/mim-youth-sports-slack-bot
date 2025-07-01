@@ -110,14 +110,20 @@ class DatabaseService:
             logger.error(f"Error saving product design: {e}")
             raise e
     
-    def find_existing_product_design(self, blueprint_id: int, print_provider_id: int, team_logo_image_id: str) -> Optional[Dict]:
-        """Find existing product design with same logo and blueprint"""
+    def find_existing_product_design(self, blueprint_id: int, print_provider_id: int, team_logo_image_id: str, variant_id: int = None) -> Optional[Dict]:
+        """Find existing product design with same logo, blueprint, and optionally variant"""
         try:
             if self.supabase:
                 # Query Supabase for existing design
-                result = self.supabase.table("product_designs").select("*").eq("blueprint_id", blueprint_id).eq("print_provider_id", print_provider_id).eq("team_logo_image_id", team_logo_image_id).eq("status", "active").execute()
+                query = self.supabase.table("product_designs").select("*").eq("blueprint_id", blueprint_id).eq("print_provider_id", print_provider_id).eq("team_logo_image_id", team_logo_image_id).eq("status", "active")
+                
+                # Include variant_id in search if provided (for color-specific requests)
+                if variant_id is not None:
+                    query = query.eq("default_variant_id", variant_id)
+                
+                result = query.execute()
                 if result.data and len(result.data) > 0:
-                    logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}")
+                    logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}, variant {variant_id}")
                     return result.data[0]
             else:
                 # Search JSON file
@@ -126,7 +132,12 @@ class DatabaseService:
                         design.get("print_provider_id") == print_provider_id and 
                         design.get("team_logo_image_id") == team_logo_image_id and
                         design.get("status") == "active"):
-                        logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}")
+                        
+                        # Check variant_id if provided
+                        if variant_id is not None and design.get("default_variant_id") != variant_id:
+                            continue
+                            
+                        logger.info(f"Found existing product design for logo {team_logo_image_id}, blueprint {blueprint_id}, variant {variant_id}")
                         return design
             
             return None

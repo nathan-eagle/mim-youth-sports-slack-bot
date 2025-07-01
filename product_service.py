@@ -359,7 +359,34 @@ class ProductService:
                                     fallback_matches.append(match_info)
         
         # Return priority matches first, then fallbacks
-        selected_variants = priority_matches + fallback_matches
+        # For very specific requests, limit to the best match
+        all_matches = priority_matches + fallback_matches
+        
+        # If user mentioned specific product + color combo, prioritize that single match
+        if len(all_matches) > 1:
+            # Check if they mentioned a specific product type
+            specific_product = None
+            if 'jersey' in text_lower and ('t-shirt' in text_lower or 'tshirt' in text_lower or 'shirt' in text_lower):
+                specific_product = '12'  # Jersey Short Sleeve Tee
+            elif 'jersey' in text_lower and 'hoodie' not in text_lower:
+                specific_product = '12'  # Jersey Short Sleeve Tee
+            elif 'hoodie' in text_lower:
+                specific_product = '92'  # College Hoodie
+            elif 't-shirt' in text_lower or 'tshirt' in text_lower:
+                specific_product = '6'  # Heavy Cotton Tee
+            
+            if specific_product:
+                # Find matches for that specific product
+                specific_matches = [m for m in all_matches if m['product_id'] == specific_product]
+                if specific_matches:
+                    # Return only the first (best) match for the specific product
+                    selected_variants = specific_matches[:1]
+                else:
+                    selected_variants = all_matches
+            else:
+                selected_variants = all_matches
+        else:
+            selected_variants = all_matches
         
         return selected_variants
     
