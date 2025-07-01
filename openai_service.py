@@ -144,5 +144,63 @@ class OpenAIService:
             logger.error(f"OpenAI contextual response error: {e}")
             return "I'd be happy to help you with your team merchandise! What would you like to create next?"
 
+    def analyze_color_request(self, user_request: str, logo_url: str, available_colors: list, product_name: str) -> Dict:
+        """Use AI to analyze user's color request and match it to available colors with logo context"""
+        
+        system_prompt = f"""You are an expert color analyst for youth sports merchandise. 
+        
+        A parent has uploaded a team logo and is requesting a specific color for their {product_name}.
+        
+        Your job is to:
+        1. Analyze the user's color request in the context of their team logo
+        2. Consider the logo's colors when they mention "same color as logo" or "similar to logo"
+        3. Match their request to the best available color option
+        4. Provide reasoning for your choice
+        
+        Available colors for {product_name}: {', '.join(available_colors)}
+        
+        Logo URL: {logo_url}
+        
+        Consider these guidelines:
+        - If they mention "same as logo" or "like in logo", try to match prominent logo colors
+        - "Light blue", "aqua", "sky blue" typically map to lighter blue variants
+        - "Navy", "dark blue" map to darker blue variants  
+        - Be intelligent about color synonyms (e.g., "canvas red" = red)
+        - Choose the closest available match if exact color isn't available
+        
+        Respond in JSON format:
+        {{
+            "best_color_match": "exact color name from available list",
+            "confidence": "high|medium|low",
+            "reasoning": "brief explanation of why this color was chosen",
+            "logo_colors_considered": "brief description of logo colors if relevant"
+        }}"""
+        
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"User's color request: '{user_request}'"}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            logger.info(f"AI color analysis result: {result}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"OpenAI color analysis error: {e}")
+            # Fallback to first available color
+            return {
+                "best_color_match": available_colors[0] if available_colors else "Black",
+                "confidence": "low", 
+                "reasoning": "AI analysis failed, using fallback color",
+                "logo_colors_considered": "Unable to analyze due to error"
+            }
+
 # Global instance
 openai_service = OpenAIService() 

@@ -401,8 +401,11 @@ I'll create custom mockups of our top youth sports products:
             # Check for color change requests first - this is our new priority flow
             logo_info = conversation.get("logo_info")
             if logo_info and logo_info.get("printify_image_id"):
-                # Parse color preferences to see if user wants specific color changes
-                selected_variants = product_service.parse_color_preferences(text)
+                # Get logo URL for AI analysis
+                logo_url = logo_info.get("url", "No logo URL available")
+                
+                # Use AI-powered color analysis with logo context
+                selected_variants = product_service.parse_color_preferences_ai(text, logo_url)
                 
                 if selected_variants:
                     # User wants specific color changes - create new drops!
@@ -466,7 +469,7 @@ I'll create custom mockups of our top youth sports products:
                         default_color = default_variants.get(product_id, 'Black')
                         selected_variant = product_service._find_variant_by_color(product_id, default_color)
                         
-                        if selected_variant:
+                        if selected_variant and product_match.get('formatted'):
                             product_info = {"id": product_id, "formatted": {"title": product_match['formatted']['title']}}
                             response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
                             
@@ -543,8 +546,12 @@ I'll create custom mockups of our top youth sports products:
     def _handle_color_selection(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
         """Handle color selection input from user"""
         try:
-            # Parse color preferences from user input
-            selected_variants = product_service.parse_color_preferences(text)
+            # Get logo URL for AI analysis
+            logo_info = conversation.get("logo_info", {})
+            logo_url = logo_info.get("url", "No logo URL available")
+            
+            # Use AI-powered color analysis with logo context
+            selected_variants = product_service.parse_color_preferences_ai(text, logo_url)
             
             if not selected_variants:
                 # No valid color selections found, show color options again

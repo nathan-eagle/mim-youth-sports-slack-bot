@@ -274,6 +274,75 @@ class ProductService:
             colors_by_product[product_id] = self.get_colors_for_product(product_id)
         return colors_by_product
     
+    def parse_color_preferences_ai(self, text: str, logo_url: str = None) -> List[Dict]:
+        """AI-powered color preference parsing with logo context"""
+        from openai_service import openai_service
+        
+        selected_variants = []
+        text_lower = text.lower()
+        
+        # Extract product type from request
+        product_keywords = {
+            'jersey': '12',  # Unisex Jersey Short Sleeve Tee
+            't-shirt': '6',  # Unisex Heavy Cotton Tee
+            'tshirt': '6',
+            'shirt': '6',
+            'hoodie': '92',  # Unisex College Hoodie
+            'sweatshirt': '92'
+        }
+        
+        # Find which product they're requesting
+        target_products = []
+        for keyword, product_id in product_keywords.items():
+            if keyword in text_lower:
+                target_products.append(product_id)
+        
+        # If no specific product mentioned, try all main products
+        if not target_products:
+            target_products = ['12', '6', '92']  # Jersey, Heavy Cotton, Hoodie
+        
+        # For each target product, use AI to find best color match
+        for product_id in target_products:
+            try:
+                # Get available colors for this product
+                available_colors = self.get_colors_for_product(product_id)
+                if not available_colors:
+                    continue
+                
+                # Get product name
+                product_info = self.get_product_by_id(product_id)
+                product_name = product_info.get('title', 'Product') if product_info else 'Product'
+                
+                # Use AI to analyze color request
+                ai_result = openai_service.analyze_color_request(
+                    user_request=text,
+                    logo_url=logo_url or "No logo provided",
+                    available_colors=available_colors,
+                    product_name=product_name
+                )
+                
+                best_color = ai_result.get('best_color_match')
+                if best_color and best_color in available_colors:
+                    # Find the variant for this color
+                    variant = self._find_variant_by_color(product_id, best_color)
+                    if variant:
+                        selected_variants.append({
+                            'product_id': product_id,
+                            'product_name': product_name,
+                            'color': best_color,
+                            'variant': variant,
+                            'ai_confidence': ai_result.get('confidence', 'medium'),
+                            'ai_reasoning': ai_result.get('reasoning', ''),
+                            'logo_colors_considered': ai_result.get('logo_colors_considered', '')
+                        })
+                        logger.info(f"AI selected {best_color} for {product_name}: {ai_result.get('reasoning')}")
+                
+            except Exception as e:
+                logger.error(f"AI color analysis failed for product {product_id}: {e}")
+                continue
+        
+        return selected_variants
+
     def parse_color_preferences(self, text: str) -> List[Dict]:
         """Parse color preferences from text"""
         import re
@@ -283,9 +352,12 @@ class ProductService:
         
         # Color mappings and synonyms
         color_mappings = {
-            'light blue': ['Light Blue', 'Carolina Blue', 'Baby Blue', 'Sky Blue'],
+            'light blue': ['Light Blue', 'Carolina Blue', 'Baby Blue', 'Sky Blue', 'Sky'],
+            'aqua': ['Aqua', 'Heather Aqua', 'Carolina Blue', 'Sky Blue'],
+            'carolina blue': ['Carolina Blue', 'Light Blue', 'Sky Blue'],
+            'sky blue': ['Sky Blue', 'Sky', 'Carolina Blue', 'Light Blue'],
             'blue': ['Royal Blue', 'Navy Blue', 'Blue', 'Dark Blue'],
-            'red': ['Red', 'Cardinal Red', 'Fire Red', 'Cherry Red'],
+            'red': ['Red', 'Cardinal Red', 'Fire Red', 'Cherry Red', 'Canvas Red'],
             'black': ['Black', 'Jet Black'],
             'white': ['White', 'Arctic White', 'Solid White Blend'],
             'gray': ['Sport Grey', 'Athletic Heather', 'Heather Grey'],
