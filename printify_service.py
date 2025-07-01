@@ -266,8 +266,8 @@ class PrintifyService:
                 if existing_design and existing_design.get("printify_product_id"):
                     logger.info(f"Reusing existing product: {existing_design['printify_product_id']}")
                     
-                    # Get fresh mockup from existing product
-                    mockup_result = self._get_product_mockup(existing_design["printify_product_id"])
+                    # Get fresh mockup from existing product for the specific variant
+                    mockup_result = self._get_product_mockup(existing_design["printify_product_id"], variant_id)
                     
                     return {
                         "success": True,
@@ -346,8 +346,8 @@ class PrintifyService:
                 
                 logger.info(f"Created permanent product for stable mockups: {product_id}")
                 
-                # Generate mockup from the created product
-                mockup_result = self._get_product_mockup(product_id)
+                # Generate mockup from the created product for the specific variant
+                mockup_result = self._get_product_mockup(product_id, variant_id)
                 
                 # Keep the product for stable mockup URLs (don't delete)
                 
