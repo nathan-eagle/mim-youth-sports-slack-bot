@@ -437,7 +437,7 @@ I'll create custom mockups of our top youth sports products:
                 - If they're just being positive/thankful, respond enthusiastically
                 - If they want to modify the same product, guide them appropriately
                 
-                Available products: shirt (Kids Heavy Cotton™ Tee), hoodie (Youth Heavy Blend Hooded Sweatshirt), hat (Dad Hat with Leather Patch)
+                Available products: shirt (Unisex Jersey Short Sleeve Tee, Unisex Heavy Cotton Tee, Unisex Softstyle T-Shirt), hoodie (Unisex College Hoodie, Unisex Midweight Softstyle Fleece Hoodie, Unisex Supply Hoodie)
                 
                 Respond as an enthusiastic youth sports merchandise assistant.
                 """
@@ -455,9 +455,12 @@ I'll create custom mockups of our top youth sports products:
                         
                         # Find default color for this product
                         default_variants = {
-                            '157': 'Black',  # Kids Heavy Cotton™ Tee
-                            '314': 'Navy',   # Youth Heavy Blend Hooded Sweatshirt  
-                            '1221': 'White / Black patch'  # Dad Hat with Leather Patch
+                            '12': 'Black',    # Unisex Jersey Short Sleeve Tee
+                            '6': 'Black',     # Unisex Heavy Cotton Tee
+                            '145': 'Black',   # Unisex Softstyle T-Shirt
+                            '92': 'Navy',     # Unisex College Hoodie
+                            '1525': 'Black',  # Unisex Midweight Softstyle Fleece Hoodie
+                            '499': 'Black'    # Unisex Supply Hoodie
                         }
                         product_id = product_match['id']
                         default_color = default_variants.get(product_id, 'Black')
@@ -688,12 +691,12 @@ I'll create custom mockups of our top youth sports products:
             # Send initial message
             self._send_message(channel, f"🎨 Perfect! Creating mockups for {team_name}...")
             
-            # Get the 3 best products in order: T-shirt, Hoodie, Hat
+            # Get the best products from our cache - use the top 3 most popular
             best_products = product_service.get_best_products()
             products_order = [
-                ("157", "Kids Heavy Cotton™ Tee"),  # T-shirt first
-                ("314", "Youth Heavy Blend Hooded Sweatshirt"),  # Hoodie second  
-                ("1221", "Dad Hat with Leather Patch")  # Hat third - faster dye-sublimation
+                ("12", "Unisex Jersey Short Sleeve Tee"),  # Top shirt
+                ("92", "Unisex College Hoodie"),  # Top hoodie
+                ("6", "Unisex Heavy Cotton Tee")   # Second shirt
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -703,8 +706,8 @@ I'll create custom mockups of our top youth sports products:
                 # Add delay between products to avoid rate limiting (except for first product)
                 if i > 0:
                     import time
-                    # Longer delay for hat since it needs more time for mockup generation
-                    delay = 5 if "Cap" in product_name or "Hat" in product_name else 2
+                    # Standard delay between products
+                    delay = 2
                     time.sleep(delay)
                     logger.info(f"Added {delay}-second delay before creating {product_name}")
                     
@@ -718,8 +721,8 @@ I'll create custom mockups of our top youth sports products:
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                         
                         # Simple progress message (except for last item)
-                        if product_id != "1221":  # Not the last item (Dad Hat)
-                            next_product = "hoodie" if product_id == "157" else "hat"
+                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
+                            next_product = "hoodie" if product_id == "12" else "t-shirt"
                             self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
@@ -773,8 +776,8 @@ I'll create custom mockups of our top youth sports products:
                 # Add delay between products to avoid rate limiting (except for first product)
                 if i > 0:
                     import time
-                    # Longer delay for hat since it needs more time for mockup generation
-                    delay = 5 if "Cap" in product_name or "Hat" in product_name else 2
+                    # Standard delay between products
+                    delay = 2
                     time.sleep(delay)
                     logger.info(f"Added {delay}-second delay before creating {product_name}")
                     
@@ -792,8 +795,8 @@ I'll create custom mockups of our top youth sports products:
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], product_title_with_color, response.get("publish_method"))
                         
                         # Simple progress message (except for last item)
-                        if product_id != "1221":  # Not the last item (Dad Hat)
-                            next_product = "hoodie" if product_id == "157" else "hat"
+                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
+                            next_product = "hoodie" if product_id == "12" else "t-shirt"
                             self._send_message(channel, f"⚡ Creating {next_product}...")
                     
                 except Exception as e:
@@ -859,8 +862,8 @@ I'll create custom mockups of our top youth sports products:
                 # Add delay between products to avoid rate limiting (except for first product)
                 if i > 0:
                     import time
-                    # Longer delay for hat since it needs more time for mockup generation
-                    delay = 5 if "Cap" in product_name or "Hat" in product_name else 2
+                    # Standard delay between products
+                    delay = 2
                     time.sleep(delay)
                     logger.info(f"Added {delay}-second delay before creating {product_name}")
                     

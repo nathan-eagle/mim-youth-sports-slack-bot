@@ -20,12 +20,15 @@ class OpenAIService:
         Parents message you wanting to customize products for their kids' sports teams.
         
         Available products:
-        - Kids Heavy Cotton Tee (shirt)
-        - Youth Heavy Blend Hooded Sweatshirt (hoodie) 
-        - Snapback Trucker Cap (hat)
+        - Unisex Jersey Short Sleeve Tee (shirt)
+        - Unisex Heavy Cotton Tee (shirt)
+        - Unisex Softstyle T-Shirt (shirt)
+        - Unisex College Hoodie (hoodie)
+        - Unisex Midweight Softstyle Fleece Hoodie (hoodie)
+        - Unisex Supply Hoodie (hoodie)
         
         Your job is to:
-        1. Determine if the parent has specified a product type (shirt, hoodie, hat)
+        1. Determine if the parent has specified a product type (shirt, hoodie)
         2. Extract any team/sport information mentioned
         3. Note if they want to upload a logo
         4. Provide a friendly, enthusiastic sports parent response
@@ -33,7 +36,7 @@ class OpenAIService:
         Respond in JSON format with:
         {
             "product_specified": true/false,
-            "product_type": "shirt"|"hoodie"|"hat"|null,
+            "product_type": "shirt"|"hoodie"|null,
             "sport_mentioned": "sport name or null",
             "team_mentioned": "team name or null", 
             "wants_logo": true/false,

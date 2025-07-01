@@ -117,6 +117,29 @@ class ProductService:
         
         return None
     
+    def _find_variant_by_color(self, product_id: str, color: str) -> Optional[Dict]:
+        """Find a variant by color (backward compatibility method)"""
+        variants = self.get_product_variants(product_id)
+        
+        # Try to find exact color match first
+        for variant in variants:
+            if (variant.get('color', '').lower() == color.lower() and
+                variant.get('available', True)):
+                return variant
+        
+        # If no exact match, try partial match
+        for variant in variants:
+            if (color.lower() in variant.get('color', '').lower() and
+                variant.get('available', True)):
+                return variant
+        
+        # Return first available variant as fallback
+        for variant in variants:
+            if variant.get('available', True):
+                return variant
+        
+        return None
+    
     def validate_product_data(self, product_id: str) -> Dict[str, bool]:
         """Validate that a product has all required data for ordering"""
         product = self.get_product_by_id(product_id)
@@ -243,6 +266,32 @@ class ProductService:
             suggestions.extend(hoodie_list)
         
         return "\n".join(suggestions)
+    
+    def get_available_colors_for_best_products(self) -> Dict[str, List[str]]:
+        """Get available colors for all products (backward compatibility)"""
+        colors_by_product = {}
+        for product_id in self.products_cache.keys():
+            colors_by_product[product_id] = self.get_colors_for_product(product_id)
+        return colors_by_product
+    
+    def parse_color_preferences(self, text: str) -> List[Dict]:
+        """Parse color preferences from text (backward compatibility)"""
+        # Simple implementation - return empty list for now
+        # This method was used for advanced color selection flows
+        return []
+    
+    def format_color_selection_message(self) -> str:
+        """Format color selection message (backward compatibility)"""
+        products = self.get_all_products()
+        if not products:
+            return "No products available."
+        
+        # Show colors for first product as example
+        first_product_id = list(products.keys())[0]
+        colors = self.get_colors_for_product(first_product_id)[:10]  # First 10 colors
+        color_list = ", ".join(colors)
+        
+        return f"Available colors include: {color_list}. Just let me know your preference!"
 
 
 # Global instance for backward compatibility
