@@ -853,12 +853,19 @@ I'll create custom mockups of our top youth sports products:
             # Send initial message
             self._send_message(channel, f"🎨 Perfect! Creating your team merchandise for {team_name}...")
             
-            # Default colors for the 3 best products
-            default_variants = {
+            # Get AI-recommended default colors for each product based on the logo
+            logo_url = logo_info.get("url", "No logo URL available")
+            ai_default_colors = self._get_ai_default_colors_for_products(logo_url)
+            
+            # Fallback colors if AI fails
+            fallback_variants = {
                 '12': 'Black',   # Unisex Jersey Short Sleeve Tee - Black is most popular
                 '92': 'Navy',    # Unisex College Hoodie - Navy is classic  
                 '6': 'Black'     # Unisex Heavy Cotton Tee - Black is most popular
             }
+            
+            # Use AI colors or fallback
+            default_variants = ai_default_colors if ai_default_colors else fallback_variants
             
             # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
             products_order = [
@@ -1466,6 +1473,38 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
             # Fallback to regular product result
             self._send_product_result(channel, image_url, purchase_url, product_name, publish_method)
     
+    def _get_ai_default_colors_for_products(self, logo_url: str) -> Dict[str, str]:
+        """Get AI-recommended default colors for each of the main products based on logo"""
+        try:
+            products_to_analyze = {
+                '12': 'Unisex Jersey Short Sleeve Tee',
+                '92': 'Unisex College Hoodie', 
+                '6': 'Unisex Heavy Cotton Tee'
+            }
+            
+            ai_defaults = {}
+            colors_by_product = product_service.get_available_colors_for_best_products()
+            
+            for product_id, product_name in products_to_analyze.items():
+                available_colors = colors_by_product.get(product_id, [])
+                if not available_colors:
+                    continue
+                    
+                # Get AI recommendation for best default color for this product
+                ai_result = openai_service.get_logo_inspired_colors(logo_url, available_colors, product_name)
+                top_colors = ai_result.get('top_6_colors', [])
+                
+                # Use the first AI-recommended color as the default
+                if top_colors and top_colors[0] in available_colors:
+                    ai_defaults[product_id] = top_colors[0]
+                    logger.info(f"AI selected '{top_colors[0]}' as default for {product_name}")
+            
+            return ai_defaults if ai_defaults else None
+            
+        except Exception as e:
+            logger.error(f"AI default color selection failed: {e}")
+            return None
+
     def _get_logo_inspired_colors(self, available_colors: List[str], product_name: str, logo_url: str) -> List[str]:
         """Get AI-recommended colors based on logo analysis"""
         try:
