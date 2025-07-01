@@ -281,15 +281,11 @@ class PrintifyService:
                         "reused_existing": True
                     }
             
-            # Get all available variants for this blueprint and print provider
-            all_variant_ids = self._get_all_variant_ids_for_blueprint(blueprint_id, print_provider_id)
+            # For mockup generation, use only the specific variant instead of all variants
+            # This avoids the validation error where not all variants support the same print areas
+            all_variant_ids = [variant_id]
             
-            # If we couldn't get variants from API, use a fallback approach
-            if not all_variant_ids:
-                logger.warning(f"Could not get variants for blueprint {blueprint_id}, provider {print_provider_id}. Using single variant.")
-                all_variant_ids = [variant_id]
-            
-            logger.info(f"Using variant IDs for print_areas: {all_variant_ids[:10]}{'...' if len(all_variant_ids) > 10 else ''}")
+            logger.info(f"Using single variant ID for print_areas: {all_variant_ids}")
             
             # Create permanent product for stable mockup URLs
             design_data = {
