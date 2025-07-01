@@ -152,6 +152,97 @@ class ProductService:
         
         validation['valid'] = len(validation['errors']) == 0
         return validation
+    
+    def find_product_by_intent(self, text: str) -> Optional[Dict]:
+        """Find a product based on user intent/text"""
+        text_lower = text.lower()
+        
+        # Map keywords to product categories and specific products
+        keyword_mappings = {
+            # Shirts
+            'shirt': 'shirt',
+            'tee': 'shirt', 
+            't-shirt': 'shirt',
+            'jersey': '12',  # Jersey Short Sleeve Tee
+            'heavy cotton': '6',  # Heavy Cotton Tee
+            'softstyle': '145',  # Softstyle T-Shirt
+            
+            # Hoodies
+            'hoodie': 'hoodie',
+            'sweatshirt': 'hoodie',
+            'hooded': 'hoodie',
+            'college': '92',  # College Hoodie
+            'fleece': '1525',  # Midweight Softstyle Fleece Hoodie
+            'supply': '499'  # Supply Hoodie
+        }
+        
+        # First try to find specific product by ID
+        for keyword, product_id_or_category in keyword_mappings.items():
+            if keyword in text_lower:
+                # If it's a specific product ID
+                if product_id_or_category.isdigit():
+                    product = self.get_product_by_id(product_id_or_category)
+                    if product:
+                        return {
+                            'id': product_id_or_category,
+                            'product': product,
+                            'formatted': {
+                                'title': product.get('title'),
+                                'category': product.get('category')
+                            }
+                        }
+                # If it's a category
+                else:
+                    products = self.get_products_by_category(product_id_or_category)
+                    if products:
+                        # Return the first (highest popularity) product in that category
+                        first_product_id = list(products.keys())[0]
+                        first_product = products[first_product_id]
+                        return {
+                            'id': first_product_id,
+                            'product': first_product,
+                            'formatted': {
+                                'title': first_product.get('title'),
+                                'category': first_product.get('category')
+                            }
+                        }
+        
+        # Default: return the highest popularity product (Jersey Tee)
+        default_product = self.get_product_by_id('12')
+        if default_product:
+            return {
+                'id': '12',
+                'product': default_product,
+                'formatted': {
+                    'title': default_product.get('title'),
+                    'category': default_product.get('category')
+                }
+            }
+        
+        return None
+    
+    def get_product_suggestions_text(self) -> str:
+        """Get formatted text with product suggestions"""
+        products = self.get_all_products()
+        
+        if not products:
+            return "No products available at the moment."
+        
+        # Group by category
+        shirts = self.get_products_by_category('shirt')
+        hoodies = self.get_products_by_category('hoodie')
+        
+        suggestions = []
+        
+        if shirts:
+            shirt_list = [f"• {product.get('title')}" for product in list(shirts.values())[:3]]
+            suggestions.extend(shirt_list)
+        
+        if hoodies:
+            hoodie_list = [f"• {product.get('title')}" for product in list(hoodies.values())[:3]]
+            suggestions.extend(hoodie_list)
+        
+        return "\n".join(suggestions)
 
 
 # Global instance for backward compatibility

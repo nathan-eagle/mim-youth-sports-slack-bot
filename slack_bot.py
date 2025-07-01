@@ -45,14 +45,16 @@ class SlackBot:
             if text.lower().strip() in ['restart', 'reset', 'start over']:
                 conversation_manager.reset_conversation(channel, user)
                 # Send the new service description message
-                service_msg = """Welcome to the team merchandise service! 🏆
+                # Get actual product suggestions from our cache
+                product_suggestions = product_service.get_product_suggestions_text()
+                
+                service_msg = f"""Welcome to the team merchandise service! 🏆
 
-I'll create custom mockups of our 3 most popular youth sports products:
-• *Kids Heavy Cotton Tee* (T-shirt)
-• *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
-• *Dad Hat with Leather Patch* (Hat)
+I'll create custom mockups of our top youth sports products:
 
-📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
+{product_suggestions}
+
+📸 *Just upload your team logo* and I'll show you these products with your design!"""
                 self._send_message(channel, service_msg)
                 return {"status": "success"}
             
@@ -254,17 +256,17 @@ I'll create custom mockups of our 3 most popular youth sports products:
             updates["state"] = "awaiting_logo"
             conversation_manager.update_conversation(channel, user, updates)
             
-            suggestion_message = product_service.get_product_suggestions_text()
+            # Get actual product suggestions from our cache
+            product_suggestions = product_service.get_product_suggestions_text()
             
             # Service description with immediate logo request
-            service_description = """Welcome to the team merchandise service! 🏆
+            service_description = f"""Welcome to the team merchandise service! 🏆
 
-I'll create custom mockups of our 3 most popular youth sports products:
-• *Kids Heavy Cotton Tee* (T-shirt)
-• *Youth Heavy Blend Hooded Sweatshirt* (Hoodie) 
-• *Dad Hat with Leather Patch* (Hat)
+I'll create custom mockups of our top youth sports products:
 
-📸 *Just upload your team logo* and I'll show you all 3 products with your design!"""
+{product_suggestions}
+
+📸 *Just upload your team logo* and I'll show you these products with your design!"""
             
             return {"message": service_description}
             
