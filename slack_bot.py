@@ -868,16 +868,25 @@ I'll create custom mockups of our top youth sports products:
                     logger.info(f"Added {delay}-second delay before creating {product_name}")
                     
                 try:
-                    # Find the variant for the default color
-                    default_color = default_variants[product_id]
-                    selected_variant = product_service._find_variant_by_color(product_id, default_color)
-                    
-                    if not selected_variant:
-                        logger.warning(f"Could not find variant for {product_name} in {default_color}, using first available")
-                        # Fallback to first variant
+                    # For College Hoodie, use first variant to avoid validation issues
+                    if product_id == "92":  # College Hoodie
+                        logger.info(f"Using first available variant for {product_name} to avoid validation issues")
                         product_details = product_service.get_product_by_id(product_id)
                         if product_details and product_details.get('variants'):
                             selected_variant = product_details['variants'][0]
+                        else:
+                            selected_variant = None
+                    else:
+                        # For other products, try to find the default color first
+                        default_color = default_variants[product_id]
+                        selected_variant = product_service._find_variant_by_color(product_id, default_color)
+                        
+                        if not selected_variant:
+                            logger.warning(f"Could not find variant for {product_name} in {default_color}, using first available")
+                            # Fallback to first variant
+                            product_details = product_service.get_product_by_id(product_id)
+                            if product_details and product_details.get('variants'):
+                                selected_variant = product_details['variants'][0]
                     
                     if selected_variant:
                         # Create mockup for this product with default variant
