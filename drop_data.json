@@ -40,6 +40,132 @@
       "product_type": "shirt",
       "default_variant_id": 18395,
       "default_color": "Unknown"
+    },
+    "19f8f322-8081-4e1d-b657-8b55ee3f2d4b": {
+      "id": "19f8f322-8081-4e1d-b657-8b55ee3f2d4b",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641c1278d26655fa0c7383",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641c1278d26655fa0c7383/18486/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:34:16.531735",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18099,
+      "default_color": "Unknown"
+    },
+    "5e2054b5-aee0-435a-9ca5-3b35ce439e4f": {
+      "id": "5e2054b5-aee0-435a-9ca5-3b35ce439e4f",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641c1278d26655fa0c7383",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641c1278d26655fa0c7383/18398/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:34:18.638573",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18395,
+      "default_color": "Unknown"
+    },
+    "883e6b41-0a75-452b-aa4e-c54c5aa1a326": {
+      "id": "883e6b41-0a75-452b-aa4e-c54c5aa1a326",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641c1fd9fa9f6f180d7b7b",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641c1fd9fa9f6f180d7b7b/18486/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:34:27.585187",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18443,
+      "default_color": "Unknown"
+    },
+    "c8f84306-72ff-4b95-aed9-1be9466ab486": {
+      "id": "c8f84306-72ff-4b95-aed9-1be9466ab486",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641c1278d26655fa0c7383",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641c1278d26655fa0c7383/18102/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:47:40.494833",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18099,
+      "default_color": "Unknown"
+    },
+    "e709453c-8127-4fef-86b7-7cb085534c72": {
+      "id": "e709453c-8127-4fef-86b7-7cb085534c72",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641c1278d26655fa0c7383",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641c1278d26655fa0c7383/18398/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:47:42.480188",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18395,
+      "default_color": "Unknown"
+    },
+    "d8afd8c8-bebf-4177-b307-c16252e61acf": {
+      "id": "d8afd8c8-bebf-4177-b307-c16252e61acf",
+      "name": "Test Team Unisex Jersey Short Sleeve Tee",
+      "description": "Custom Unisex Jersey Short Sleeve Tee with team logo in Unknown",
+      "blueprint_id": 12,
+      "print_provider_id": 99,
+      "printify_product_id": "68641f42d9fa9f6f180d7c29",
+      "team_logo_image_id": "685d8aee5638948d7abca30a",
+      "mockup_image_url": "https://images-api.printify.com/mockup/68641f42d9fa9f6f180d7c29/18486/92547/custom-unisex-jersey-short-sleeve-tee-for-test-team.jpg?camera_label=front",
+      "base_price": 20.0,
+      "markup_percentage": 50.0,
+      "created_at": "2025-07-01T13:47:51.561706",
+      "created_by": "test_channel_test_user",
+      "status": "active",
+      "team_info": {
+        "name": "Test Team"
+      },
+      "product_type": "shirt",
+      "default_variant_id": 18443,
+      "default_color": "Unknown"
     }
   },
   "customer_orders": {},
