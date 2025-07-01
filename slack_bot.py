@@ -1141,7 +1141,7 @@ I'll create custom mockups of our top youth sports products:
                     }
                 else:
                     # Old single-variant product - create new master product
-                    logger.info(f"Existing product {product_id} doesn't support variant {selected_variant['id']}, creating new master product")
+                    logger.info(f"Existing product {product_id} doesn't support variant {selected_variant['id']}, forcing creation of new master product")
                     design_result = printify_service.create_product_design(
                         blueprint_id=selected_product['blueprint_id'],
                         print_provider_id=selected_product['print_provider_id'],
@@ -1149,7 +1149,7 @@ I'll create custom mockups of our top youth sports products:
                         image_id=logo_info["printify_image_id"],
                         product_title=f"Custom {selected_product['title']} for {team_info.get('name', 'Team')}",
                         database_service=database_service,
-                        force_new_product=False
+                        force_new_product=True  # FORCE new product - don't reuse old one
                     )
             else:
                 # Create new master product with all variants
