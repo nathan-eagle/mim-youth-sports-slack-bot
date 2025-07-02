@@ -1,0 +1,344 @@
+{
+  "timestamp": 1751421735.766641,
+  "version": "comprehensive",
+  "summary": {
+    "total": 35,
+    "passed": 33,
+    "failed": 2,
+    "success_rate": 94.28571428571428
+  },
+  "category_breakdown": {
+    "baseline": {
+      "total": 10,
+      "passed": 9
+    },
+    "complex_colors": {
+      "total": 5,
+      "passed": 5
+    },
+    "casual_language": {
+      "total": 5,
+      "passed": 4
+    },
+    "sports_context": {
+      "total": 5,
+      "passed": 5
+    },
+    "urgency_quantity": {
+      "total": 5,
+      "passed": 5
+    },
+    "edge_cases": {
+      "total": 5,
+      "passed": 5
+    }
+  },
+  "failed_tests": [
+    {
+      "scenario_id": 9,
+      "user_request": "We need cotton tees in orange for our lacrosse team",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": false,
+      "issues": [
+        "Expected blueprint_id 6 but got 12"
+      ]
+    },
+    {
+      "scenario_id": 19,
+      "user_request": "yo! our swim team wants some hoodies for after practice - bright colors preferred \ud83d\udc99",
+      "category": "casual_language",
+      "difficulty": "medium",
+      "passed": false,
+      "issues": [
+        "Expected color 'blue' but detected 'yellow'"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "scenario_id": 1,
+      "user_request": "I want our logo on a bright red jersey t-shirt for my basketball team",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 2,
+      "user_request": "We need hoodies for our soccer team in navy blue",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 3,
+      "user_request": "Can you put our logo on black t-shirts for the baseball team?",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 4,
+      "user_request": "I'd like hoodies in the same color as our team logo for volleyball",
+      "category": "baseline",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 5,
+      "user_request": "We want performance shirts for our track team in bright green",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 6,
+      "user_request": "Our wrestling team needs shirts, preferably in maroon or burgundy",
+      "category": "baseline",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 7,
+      "user_request": "Can we get sweatshirts for the tennis team? Logo should pop on white",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 8,
+      "user_request": "Looking for royal blue jerseys for our football team with the logo",
+      "category": "baseline",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 9,
+      "user_request": "We need cotton tees in orange for our lacrosse team",
+      "category": "baseline",
+      "difficulty": "easy",
+      "passed": false,
+      "issues": [
+        "Expected blueprint_id 6 but got 12"
+      ]
+    },
+    {
+      "scenario_id": 10,
+      "user_request": "Can you make hoodies that match our school colors - gold and black?",
+      "category": "baseline",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 11,
+      "user_request": "We need jerseys in our team colors - purple and gold - for the Lakers youth team",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 12,
+      "user_request": "Can you make hoodies primarily in forest green with white accents for our nature club?",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 13,
+      "user_request": "Looking for shirts in cardinal red and navy blue - whichever looks better with our logo",
+      "category": "complex_colors",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 14,
+      "user_request": "Team wants hoodies in teal or turquoise - something bright and fun",
+      "category": "complex_colors",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 15,
+      "user_request": "We're thinking burgundy and cream for our vintage-style team shirts",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 16,
+      "user_request": "hey can u put our logo on some cool hoodies? maybe in like a dark blue or something",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 17,
+      "user_request": "the kids want jerseys and they're obsessed with neon green right now lol",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 18,
+      "user_request": "idk if you can do this but we need tshirts, prob black or grey, nothing too fancy",
+      "category": "casual_language",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 19,
+      "user_request": "yo! our swim team wants some hoodies for after practice - bright colors preferred \ud83d\udc99",
+      "category": "casual_language",
+      "difficulty": "medium",
+      "passed": false,
+      "issues": [
+        "Expected color 'blue' but detected 'yellow'"
+      ]
+    },
+    {
+      "scenario_id": 20,
+      "user_request": "tbh we just need shirts for the kids, whatever color looks good with our logo",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 21,
+      "user_request": "Our ice hockey team needs warm hoodies for the rink - preferably in ice blue",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 22,
+      "user_request": "Cheerleading squad wants performance tees in hot pink for competitions",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 23,
+      "user_request": "Cross country running team - need lightweight shirts in safety orange",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 24,
+      "user_request": "Gymnastics team parents want hoodies in royal purple for meets",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 25,
+      "user_request": "Water polo team - jerseys that can handle chlorine, preferably aqua blue",
+      "category": "sports_context",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 26,
+      "user_request": "URGENT: Need 30 red t-shirts for tournament this weekend!",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 27,
+      "user_request": "Ordering hoodies for entire league - about 150 kids - forest green preferred",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 28,
+      "user_request": "Small order - just 8 jerseys for our elite team, midnight blue if possible",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 29,
+      "user_request": "Rush order needed! 25 black hoodies for state championships next week",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 30,
+      "user_request": "Bulk order: 200+ shirts for summer camp, bright colors that kids will love",
+      "category": "urgency_quantity",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 31,
+      "user_request": "Not sure what we want yet, but something for the soccer team in their colors",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 32,
+      "user_request": "Merchandise for team - could be shirts or hoodies - coach wants yellow",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 33,
+      "user_request": "Do you have jerseys? We need something professional looking in charcoal",
+      "category": "edge_cases",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 34,
+      "user_request": "Team gear needed - no preference on type but must be eco-friendly in earth tones",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    },
+    {
+      "scenario_id": 35,
+      "user_request": "Whatever's cheapest for our little league team - just needs to fit kids ages 8-12",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": []
+    }
+  ]
+}

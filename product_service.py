@@ -241,7 +241,16 @@ class ProductService:
             'college': '92',  # College Hoodie
             'midweight': '1525',  # Midweight Softstyle Fleece Hoodie
             'fleece': '1525',  # Midweight Softstyle Fleece Hoodie
-            'supply': '499'  # Supply Hoodie
+            'supply': '499',  # Supply Hoodie
+            
+            # Hats
+            'hat': 'hat',
+            'cap': 'hat',
+            'dad hat': 'hat_1221',  # Dad Hat with Leather Patch
+            'baseball cap': 'hat_1221',  # Dad Hat with Leather Patch
+            'leather patch': 'hat_1221',  # Dad Hat with Leather Patch
+            'patch': 'hat_1221',  # Dad Hat with Leather Patch
+            'snapback': 'hat_1221',  # Dad Hat with Leather Patch (will add more later)
         }
         
         # First try to find specific product by ID
@@ -299,6 +308,7 @@ class ProductService:
         # Group by category
         shirts = self.get_products_by_category('shirt')
         hoodies = self.get_products_by_category('hoodie')
+        hats = self.get_products_by_category('hat')
         
         suggestions = []
         
@@ -309,6 +319,10 @@ class ProductService:
         if hoodies:
             hoodie_list = [f"• {product.get('title')}" for product in list(hoodies.values())[:3]]
             suggestions.extend(hoodie_list)
+        
+        if hats:
+            hat_list = [f"• {product.get('title')}" for product in list(hats.values())[:3]]
+            suggestions.extend(hat_list)
         
         return "\n".join(suggestions)
     
@@ -334,7 +348,7 @@ class ProductService:
             target_products = [product_match['id']]
         else:
             # No specific product mentioned, try main products
-            target_products = ['12', '6', '92']  # Jersey, Heavy Cotton, Hoodie
+            target_products = ['12', '6', '92', 'hat_1221']  # Jersey, Heavy Cotton, Hoodie, Dad Hat
         
         # For each target product, use AI to find best color match
         for product_id in target_products:
@@ -417,7 +431,16 @@ class ProductService:
             'midweight hoodie': '1525',
             'fleece hoodie': '1525',
             'softstyle fleece': '1525',
-            'sweatshirt': '92'  # Default to College Hoodie
+            'sweatshirt': '92',  # Default to College Hoodie
+            
+            # Hats
+            'hat': 'hat_1221',  # Dad Hat with Leather Patch
+            'cap': 'hat_1221',  # Dad Hat with Leather Patch
+            'dad hat': 'hat_1221',  # Dad Hat with Leather Patch
+            'baseball cap': 'hat_1221',  # Dad Hat with Leather Patch
+            'leather patch': 'hat_1221',  # Dad Hat with Leather Patch
+            'patch': 'hat_1221',  # Dad Hat with Leather Patch
+            'snapback': 'hat_1221'  # Dad Hat with Leather Patch
         }
         
         # Prioritize exact color matches for specific products

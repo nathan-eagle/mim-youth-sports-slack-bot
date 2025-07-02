@@ -1,0 +1,247 @@
+{
+  "timestamp": 1751420661.847053,
+  "version": "improved",
+  "summary": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "success_rate": 100.0,
+    "improvement_over_original": 10.0,
+    "total_improvements": 18
+  },
+  "results": [
+    {
+      "scenario_id": 1,
+      "user_request": "I want our logo on a bright red jersey t-shirt for my basketball team",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "red",
+        "detected_color": "red",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'red' appears unavailable - consider suggesting alternatives",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 2,
+      "user_request": "We need hoodies for our soccer team in navy blue",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "navy",
+        "detected_color": "navy",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "blue"
+        ],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'navy' appears unavailable - consider suggesting alternatives",
+        "Detected secondary colors: ['blue']"
+      ]
+    },
+    {
+      "scenario_id": 3,
+      "user_request": "Can you put our logo on black t-shirts for the baseball team?",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "black",
+        "detected_color": "black",
+        "color_confidence": 0.8999999999999999,
+        "secondary_colors": [],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'black' appears unavailable - consider suggesting alternatives",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 4,
+      "user_request": "I'd like hoodies in the same color as our team logo for volleyball",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "logo-inspired",
+        "detected_color": null,
+        "color_confidence": 0.0,
+        "secondary_colors": []
+      },
+      "improvements": []
+    },
+    {
+      "scenario_id": 5,
+      "user_request": "We want performance shirts for our track team in bright green",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "green",
+        "detected_color": "green",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'green' appears unavailable - consider suggesting alternatives",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 6,
+      "user_request": "Our wrestling team needs shirts, preferably in maroon or burgundy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "maroon",
+        "detected_color": "maroon",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "burgundy"
+        ],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'maroon' appears unavailable - consider suggesting alternatives",
+        "Detected secondary colors: ['burgundy']"
+      ]
+    },
+    {
+      "scenario_id": 7,
+      "user_request": "Can we get sweatshirts for the tennis team? Logo should pop on white",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "white",
+        "detected_color": "white",
+        "color_confidence": 0.8999999999999999,
+        "secondary_colors": [],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'white' appears unavailable - consider suggesting alternatives",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 8,
+      "user_request": "Looking for royal blue jerseys for our football team with the logo",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "royal blue",
+        "detected_color": "royal blue",
+        "color_confidence": 0.7,
+        "secondary_colors": [
+          "royal",
+          "blue"
+        ],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'royal blue' appears unavailable - consider suggesting alternatives",
+        "Detected secondary colors: ['royal', 'blue']"
+      ]
+    },
+    {
+      "scenario_id": 9,
+      "user_request": "We need cotton tees in orange for our lacrosse team",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "orange",
+        "detected_color": "orange",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'orange' appears unavailable - consider suggesting alternatives",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 10,
+      "user_request": "Can you make hoodies that match our school colors - gold and black?",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "gold",
+        "detected_color": "gold",
+        "color_confidence": 0.7,
+        "secondary_colors": [
+          "black"
+        ],
+        "color_available": false,
+        "availability_confidence": 0.0,
+        "matching_variants": 0
+      },
+      "improvements": [
+        "Color 'gold' appears unavailable - consider suggesting alternatives",
+        "Detected secondary colors: ['black']"
+      ]
+    }
+  ]
+}

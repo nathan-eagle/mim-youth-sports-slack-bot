@@ -4,7 +4,7 @@
   "optimization_info": {
     "source": "live_printify_api",
     "original_products": 6,
-    "optimized_products": 6,
+    "optimized_products": 7,
     "categories_included": 2,
     "selection_criteria": "live_api_refresh",
     "api_refresh_date": "2025-07-01T12:32:20.916437"
@@ -19,6 +19,11 @@
       "total_available": 1,
       "top3_selected": 1,
       "avg_popularity": 200
+    },
+    "hat": {
+      "total_available": 1,
+      "top3_selected": 1,
+      "avg_popularity": 100
     }
   },
   "providers": {
@@ -60,7 +65,7 @@
     "94": "Harrier",
     "48": "Colorway",
     "70": "Printed Mint",
-    "55": "Drukātava",
+    "55": "Druk\u0101tava",
     "47": "Miami Sublimation",
     "59": "Imagine Your Photos",
     "69": "Prodigi",
@@ -16112,6 +16117,369 @@
       ],
       "available": true,
       "popularity_score": 200
+    },
+    "hat_1221": {
+      "id": "hat_1221",
+      "title": "Dad Hat with Leather Patch (Rectangle)",
+      "description": "These personalized Dad hats come with an unstructured, six-panel, low-profile and a pre-curved visor for that signature look. Each hat features 100% bio-washed chino twill, a self-fabric, tri-glide buckle closure with antique brass - a detail that any dad would appreciate. <div>.:Materials: 100% bio-washed chino twill (hat), 100% faux leather (patch)</div><br /><div>.:Unstructured, six-panel, low-profile</div><br /><div>.:Pre-curved bill</div><br /><div>.:Blank sourced from Bangladesh</div><br /><div>.:Please note: Hand-wash only</div>",
+      "tags": [],
+      "blueprint_id": 1221,
+      "category": "hat",
+      "brand": "ValuCap",
+      "model": "VC300A",
+      "primary_print_provider_id": 261,
+      "print_areas": [
+        {
+          "variant_ids": [
+            93556,
+            93558,
+            93560,
+            93562,
+            93564,
+            93566,
+            93568,
+            93570,
+            93572,
+            93574,
+            93576,
+            93578,
+            93580,
+            93582,
+            93584,
+            93586,
+            93588,
+            93590,
+            93592,
+            93594,
+            93596,
+            93598,
+            93600,
+            93602
+          ],
+          "placeholders": [
+            {
+              "position": "front",
+              "height": 2362,
+              "width": 2362
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": 93556,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "White / Light Brown patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "White / Light Brown patch",
+          "size": "One size"
+        },
+        {
+          "id": 93558,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Black / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Black / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93560,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Black / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Black / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93562,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Black / Light Brown",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Black / Light Brown",
+          "size": "One size"
+        },
+        {
+          "id": 93564,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "White / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "White / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93566,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Black / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Black / Pink patch",
+          "size": "One size"
+        },
+        {
+          "id": 93568,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Grey / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Grey / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93570,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Grey / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Grey / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93572,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Grey / Light Brown patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Grey / Light Brown patch",
+          "size": "One size"
+        },
+        {
+          "id": 93574,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Grey / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Grey / Pink patch",
+          "size": "One size"
+        },
+        {
+          "id": 93576,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Light Pink / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Light Pink / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93578,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Light Pink / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Light Pink / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93580,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Light Pink / Light Brown patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Light Pink / Light Brown patch",
+          "size": "One size"
+        },
+        {
+          "id": 93582,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Light Pink / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Light Pink / Pink patch",
+          "size": "One size"
+        },
+        {
+          "id": 93584,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Navy / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Navy / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93586,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Navy / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Navy / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93588,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Navy / Light Brown patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Navy / Light Brown patch",
+          "size": "One size"
+        },
+        {
+          "id": 93590,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Navy / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Navy / Pink patch",
+          "size": "One size"
+        },
+        {
+          "id": 93592,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Red / Black patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Red / Black patch",
+          "size": "One size"
+        },
+        {
+          "id": 93594,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Red / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Red / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93596,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Red / Light Brown patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Red / Light Brown patch",
+          "size": "One size"
+        },
+        {
+          "id": 93598,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "Red / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "Red / Pink patch",
+          "size": "One size"
+        },
+        {
+          "id": 93600,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "White / Grey patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "White / Grey patch",
+          "size": "One size"
+        },
+        {
+          "id": 93602,
+          "price": 1999,
+          "available": true,
+          "grams": null,
+          "options": {
+            "color": "White / Pink patch",
+            "shape": "Rectangle",
+            "size": "One size"
+          },
+          "color": "White / Pink patch",
+          "size": "One size"
+        }
+      ],
+      "available": true
     }
   }
 }

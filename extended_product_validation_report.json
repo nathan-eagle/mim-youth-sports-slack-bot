@@ -1,0 +1,665 @@
+{
+  "timestamp": 1751421637.462913,
+  "version": "extended",
+  "summary": {
+    "total": 25,
+    "passed": 22,
+    "failed": 3,
+    "success_rate": 88.0,
+    "total_improvements": 22
+  },
+  "category_breakdown": {
+    "complex_colors": {
+      "total": 5,
+      "passed": 4,
+      "difficulties": {
+        "medium": {
+          "total": 3,
+          "passed": 3,
+          "success_rate": 100.0
+        },
+        "hard": {
+          "total": 2,
+          "passed": 1,
+          "success_rate": 50.0
+        }
+      },
+      "success_rate": 80.0
+    },
+    "casual_language": {
+      "total": 5,
+      "passed": 4,
+      "difficulties": {
+        "easy": {
+          "total": 3,
+          "passed": 3,
+          "success_rate": 100.0
+        },
+        "medium": {
+          "total": 2,
+          "passed": 1,
+          "success_rate": 50.0
+        }
+      },
+      "success_rate": 80.0
+    },
+    "sports_context": {
+      "total": 5,
+      "passed": 4,
+      "difficulties": {
+        "easy": {
+          "total": 4,
+          "passed": 3,
+          "success_rate": 75.0
+        },
+        "medium": {
+          "total": 1,
+          "passed": 1,
+          "success_rate": 100.0
+        }
+      },
+      "success_rate": 80.0
+    },
+    "urgency_quantity": {
+      "total": 5,
+      "passed": 5,
+      "difficulties": {
+        "easy": {
+          "total": 4,
+          "passed": 4,
+          "success_rate": 100.0
+        },
+        "hard": {
+          "total": 1,
+          "passed": 1,
+          "success_rate": 100.0
+        }
+      },
+      "success_rate": 100.0
+    },
+    "edge_cases": {
+      "total": 5,
+      "passed": 5,
+      "difficulties": {
+        "hard": {
+          "total": 4,
+          "passed": 4,
+          "success_rate": 100.0
+        },
+        "medium": {
+          "total": 1,
+          "passed": 1,
+          "success_rate": 100.0
+        }
+      },
+      "success_rate": 100.0
+    }
+  },
+  "results": [
+    {
+      "scenario_id": 11,
+      "user_request": "We need jerseys in our team colors - purple and gold - for the Lakers youth team",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "purple",
+        "detected_color": "purple",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "gold"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['gold']"
+      ]
+    },
+    {
+      "scenario_id": 12,
+      "user_request": "Can you make hoodies primarily in forest green with white accents for our nature club?",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "green",
+        "detected_color": "forest",
+        "color_confidence": 0.7,
+        "secondary_colors": [
+          "green",
+          "white"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['green', 'white']"
+      ]
+    },
+    {
+      "scenario_id": 13,
+      "user_request": "Looking for shirts in cardinal red and navy blue - whichever looks better with our logo",
+      "category": "complex_colors",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "red",
+        "detected_color": "red",
+        "color_confidence": 0.7,
+        "secondary_colors": [
+          "navy",
+          "blue"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['navy', 'blue']"
+      ]
+    },
+    {
+      "scenario_id": 14,
+      "user_request": "Team wants hoodies in teal or turquoise - something bright and fun",
+      "category": "complex_colors",
+      "difficulty": "hard",
+      "passed": false,
+      "issues": [
+        "Expected color 'teal' but detected 'yellow'"
+      ],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "teal",
+        "detected_color": "yellow",
+        "color_confidence": 0.7,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": []
+    },
+    {
+      "scenario_id": 15,
+      "user_request": "We're thinking burgundy and cream for our vintage-style team shirts",
+      "category": "complex_colors",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "burgundy",
+        "detected_color": "burgundy",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "cream"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['cream']"
+      ]
+    },
+    {
+      "scenario_id": 16,
+      "user_request": "hey can u put our logo on some cool hoodies? maybe in like a dark blue or something",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "blue",
+        "detected_color": "blue",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 17,
+      "user_request": "the kids want jerseys and they're obsessed with neon green right now lol",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "green",
+        "detected_color": "green",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 18,
+      "user_request": "idk if you can do this but we need tshirts, prob black or grey, nothing too fancy",
+      "category": "casual_language",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "black",
+        "detected_color": "black",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "grey"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['grey']"
+      ]
+    },
+    {
+      "scenario_id": 19,
+      "user_request": "yo! our swim team wants some hoodies for after practice - bright colors preferred \ud83d\udc99",
+      "category": "casual_language",
+      "difficulty": "medium",
+      "passed": false,
+      "issues": [
+        "Expected color 'blue' but detected 'yellow'"
+      ],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "blue",
+        "detected_color": "yellow",
+        "color_confidence": 0.7,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": []
+    },
+    {
+      "scenario_id": 20,
+      "user_request": "tbh we just need shirts for the kids, whatever color looks good with our logo",
+      "category": "casual_language",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "logo-inspired",
+        "detected_color": null,
+        "color_confidence": 0.0,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": []
+    },
+    {
+      "scenario_id": 21,
+      "user_request": "Our ice hockey team needs warm hoodies for the rink - preferably in ice blue",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "blue",
+        "detected_color": "blue",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 22,
+      "user_request": "Cheerleading squad wants performance tees in hot pink for competitions",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "pink",
+        "detected_color": "pink",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 23,
+      "user_request": "Cross country running team - need lightweight shirts in safety orange",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "orange",
+        "detected_color": "orange",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 24,
+      "user_request": "Gymnastics team parents want hoodies in royal purple for meets",
+      "category": "sports_context",
+      "difficulty": "easy",
+      "passed": false,
+      "issues": [
+        "Expected color 'purple' but detected 'royal'"
+      ],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "purple",
+        "detected_color": "royal",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "purple"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['purple']"
+      ]
+    },
+    {
+      "scenario_id": 25,
+      "user_request": "Water polo team - jerseys that can handle chlorine, preferably aqua blue",
+      "category": "sports_context",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "blue",
+        "detected_color": "blue",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 26,
+      "user_request": "URGENT: Need 30 red t-shirts for tournament this weekend!",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "red",
+        "detected_color": "red",
+        "color_confidence": 0.8999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 27,
+      "user_request": "Ordering hoodies for entire league - about 150 kids - forest green preferred",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "green",
+        "detected_color": "forest",
+        "color_confidence": 0.7999999999999999,
+        "secondary_colors": [
+          "green"
+        ],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Detected secondary colors: ['green']"
+      ]
+    },
+    {
+      "scenario_id": 28,
+      "user_request": "Small order - just 8 jerseys for our elite team, midnight blue if possible",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "blue",
+        "detected_color": "blue",
+        "color_confidence": 0.8999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 29,
+      "user_request": "Rush order needed! 25 black hoodies for state championships next week",
+      "category": "urgency_quantity",
+      "difficulty": "easy",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "hoodie",
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": 92,
+        "actual_blueprint_id": 92,
+        "expected_color": "black",
+        "detected_color": "black",
+        "color_confidence": 0.8999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 30,
+      "user_request": "Bulk order: 200+ shirts for summer camp, bright colors that kids will love",
+      "category": "urgency_quantity",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "t-shirt",
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": 6,
+        "actual_blueprint_id": 6,
+        "expected_color": "bright",
+        "detected_color": "yellow",
+        "color_confidence": 0.7,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": []
+    },
+    {
+      "scenario_id": 31,
+      "user_request": "Not sure what we want yet, but something for the soccer team in their colors",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": null,
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": null,
+        "actual_blueprint_id": 6,
+        "expected_color": "logo-inspired",
+        "detected_color": null,
+        "color_confidence": 0.0,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Provided product recommendation for ambiguous request"
+      ]
+    },
+    {
+      "scenario_id": 32,
+      "user_request": "Merchandise for team - could be shirts or hoodies - coach wants yellow",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": null,
+        "recommended_product": "Unisex College Hoodie",
+        "expected_blueprint_id": null,
+        "actual_blueprint_id": 92,
+        "expected_color": "yellow",
+        "detected_color": "yellow",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Provided product recommendation for ambiguous request",
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 33,
+      "user_request": "Do you have jerseys? We need something professional looking in charcoal",
+      "category": "edge_cases",
+      "difficulty": "medium",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": "jersey",
+        "recommended_product": "Unisex Jersey Short Sleeve Tee",
+        "expected_blueprint_id": 12,
+        "actual_blueprint_id": 12,
+        "expected_color": "gray",
+        "detected_color": "charcoal",
+        "color_confidence": 0.9999999999999999,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "High confidence color detection"
+      ]
+    },
+    {
+      "scenario_id": 34,
+      "user_request": "Team gear needed - no preference on type but must be eco-friendly in earth tones",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": null,
+        "recommended_product": null,
+        "expected_blueprint_id": null,
+        "actual_blueprint_id": null,
+        "expected_color": "brown",
+        "detected_color": "brown",
+        "color_confidence": 0.7,
+        "secondary_colors": [],
+        "ambiguous_request": true
+      },
+      "improvements": [
+        "Correctly identified ambiguous product request"
+      ]
+    },
+    {
+      "scenario_id": 35,
+      "user_request": "Whatever's cheapest for our little league team - just needs to fit kids ages 8-12",
+      "category": "edge_cases",
+      "difficulty": "hard",
+      "passed": true,
+      "issues": [],
+      "details": {
+        "expected_product": null,
+        "recommended_product": "Unisex Heavy Cotton Tee",
+        "expected_blueprint_id": null,
+        "actual_blueprint_id": 6,
+        "expected_color": null,
+        "detected_color": null,
+        "color_confidence": 0.0,
+        "secondary_colors": [],
+        "ambiguous_request": false
+      },
+      "improvements": [
+        "Provided product recommendation for ambiguous request"
+      ]
+    }
+  ]
+}
