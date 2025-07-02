@@ -49,7 +49,7 @@ structlog.configure(
 logger = structlog.get_logger(__name__)
 
 # Global instances
-settings = Settings()
+settings: Optional[Settings] = None
 state_manager: Optional[RedisStateManager] = None
 event_processor: Optional[BackgroundEventProcessor] = None
 performance_monitor: Optional[PerformanceMonitor] = None
@@ -62,11 +62,14 @@ async def lifespan(app: FastAPI):
     Application lifecycle management
     Initialize and cleanup resources
     """
-    global state_manager, event_processor, performance_monitor, slack_gateway
+    global settings, state_manager, event_processor, performance_monitor, slack_gateway
     
     logger.info("Starting MiM Slack Bot application")
     
     try:
+        # Initialize settings first
+        settings = Settings()
+        
         # Initialize core services
         state_manager = RedisStateManager(settings.redis_url)
         await state_manager.initialize()

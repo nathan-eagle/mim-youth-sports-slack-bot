@@ -5,7 +5,8 @@ Centralized settings with environment variable support
 
 import os
 from typing import Optional, List, Dict, Any
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -29,9 +30,9 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", env="HOST")
     port: int = Field(default=8000, env="PORT")
     
-    # Slack API settings
-    slack_bot_token: str = Field(..., env="SLACK_BOT_TOKEN")
-    slack_signing_secret: str = Field(..., env="SLACK_SIGNING_SECRET")
+    # Slack API settings (optional for local testing)
+    slack_bot_token: Optional[str] = Field(default=None, env="SLACK_BOT_TOKEN")
+    slack_signing_secret: Optional[str] = Field(default=None, env="SLACK_SIGNING_SECRET")
     
     # OpenAI API settings
     openai_api_key: str = Field(..., env="OPENAI_API_KEY")
@@ -93,23 +94,26 @@ class Settings(BaseSettings):
     )
     temp_file_cleanup_hours: int = Field(default=2, env="MIM_TEMP_FILE_CLEANUP_HOURS")
     
-    @validator('default_product_ids', pre=True)
+    @field_validator('default_product_ids', mode='before')
+    @classmethod
     def parse_product_ids(cls, v):
         """Parse product IDs from environment variable"""
         if isinstance(v, str):
             return [int(x.strip()) for x in v.split(',') if x.strip().isdigit()]
         return v
     
-    @validator('allowed_file_types', pre=True)
+    @field_validator('allowed_file_types', mode='before')
+    @classmethod
     def parse_file_types(cls, v):
         """Parse file types from environment variable"""
         if isinstance(v, str):
             return [x.strip() for x in v.split(',') if x.strip()]
         return v
     
-    class Config:
-        env_prefix = "MIM_"
-        case_sensitive = False
+    model_config = {
+        "env_prefix": "",  # No prefix - use exact env var names
+        "case_sensitive": False
+    }
         
     def get_openai_model(self, complexity: str = "simple") -> str:
         """
@@ -147,8 +151,9 @@ class Settings(BaseSettings):
         return ttl_map.get(cache_type, self.cache_ttl_default)
 
 
-# Global settings instance
-settings = Settings()
+# Global settings instance (comment out to avoid import errors)
+# settings = Settings()
+# Use Settings() directly in your code or create instance when needed
 
 
 class ProductCatalogConfig:
@@ -212,5 +217,6 @@ class ProductCatalogConfig:
         pass
 
 
-# Global product config instance
-product_config = ProductCatalogConfig()
+# Global product config instance (comment out to avoid import errors)
+# product_config = ProductCatalogConfig()
+# Use ProductCatalogConfig() directly in your code or create instance when needed
