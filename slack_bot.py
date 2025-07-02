@@ -404,15 +404,74 @@ I'll create custom mockups of our top youth sports products:
         try:
             text_lower = text.lower()
             
-            # Check if user is asking a question about colors/options
+            # Check for immediate action requests like "yes create the drop!" or "create it!"
+            action_phrases = ['yes create', 'create the drop', 'create it', 'make it', 'yes make', 'go ahead', 'let\'s do it']
+            if any(phrase in text_lower for phrase in action_phrases):
+                # Check if we have recent context about what they want to create
+                recent_context = conversation.get("recent_discussion", "")
+                logo_info = conversation.get("logo_info")
+                
+                if logo_info and logo_info.get("printify_image_id"):
+                    # Try to extract product and color from recent context or use defaults
+                    if "baby blue" in recent_context.lower() or "sky" in recent_context.lower():
+                        # They want a Baby Blue t-shirt based on recent discussion
+                        self._send_message(channel, "🎨 Creating your Baby Blue t-shirt with your logo...")
+                        selected_variant = product_service._find_variant_by_color('12', 'Baby Blue')
+                        if selected_variant:
+                            product_info = {"id": "12", "formatted": {"title": "Unisex Jersey Short Sleeve Tee"}}
+                            response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
+                            if response.get("image_url") and response.get("purchase_url"):
+                                self._send_product_result(channel, response["image_url"], response["purchase_url"], 
+                                                         f"Team {response['product_title']} (Baby Blue)", response.get("publish_method"))
+                                return {"status": "success"}
+                
+                # Fallback for unclear context
+                return {"message": "I'd love to help create that! Could you let me know which product (t-shirt or hoodie) and what color you'd like? 🎨"}
+            
             logo_info = conversation.get("logo_info")
-            if self._is_asking_for_options(text):
-                # User wants information, not a product creation
+            
+            # Check for specific color/product requests FIRST - immediate action phrases
+            color_action_phrases = ['show me', 'make', 'create', 'i want', 'give me']
+            has_action_phrase = any(phrase in text_lower for phrase in color_action_phrases)
+            has_product_context = any(word in text_lower for word in ['shirt', 'tshirt', 't-shirt', 'hoodie', 'blue', 'red', 'purple', 'sky', 'baby blue', 'color'])
+            
+            if has_action_phrase and has_product_context and logo_info and logo_info.get("printify_image_id"):
+                # Immediate acknowledgment for product creation requests
+                self._send_message(channel, "🎨 Got it! Creating that for you right now...")
+                
+                # Get logo URL for AI analysis
+                logo_url = logo_info.get("url", "No logo URL available")
+                
+                # Use AI-powered color analysis with logo context
+                selected_variants = product_service.parse_color_preferences_ai(text, logo_url)
+                
+                if selected_variants:
+                    # Create mockups with the selected color variants
+                    self._generate_specific_color_mockups(conversation, logo_info, selected_variants, channel, user)
+                    return {"status": "success"}
+                else:
+                    # If AI couldn't parse it, try basic color matching for common requests
+                    if "sky" in text_lower or "baby blue" in text_lower:
+                        # They want a baby blue t-shirt
+                        selected_variant = product_service._find_variant_by_color('12', 'Baby Blue')
+                        if selected_variant:
+                            product_info = {"id": "12", "formatted": {"title": "Unisex Jersey Short Sleeve Tee"}}
+                            response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
+                            if response.get("image_url") and response.get("purchase_url"):
+                                self._send_product_result(channel, response["image_url"], response["purchase_url"], 
+                                                         f"Team {response['product_title']} (Baby Blue)", response.get("publish_method"))
+                                return {"status": "success"}
+            
+            # Check if user is asking a question about colors/options (only if not a product creation request)
+            elif self._is_asking_for_options(text):
+                # User wants information, not a product creation - store this as recent discussion
                 response_message = self._handle_options_query(text, conversation)
+                # Store the question context for follow-up actions
+                conversation_manager.update_conversation(channel, user, {"recent_discussion": text})
                 return {"message": response_message}
             
-            # Check for specific color requests (only if not asking for options)
-            if logo_info and logo_info.get("printify_image_id"):
+            # Check for specific color requests (only if not asking for options and not handled above)
+            elif logo_info and logo_info.get("printify_image_id"):
                 # Get logo URL for AI analysis
                 logo_url = logo_info.get("url", "No logo URL available")
                 
@@ -462,7 +521,7 @@ I'll create custom mockups of our top youth sports products:
                 
                 # Check if user wants a different product (but no logo uploaded for new flow)
                 product_match = product_service.find_product_by_intent_ai(text)
-                if product_match and product_match.get('id'):
+                if product_match and isinstance(product_match, dict) and product_match.get('id'):
                     # Check if they have existing logo to use
                     if logo_info and logo_info.get("printify_image_id"):
                         # Get product title safely
@@ -480,7 +539,7 @@ I'll create custom mockups of our top youth sports products:
                             '12': 'Black',    # Unisex Jersey Short Sleeve Tee
                             '92': 'Navy'      # Unisex College Hoodie
                         }
-                        product_id = product_match['id']
+                        product_id = product_match.get('id')
                         default_color = default_variants.get(product_id, 'Black')
                         selected_variant = product_service._find_variant_by_color(product_id, default_color)
                         
