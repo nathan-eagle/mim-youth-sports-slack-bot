@@ -36,7 +36,9 @@ class ConversationManager:
         self._cleanup_old_conversations()
         
         self._initialized = True
-        logger.info("ConversationManager singleton initialized")
+        logger.info(f"ConversationManager singleton initialized with {len(self.conversations)} existing conversations")
+        if self.conversations:
+            logger.info(f"Loaded conversation keys: {list(self.conversations.keys())}")
     
     def _load_state(self):
         """Load conversation state from disk"""
@@ -129,7 +131,12 @@ class ConversationManager:
         """Get or create conversation state"""
         conversation_key = f"{channel}_{user}"
         
+        # Debug logging for conversation retrieval
+        logger.info(f"Getting conversation for key: {conversation_key}")
+        logger.info(f"Available conversation keys: {list(self.conversations.keys())}")
+        
         if conversation_key not in self.conversations:
+            logger.warning(f"Creating NEW conversation for {conversation_key} - previous state lost?")
             self.conversations[conversation_key] = {
                 "state": "initial",
                 "product_selected": None,
@@ -142,6 +149,19 @@ class ConversationManager:
                 "last_error": None
             }
             logger.info(f"Created new conversation: {conversation_key}")
+        else:
+            # Existing conversation found
+            existing_conversation = self.conversations[conversation_key]
+            last_activity = existing_conversation.get('last_activity', 0)
+            age_minutes = (time.time() - last_activity) / 60
+            logger.info(f"Found existing conversation for {conversation_key}, age: {age_minutes:.1f} minutes")
+            
+            # Log if logo info exists
+            if existing_conversation.get('logo_info'):
+                logo_id = existing_conversation['logo_info'].get('printify_image_id', 'None')
+                logger.info(f"Conversation has logo: {logo_id}")
+            else:
+                logger.warning(f"Conversation missing logo info!")
         
         # Update last activity
         self.conversations[conversation_key]["last_activity"] = time.time()

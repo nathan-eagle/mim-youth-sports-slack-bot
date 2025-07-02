@@ -118,11 +118,35 @@ def slack_events():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """Health check endpoint"""
+    """Health check endpoint with conversation state info"""
+    from conversation_manager import conversation_manager
+    import time
+    
+    # Get conversation stats
+    conversations = conversation_manager.conversations
+    active_conversations = 0
+    conversations_with_logos = 0
+    
+    current_time = time.time()
+    for conv in conversations.values():
+        # Count active conversations (within last 24 hours)
+        if (current_time - conv.get('last_activity', 0)) < (24 * 60 * 60):
+            active_conversations += 1
+        
+        # Count conversations with logos
+        if conv.get('logo_info') and conv['logo_info'].get('printify_image_id'):
+            conversations_with_logos += 1
+    
     return jsonify({
         "status": "healthy",
         "service": "MiM Youth Sports Swag Bot",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "timestamp": time.time(),
+        "conversation_stats": {
+            "total_conversations": len(conversations),
+            "active_24h": active_conversations,
+            "with_logos": conversations_with_logos
+        }
     })
 
 @app.route('/', methods=['GET'])
@@ -156,6 +180,14 @@ if __name__ == '__main__':
     
     logger.info(f"Starting MiM Youth Sports Swag Bot on port {port}")
     logger.info(f"Debug mode: {debug}")
+    
+    # Start keep-alive service if production URL is set
+    if not debug:
+        try:
+            from keep_alive import start_keep_alive
+            start_keep_alive()
+        except Exception as e:
+            logger.warning(f"Could not start keep-alive service: {e}")
     
     app.run(
         host='0.0.0.0',

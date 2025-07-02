@@ -82,6 +82,13 @@ class ProductService:
         
         return sorted(list(colors))
     
+    def get_colors_with_hex_for_product(self, product_id: str) -> List[Dict]:
+        """Get all available colors for a product with hex codes"""
+        from color_hex_service import ColorHexService
+        
+        color_names = self.get_colors_for_product(product_id)
+        return ColorHexService.get_colors_with_hex(color_names)
+    
     def get_sizes_for_product(self, product_id: str) -> List[str]:
         """Get all available sizes for a product"""
         variants = self.get_product_variants(product_id)

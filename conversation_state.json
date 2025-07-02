@@ -26,8 +26,24 @@
       "error_count": 0,
       "last_error": null,
       "pending_request": "I want a blue tshirt in a color similar to the blue in my logo"
+    },
+    "C123456789_U987654321": {
+      "state": "completed",
+      "product_selected": null,
+      "logo_info": {
+        "printify_image_id": "test_logo_123",
+        "url": "https://static.wixstatic.com/media/d072b4_a933c375e992435ea9f972afc685cff9~mv2.png"
+      },
+      "team_info": {
+        "name": "Test Team"
+      },
+      "selected_variants": {},
+      "created_at": 1751481783.7617862,
+      "last_activity": 1751481783.761788,
+      "error_count": 0,
+      "last_error": null
     }
   },
   "processed_events": [],
-  "last_updated": 1751479400.410836
+  "last_updated": 1751481783.7617888
 }
