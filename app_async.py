@@ -131,14 +131,21 @@ def verify_slack_request(request_body: str, timestamp: str, signature: str) -> b
     Returns:
         True if signature is valid, False otherwise
     """
-    if not settings.slack_signing_secret:
+    # Get signing secret directly from environment as fallback
+    signing_secret = None
+    if settings and hasattr(settings, 'slack_signing_secret'):
+        signing_secret = settings.slack_signing_secret
+    else:
+        signing_secret = os.getenv('SLACK_SIGNING_SECRET')
+    
+    if not signing_secret:
         logger.warning("SLACK_SIGNING_SECRET not set - skipping verification")
         return True
     
     # Create expected signature
     sig_basestring = f'v0:{timestamp}:{request_body}'
     expected_signature = 'v0=' + hmac.new(
-        settings.slack_signing_secret.encode(),
+        signing_secret.encode(),
         sig_basestring.encode(),
         hashlib.sha256
     ).hexdigest()
