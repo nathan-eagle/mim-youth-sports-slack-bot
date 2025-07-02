@@ -1629,72 +1629,62 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
         return any(pattern in text_lower for pattern in question_patterns)
     
     def _handle_options_query(self, text: str, conversation: Dict) -> str:
-        """Handle user questions about available options"""
-        text_lower = text.lower()
-        
-        # Check if asking about colors
-        if any(word in text_lower for word in ['color', 'colors', 'orange', 'blue', 'red']):
-            return self._get_color_options_message(text_lower)
-        
-        # Check if asking about products
-        if any(word in text_lower for word in ['product', 'products', 'item', 'items']):
-            return self._get_product_options_message()
-        
-        # General helpful response
-        return "I can help you with:\n\n🎨 **Colors**: Ask me about color options like 'what orange colors are available?'\n👕 **Products**: We have Jersey Tees and College Hoodies\n\n*Want to create a product? Just say something like 'make a red t-shirt' or 'I want a navy hoodie'*"
+        """Handle user questions about available options using AI inference"""
+        # Use AI to understand what the user is asking for
+        try:
+            # Get available products and colors for AI context
+            all_products = product_service.get_all_products()
+            
+            # Get colors for both products
+            jersey_colors = product_service.get_colors_for_product('12')
+            hoodie_colors = product_service.get_colors_for_product('92')
+            
+            # Create system prompt for AI to understand the query
+            system_prompt = f"""You are helping a user explore available options for custom team merchandise.
+            
+            Available products:
+            - Unisex Jersey Short Sleeve Tee (ID: 12) - available in {len(jersey_colors)} colors
+            - Unisex College Hoodie (ID: 92) - available in {len(hoodie_colors)} colors
+            
+            Available colors for Jersey Tee: {', '.join(jersey_colors[:20])}{'...' if len(jersey_colors) > 20 else ''}
+            Available colors for College Hoodie: {', '.join(hoodie_colors[:20])}{'...' if len(hoodie_colors) > 20 else ''}
+            
+            The user is asking: "{text}"
+            
+            Analyze their question and respond appropriately:
+            1. If asking about specific colors (like purple, orange, blue), list those specific colors
+            2. If asking about products, explain the available products
+            3. If asking generally about options, give helpful overview
+            4. Always end with clear instructions on how to create a product
+            
+            Be conversational and helpful. Use emojis appropriately.
+            
+            Respond in this format:
+            {{
+                "response_type": "color_list|product_list|general_help",
+                "message": "your helpful response here"
+            }}"""
+            
+            # Get AI response
+            response = openai_service.client.chat.completions.create(
+                model="gpt-4-turbo-preview",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": text}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.3
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content)
+            return result.get('message', 'I can help you explore our color and product options! What would you like to know?')
+            
+        except Exception as e:
+            logger.error(f"AI options query failed: {e}")
+            # Fallback response
+            return "I can help you with colors and products! Try asking 'what purple colors do you have?' or 'show me the available products'"
     
-    def _get_color_options_message(self, text_lower: str) -> str:
-        """Get available color options for products"""
-        # Check if asking about specific color family
-        if 'orange' in text_lower:
-            return self._get_orange_colors_message()
-        elif 'blue' in text_lower:
-            return self._get_blue_colors_message()
-        elif 'red' in text_lower:
-            return self._get_red_colors_message()
-        else:
-            return self._get_general_colors_message()
-    
-    def _get_orange_colors_message(self) -> str:
-        """Get all orange color options"""
-        jersey_colors = product_service.get_colors_for_product('12')
-        orange_colors = [color for color in jersey_colors if 'orange' in color.lower()]
-        
-        if orange_colors:
-            color_list = "\n".join([f"• {color}" for color in orange_colors])
-            return f"🍊 **Orange color options for t-shirts:**\n\n{color_list}\n\n*Want to see one? Just say 'make a [color name] t-shirt'*"
-        else:
-            return "Let me check what orange colors we have available..."
-    
-    def _get_blue_colors_message(self) -> str:
-        """Get all blue color options"""
-        jersey_colors = product_service.get_colors_for_product('12')
-        blue_colors = [color for color in jersey_colors if 'blue' in color.lower()]
-        
-        if blue_colors:
-            color_list = "\n".join([f"• {color}" for color in blue_colors[:10]])  # Limit to 10
-            return f"🔵 **Blue color options:**\n\n{color_list}\n\n*Want to see one? Just say 'make a [color name] t-shirt'*"
-        else:
-            return "Let me check what blue colors we have available..."
-    
-    def _get_red_colors_message(self) -> str:
-        """Get all red color options"""
-        jersey_colors = product_service.get_colors_for_product('12')
-        red_colors = [color for color in jersey_colors if any(red_word in color.lower() for red_word in ['red', 'cardinal', 'crimson', 'cherry'])]
-        
-        if red_colors:
-            color_list = "\n".join([f"• {color}" for color in red_colors])
-            return f"🔴 **Red color options:**\n\n{color_list}\n\n*Want to see one? Just say 'make a [color name] t-shirt'*"
-        else:
-            return "Let me check what red colors we have available..."
-    
-    def _get_general_colors_message(self) -> str:
-        """Get general color information"""
-        return "🎨 **We have tons of colors available!**\n\nAsk me about specific color families like:\n• 'What orange colors do you have?'\n• 'Show me blue options'\n• 'List the red colors'\n\nOr just tell me what you want: 'I want a navy t-shirt'"
-    
-    def _get_product_options_message(self) -> str:
-        """Get available product options"""
-        return "👕 **Available products:**\n\n• **Unisex Jersey Short Sleeve Tee** (t-shirt)\n• **Unisex College Hoodie** (hoodie)\n\n*Both available in 100+ colors! Ask me about specific colors or say 'make a [color] [product]'*"
 
 # Global instance
 slack_bot = SlackBot() 
