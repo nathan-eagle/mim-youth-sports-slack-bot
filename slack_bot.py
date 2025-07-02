@@ -1659,7 +1659,7 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
             
             Be conversational and helpful. Use emojis appropriately.
             
-            Respond in this format:
+            Please respond with a JSON object in this format:
             {{
                 "response_type": "color_list|product_list|general_help",
                 "message": "your helpful response here"
