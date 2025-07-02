@@ -1706,9 +1706,26 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                 jersey_colors = product_service.get_colors_for_product('12')
                 hoodie_colors = product_service.get_colors_for_product('92')
                 
+                # Get recent conversation context for better understanding
+                recent_creation = conversation.get("recent_creation", {})
+                recent_discussion = conversation.get("recent_discussion", "")
+                context_info = ""
+                
+                if recent_creation:
+                    context_info = f"""
+                RECENT CONTEXT: Just created a {recent_creation.get('product', '')} in {recent_creation.get('color', '')} color.
+                Color family discussed: {recent_creation.get('color_family', '')}
+                All matching colors from that family: {', '.join(recent_creation.get('all_matching_colors', []))}
+                """
+                
+                if recent_discussion:
+                    context_info += f"\nRecent discussion: {recent_discussion}"
+                
                 # Create AI prompt to understand the color query and suggest examples
                 color_analysis_prompt = f"""
                 A user is asking about colors for custom team merchandise: "{text}"
+                
+                {context_info}
                 
                 Available colors for Jersey Tee: {', '.join(jersey_colors)}
                 Available colors for Hoodie: {', '.join(hoodie_colors)}
@@ -1724,10 +1741,13 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                 }}
                 
                 Guidelines:
+                - Use RECENT CONTEXT to understand pronouns like "that color", "same color", "this shade"
                 - If asking about light blue, blue tones, or sky colors - find blue-family colors
                 - If asking about purple, violet - find purple-family colors  
                 - If asking about orange, burnt orange - find orange-family colors
                 - If asking about green, forest, kelly - find green-family colors
+                - If they reference "that color" and recent context shows a specific color, use that color family
+                - When they ask for a different product in "that color", find the exact color if available
                 - Choose the most appealing color as the example (avoid basic "Black" unless specifically requested)
                 - Default to creating a t-shirt unless they mention hoodie
                 - Be enthusiastic and explain what you're doing
@@ -1786,6 +1806,15 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                                     "product_created",
                                     logo_info.get("url")
                                 )
+                                
+                                # Store recent product creation context for follow-up questions
+                                recent_creation = {
+                                    "color": example_color,
+                                    "product": product_title,
+                                    "color_family": ai_analysis.get("color_family_requested", ""),
+                                    "all_matching_colors": detected_colors
+                                }
+                                conversation_manager.update_conversation(channel, user, {"recent_creation": recent_creation})
                                 
                                 return {"status": "created_example", "color": example_color, "alternatives": other_colors}
                 
