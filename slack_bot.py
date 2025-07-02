@@ -446,7 +446,7 @@ I'll create custom mockups of our top youth sports products:
                 - If they're just being positive/thankful, respond enthusiastically
                 - If they want to modify the same product, guide them appropriately
                 
-                Available products: shirt (Unisex Jersey Short Sleeve Tee, Unisex Heavy Cotton Tee, Unisex Softstyle T-Shirt), hoodie (Unisex College Hoodie, Unisex Midweight Softstyle Fleece Hoodie, Unisex Supply Hoodie)
+                Available products: shirt (Unisex Jersey Short Sleeve Tee), hoodie (Unisex College Hoodie). Default products shown are Jersey Tee and College Hoodie.
                 
                 Respond as an enthusiastic youth sports merchandise assistant.
                 """
@@ -704,12 +704,11 @@ I'll create custom mockups of our top youth sports products:
             # Send initial message
             self._send_message(channel, f"🎨 Perfect! Creating mockups for {team_name}...")
             
-            # Get the best products from our cache - use Jersey Tee, College Hoodie, Heavy Cotton Tee
+            # Get the best products from our cache - use only Jersey Tee and College Hoodie
             best_products = product_service.get_best_products()
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
-                ("92", "Unisex College Hoodie"),  # College Hoodie  
-                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee (hats don't have blueprint_ids)
+                ("92", "Unisex College Hoodie")   # College Hoodie
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -733,10 +732,9 @@ I'll create custom mockups of our top youth sports products:
                         # Send this mockup immediately
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], response["product_title"], response.get("publish_method"))
                         
-                        # Simple progress message (except for last item)
-                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
-                            next_product = "hoodie" if product_id == "12" else "t-shirt"
-                            self._send_message(channel, f"⚡ Creating {next_product}...")
+                        # Simple progress message (only for jersey tee -> hoodie)
+                        if product_id == "12":  # Jersey Tee, next is hoodie
+                            self._send_message(channel, f"⚡ Creating hoodie...")
                     
                 except Exception as e:
                     logger.error(f"Error creating mockup for {product_name}: {e}")
@@ -769,16 +767,15 @@ I'll create custom mockups of our top youth sports products:
             self._send_message(channel, "Sorry, had some issues creating the mockups. Please try uploading your logo again!")
     
     def _generate_all_mockups_with_colors(self, conversation: Dict, logo_info: Dict, selected_variants: Dict, channel: str, user: str):
-        """Generate mockups for all 3 products using selected color variants"""
+        """Generate mockups for the 2 main products using selected color variants"""
         try:
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
             
-            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
+            # Products in order: Jersey Tee, College Hoodie only
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
-                ("92", "Unisex College Hoodie"),  # College Hoodie
-                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
+                ("92", "Unisex College Hoodie")   # College Hoodie
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -807,10 +804,9 @@ I'll create custom mockups of our top youth sports products:
                         product_title_with_color = f"{response['product_title']} ({color})"
                         self._send_product_result(channel, response["image_url"], response["purchase_url"], product_title_with_color, response.get("publish_method"))
                         
-                        # Simple progress message (except for last item)
-                        if product_id != "6":  # Not the last item (Heavy Cotton Tee)
-                            next_product = "hoodie" if product_id == "12" else "t-shirt"
-                            self._send_message(channel, f"⚡ Creating {next_product}...")
+                        # Simple progress message (only for jersey tee -> hoodie)
+                        if product_id == "12":  # Jersey Tee, next is hoodie
+                            self._send_message(channel, f"⚡ Creating hoodie...")
                     
                 except Exception as e:
                     logger.error(f"Error creating mockup for {product_name}: {e}")
@@ -860,18 +856,16 @@ I'll create custom mockups of our top youth sports products:
             # Fallback colors if AI fails
             fallback_variants = {
                 '12': 'Black',   # Unisex Jersey Short Sleeve Tee - Black is most popular
-                '92': 'Navy',    # Unisex College Hoodie - Navy is classic  
-                '6': 'Black'     # Unisex Heavy Cotton Tee - Black is most popular
+                '92': 'Navy'     # Unisex College Hoodie - Navy is classic
             }
             
             # Use AI colors or fallback
             default_variants = ai_default_colors if ai_default_colors else fallback_variants
             
-            # Products in order: Jersey Tee, College Hoodie, Heavy Cotton Tee
+            # Products in order: Jersey Tee, College Hoodie only
             products_order = [
                 ("12", "Unisex Jersey Short Sleeve Tee"),  # Jersey Short Sleeve Tee
-                ("92", "Unisex College Hoodie"),  # College Hoodie
-                ("6", "Unisex Heavy Cotton Tee")   # Heavy Cotton Tee
+                ("92", "Unisex College Hoodie")   # College Hoodie
             ]
             
             for i, (product_id, product_name) in enumerate(products_order):
@@ -926,10 +920,9 @@ I'll create custom mockups of our top youth sports products:
                             # Send product with color alternatives info
                             self._send_product_result_with_alternatives(channel, response["image_url"], response["purchase_url"], product_title_with_color, available_colors, response.get("publish_method"), logo_info.get("url"))
                             
-                            # Simple progress message (except for last item)
-                            if product_id != "6":  # Not the last item (Heavy Cotton Tee)
-                                next_product = "hoodie" if product_id == "12" else "t-shirt"
-                                self._send_message(channel, f"⚡ Creating {next_product}...")
+                            # Simple progress message (only for jersey tee -> hoodie)
+                            if product_id == "12":  # Jersey Tee, next is hoodie
+                                self._send_message(channel, f"⚡ Creating hoodie...")
                     
                 except Exception as e:
                     logger.error(f"Error creating default mockup for {product_name}: {e}")
