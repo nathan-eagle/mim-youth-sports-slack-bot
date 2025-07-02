@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 import structlog
 
-from .redis_state_manager import RedisStateManager
+from .supabase_state_manager import SupabaseStateManager
 from .performance_monitor import PerformanceMonitor
 from .optimized_ai_service import OptimizedAIService
 from .intelligent_cache import IntelligentCache
@@ -47,7 +47,7 @@ class BackgroundEventProcessor:
     
     def __init__(
         self,
-        state_manager: RedisStateManager,
+        state_manager: SupabaseStateManager,
         performance_monitor: Optional[PerformanceMonitor] = None,
         max_workers: int = 4,
         max_retries: int = 3

@@ -61,6 +61,7 @@ async def test_with_real_environment():
         from core.config import Settings
         from core.services.intelligent_cache import CacheKey
         from core.services.optimized_ai_service import ModelSelector, PromptOptimizer
+        from core.services.supabase_state_manager import SupabaseStateManager
         
         # Create settings with real environment
         settings = Settings()
@@ -241,13 +242,13 @@ async def test_with_real_environment():
     print("   1. ✅ Environment variables configured")
     print("   2. ✅ All core services implemented") 
     print("   3. ✅ Performance improvements verified")
-    print("   4. 🔄 Need Redis for full functionality")
+    print("   4. ✅ Using Supabase for all state management")
     print("   5. 🔄 Add Slack keys for Slack integration")
     
     print("\n🎯 NEXT STEPS:")
-    print("   • Set up Redis (local or cloud)")
-    print("   • Add Slack bot token and signing secret")
-    print("   • Deploy with: uvicorn app_async:app --host 0.0.0.0 --port 8000")
+    print("   • Add Slack bot token and signing secret to Vercel")
+    print("   • Deploy to Vercel (Redis not needed - using Supabase!)")
+    print("   • Test with: uvicorn app_async:app --host 0.0.0.0 --port 8000")
     
     return True
 

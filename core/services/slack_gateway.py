@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional, List, Set
 from datetime import datetime, timedelta
 import structlog
 
-from .redis_state_manager import RedisStateManager
+from .supabase_state_manager import SupabaseStateManager
 from .performance_monitor import PerformanceMonitor
 
 logger = structlog.get_logger(__name__)
@@ -28,7 +28,7 @@ class SlackEventGateway:
         self,
         signing_secret: str,
         event_processor,  # BackgroundEventProcessor
-        state_manager: RedisStateManager,
+        state_manager: SupabaseStateManager,
         performance_monitor: Optional[PerformanceMonitor] = None
     ):
         """
@@ -37,7 +37,7 @@ class SlackEventGateway:
         Args:
             signing_secret: Slack signing secret for verification
             event_processor: Background event processor instance
-            state_manager: Redis state manager
+            state_manager: Supabase state manager
             performance_monitor: Performance monitoring instance
         """
         self.signing_secret = signing_secret

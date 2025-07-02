@@ -59,10 +59,9 @@ class Settings(BaseSettings):
     database_pool_size: int = Field(default=10, env="MIM_DATABASE_POOL_SIZE")
     database_max_overflow: int = Field(default=20, env="MIM_DATABASE_MAX_OVERFLOW")
     
-    # Redis settings
-    redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
-    redis_max_connections: int = Field(default=20, env="MIM_REDIS_MAX_CONNECTIONS")
-    redis_socket_timeout: int = Field(default=5, env="MIM_REDIS_SOCKET_TIMEOUT")
+    # State management settings (using Supabase instead of Redis)
+    use_supabase_state: bool = Field(default=True, env="MIM_USE_SUPABASE_STATE")
+    state_cleanup_interval: int = Field(default=300, env="MIM_STATE_CLEANUP_INTERVAL")  # seconds
     
     # Performance settings
     async_worker_count: int = Field(default=4, env="MIM_ASYNC_WORKER_COUNT")

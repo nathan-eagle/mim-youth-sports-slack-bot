@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 
 from core.services.slack_gateway import SlackEventGateway
-from core.services.redis_state_manager import RedisStateManager
+from core.services.supabase_state_manager import SupabaseStateManager
 from core.services.background_processor import BackgroundEventProcessor
 from core.services.performance_monitor import PerformanceMonitor
 from core.config import Settings
@@ -50,7 +50,7 @@ logger = structlog.get_logger(__name__)
 
 # Global instances
 settings: Optional[Settings] = None
-state_manager: Optional[RedisStateManager] = None
+state_manager: Optional[SupabaseStateManager] = None
 event_processor: Optional[BackgroundEventProcessor] = None
 performance_monitor: Optional[PerformanceMonitor] = None
 slack_gateway: Optional[SlackEventGateway] = None
@@ -71,7 +71,10 @@ async def lifespan(app: FastAPI):
         settings = Settings()
         
         # Initialize core services
-        state_manager = RedisStateManager(settings.redis_url)
+        state_manager = SupabaseStateManager(
+            supabase_url=settings.supabase_url,
+            supabase_key=settings.supabase_service_key
+        )
         await state_manager.initialize()
         
         performance_monitor = PerformanceMonitor()

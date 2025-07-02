@@ -8,10 +8,10 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import structlog
 
-import redis.asyncio as redis
+# Using Supabase for state management instead of Redis
 
 from ..config import Settings
-from .redis_state_manager import RedisStateManager
+from .supabase_state_manager import SupabaseStateManager
 from .intelligent_cache import IntelligentCache
 from .optimized_ai_service import OptimizedAIService
 from .async_product_service import AsyncProductService
@@ -45,8 +45,8 @@ class ServiceOrchestrator:
         self.settings = settings
         
         # Core infrastructure
-        self.redis_client: Optional[redis.Redis] = None
-        self.state_manager: Optional[RedisStateManager] = None
+        # Removed Redis client - using Supabase for all persistence
+        self.state_manager: Optional[SupabaseStateManager] = None
         self.performance_monitor: Optional[PerformanceMonitor] = None
         
         # Business services
@@ -73,7 +73,7 @@ class ServiceOrchestrator:
             logger.info("Starting service initialization")
             
             # 1. Initialize Redis connection
-            await self._initialize_redis()
+            # Skip Redis initialization - using Supabase
             
             # 2. Initialize core infrastructure services
             await self._initialize_infrastructure()
@@ -127,42 +127,29 @@ class ServiceOrchestrator:
                 await self.performance_monitor.shutdown()
             
             # 4. Close Redis connection
-            if self.redis_client:
-                await self.redis_client.close()
+            # No Redis client to close - using Supabase
             
             logger.info("Graceful shutdown completed")
             
         except Exception as e:
             logger.error("Error during shutdown", error=str(e))
     
-    async def _initialize_redis(self):
-        """Initialize Redis connection"""
-        logger.debug("Initializing Redis connection")
-        
-        self.redis_client = redis.Redis.from_url(
-            self.settings.redis_url,
-            max_connections=self.settings.redis_max_connections,
-            socket_timeout=self.settings.redis_socket_timeout,
-            decode_responses=True
-        )
-        
-        # Test connection
-        await self.redis_client.ping()
-        logger.info("Redis connection established")
+    # Redis initialization removed - using Supabase for all persistence
     
     async def _initialize_infrastructure(self):
         """Initialize core infrastructure services"""
         logger.debug("Initializing infrastructure services")
         
         # State Manager
-        self.state_manager = RedisStateManager(
-            redis_url=self.settings.redis_url,
-            max_connections=self.settings.redis_max_connections
+        self.state_manager = SupabaseStateManager(
+            supabase_url=self.settings.supabase_url,
+            supabase_key=self.settings.supabase_service_key,
+            max_connections=self.settings.database_pool_size
         )
         await self.state_manager.initialize()
         
         # Performance Monitor
-        self.performance_monitor = PerformanceMonitor(self.redis_client)
+        self.performance_monitor = PerformanceMonitor()
         await self.performance_monitor.initialize()
         
         logger.info("Infrastructure services initialized")
@@ -171,8 +158,8 @@ class ServiceOrchestrator:
         """Initialize business logic services"""
         logger.debug("Initializing business services")
         
-        # Intelligent Cache
-        self.cache = IntelligentCache(self.redis_client, self.settings)
+        # Intelligent Cache (using Supabase state manager)
+        self.cache = IntelligentCache(self.state_manager, self.settings)
         await self.cache.initialize()
         
         # AI Service
@@ -228,7 +215,7 @@ class ServiceOrchestrator:
     
     # Service Access Methods
     
-    def get_state_manager(self) -> RedisStateManager:
+    def get_state_manager(self) -> SupabaseStateManager:
         """Get state manager instance"""
         if not self._initialized or not self.state_manager:
             raise RuntimeError("State manager not initialized")
@@ -412,7 +399,7 @@ class ServiceOrchestrator:
             
             # Check each service
             service_checks = [
-                ('redis', self.state_manager.health_check()),
+                ('supabase', self.state_manager.health_check()),
                 ('ai_service', self.ai_service.health_check()),
                 ('product_service', self.product_service.health_check()),
                 ('database_service', self.database_service.health_check()),

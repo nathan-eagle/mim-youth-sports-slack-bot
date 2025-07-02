@@ -2,10 +2,13 @@
 
 ## Quick Setup for Vercel
 
-### 1. Redis Setup (Required)
-Add Upstash Redis integration in Vercel dashboard:
-- Go to your Vercel project → Integrations → Add Upstash Redis
-- This automatically sets `REDIS_URL` environment variable
+### 1. Database Setup ✅ Already Done!
+Using your existing Supabase database for all persistence:
+- ✅ Conversation state management
+- ✅ Event deduplication  
+- ✅ Intelligent caching
+- ✅ Performance metrics
+- **No additional database setup required!**
 
 ### 2. Environment Variables
 All your existing environment variables in `.env` will work on Vercel. The refactored system uses:
@@ -19,7 +22,6 @@ All your existing environment variables in `.env` will work on Vercel. The refac
 🔄 **Need to Add in Vercel:**
 - `SLACK_BOT_TOKEN=xoxb-your-token`
 - `SLACK_SIGNING_SECRET=your-secret`
-- `REDIS_URL` (auto-added by Upstash integration)
 
 ### 3. FastAPI Entry Point
 Vercel will automatically detect `app_async.py` and use the FastAPI app.
@@ -38,7 +40,8 @@ Vercel auto-deploys from main branch.
 
 ## Key Improvements for Vercel
 - ✅ Async architecture (better serverless performance)
-- ✅ Redis state management (stateless functions)
+- ✅ Supabase state management (unified database)
 - ✅ Background processing (non-blocking responses)
 - ✅ Environment-based configuration
 - ✅ Production error handling
+- ✅ **No additional services needed** - everything uses Supabase!

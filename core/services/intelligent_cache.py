@@ -11,8 +11,7 @@ from datetime import datetime, timedelta
 from functools import wraps
 import structlog
 
-import redis.asyncio as redis
-from redis.exceptions import RedisError
+# Using Supabase state manager for caching instead of Redis
 
 from ..config import Settings
 
@@ -85,15 +84,15 @@ class IntelligentCache:
     - Performance monitoring and hit rate optimization
     """
     
-    def __init__(self, redis_client: redis.Redis, settings: Settings):
+    def __init__(self, state_manager, settings: Settings):
         """
         Initialize intelligent cache
         
         Args:
-            redis_client: Redis client instance
+            state_manager: Supabase state manager instance
             settings: Application settings
         """
-        self.redis = redis_client
+        self.state_manager = state_manager
         self.settings = settings
         
         # Cache prefixes
@@ -117,7 +116,7 @@ class IntelligentCache:
         """Initialize cache system and start background tasks"""
         try:
             # Test Redis connection
-            await self.redis.ping()
+            await self.state_manager.health_check()
             
             # Start background tasks
             asyncio.create_task(self._background_maintenance())
@@ -408,20 +407,15 @@ class IntelligentCache:
             Cached value or None if not found
         """
         try:
-            value = await self.redis.get(key)
+            value = await self.state_manager.get_cache(key)
             
             if value is None:
                 self._misses += 1
                 return None
             
-            # Try to parse as JSON
-            try:
-                parsed_value = json.loads(value)
-                self._hits += 1
-                return parsed_value
-            except json.JSONDecodeError:
-                self._hits += 1
-                return value
+            # Supabase already returns deserialized JSON
+            self._hits += 1
+            return value
                 
         except Exception as e:
             self._errors += 1
@@ -446,17 +440,12 @@ class IntelligentCache:
             True if successful
         """
         try:
-            # Serialize value
-            if isinstance(value, (dict, list)):
-                serialized_value = json.dumps(value)
-            else:
-                serialized_value = str(value)
-            
+            # Supabase handles JSON serialization automatically
             # Set with TTL
             if ttl:
-                result = await self.redis.setex(key, ttl, serialized_value)
+                result = await self.state_manager.set_cache(key, value, ttl)
             else:
-                result = await self.redis.set(key, serialized_value)
+                result = await self.state_manager.set_cache(key, value)
             
             return bool(result)
             
@@ -468,7 +457,7 @@ class IntelligentCache:
     async def delete(self, key: str) -> bool:
         """Delete key from cache"""
         try:
-            result = await self.redis.delete(key)
+            result = await self.state_manager.delete_cache(key)
             return bool(result)
         except Exception as e:
             logger.error("Cache delete failed", key=key, error=str(e))
@@ -477,7 +466,8 @@ class IntelligentCache:
     async def exists(self, key: str) -> bool:
         """Check if key exists in cache"""
         try:
-            result = await self.redis.exists(key)
+            cached_value = await self.state_manager.get_cache(key)
+            result = cached_value is not None
             return bool(result)
         except Exception as e:
             logger.error("Cache exists check failed", key=key, error=str(e))
@@ -509,13 +499,14 @@ class IntelligentCache:
     
     async def _record_hit(self, operation: str):
         """Record cache hit for metrics"""
-        self._hits += 1
-        await self.redis.incr(f"{self.METRICS_PREFIX}:hits:{operation}")
+        # Hits already tracked in get method
+        pass
     
     async def _record_miss(self, operation: str):
         """Record cache miss for metrics"""
         self._misses += 1
-        await self.redis.incr(f"{self.METRICS_PREFIX}:misses:{operation}")
+        # Track misses in memory (could store in Supabase if needed)
+        pass  # Already incremented above
     
     async def _background_maintenance(self):
         """Background task for cache maintenance"""
