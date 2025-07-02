@@ -155,33 +155,43 @@ async def slack_events(request: Request, background_tasks: BackgroundTasks):
     This endpoint provides immediate acknowledgment to Slack while processing
     events in the background to avoid timeout issues.
     """
-    async with performance_monitor.track_operation("slack_event_handling"):
+    # Add safety check for performance monitor
+    if performance_monitor:
+        async with performance_monitor.track_operation("slack_event_handling"):
+            return await _handle_slack_event(request, background_tasks)
+    else:
+        return await _handle_slack_event(request, background_tasks)
+
+
+async def _handle_slack_event(request: Request, background_tasks: BackgroundTasks):
+    try:
+        # Get request data
+        request_body = await request.body()
+        request_body_str = request_body.decode('utf-8')
+        timestamp = request.headers.get('X-Slack-Request-Timestamp', '')
+        signature = request.headers.get('X-Slack-Signature', '')
+        
+        # Verify request signature
+        if not verify_slack_request(request_body_str, timestamp, signature):
+            logger.warning("Invalid Slack signature received")
+            raise HTTPException(status_code=401, detail="Invalid signature")
+        
+        # Parse JSON
         try:
-            # Get request data
-            request_body = await request.body()
-            request_body_str = request_body.decode('utf-8')
-            timestamp = request.headers.get('X-Slack-Request-Timestamp', '')
-            signature = request.headers.get('X-Slack-Signature', '')
-            
-            # Verify request signature
-            if not verify_slack_request(request_body_str, timestamp, signature):
-                logger.warning("Invalid Slack signature received")
-                raise HTTPException(status_code=401, detail="Invalid signature")
-            
-            # Parse JSON
-            try:
-                data = json.loads(request_body_str)
-            except json.JSONDecodeError as e:
-                logger.error("Invalid JSON in request", error=str(e))
-                raise HTTPException(status_code=400, detail="Invalid JSON")
-            
-            # Handle URL verification challenge
-            if data.get('type') == 'url_verification':
-                logger.info("Handling URL verification challenge")
-                return JSONResponse({"challenge": data.get('challenge')})
-            
-            # Handle event callbacks
-            if data.get('type') == 'event_callback':
+            data = json.loads(request_body_str)
+        except json.JSONDecodeError as e:
+            logger.error("Invalid JSON in request", error=str(e))
+            raise HTTPException(status_code=400, detail="Invalid JSON")
+        
+        # Handle URL verification challenge
+        if data.get('type') == 'url_verification':
+            logger.info("Handling URL verification challenge")
+            return JSONResponse({"challenge": data.get('challenge')})
+        
+        # Handle event callbacks
+        if data.get('type') == 'event_callback':
+            # Simple fallback if services aren't initialized
+            if slack_gateway and event_processor:
                 # Process event through gateway (includes deduplication)
                 should_process = await slack_gateway.should_process_event(data)
                 
@@ -196,16 +206,22 @@ async def slack_events(request: Request, background_tasks: BackgroundTasks):
                 else:
                     logger.info("Event skipped (duplicate or ignored)", 
                                event_id=data.get('event_id'))
-            
-            # Return immediate response to Slack
-            return JSONResponse({"status": "ok"})
-            
-        except HTTPException:
-            # Re-raise HTTP exceptions
-            raise
-        except Exception as e:
-            logger.error("Error handling Slack event", error=str(e))
-            raise HTTPException(status_code=500, detail="Internal server error")
+            else:
+                # Fallback: use the old Flask bot directly
+                logger.warning("Services not initialized, falling back to direct processing")
+                from slack_bot import slack_bot
+                result = slack_bot.handle_event(data)
+                logger.info("Handled event with fallback method", result=result)
+        
+        # Return immediate response to Slack
+        return JSONResponse({"status": "ok"})
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error("Error handling Slack event", error=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.get("/health")
@@ -228,11 +244,17 @@ async def health_check():
     
     try:
         if state_manager:
-            components["redis"] = await state_manager.health_check()
+            components["supabase"] = await state_manager.health_check()
         if event_processor:
             components["background_processor"] = await event_processor.health_check()
         if performance_monitor:
             components["performance_monitor"] = await performance_monitor.health_check()
+        
+        # If no services are initialized, indicate degraded mode
+        if not any([state_manager, event_processor, performance_monitor]):
+            health_status["status"] = "degraded"
+            components["note"] = "Services not fully initialized, using fallback mode"
+            
     except Exception as e:
         logger.error("Health check failed", error=str(e))
         health_status["status"] = "degraded"
@@ -251,10 +273,26 @@ async def metrics():
         Performance metrics in Prometheus format
     """
     if not performance_monitor:
-        raise HTTPException(status_code=503, detail="Metrics not available")
+        return JSONResponse({
+            "status": "degraded", 
+            "message": "Performance monitor not initialized",
+            "basic_metrics": {
+                "service": "MiM Slack Bot",
+                "version": "2.0.0",
+                "status": "running"
+            }
+        })
     
-    metrics_data = await performance_monitor.get_metrics()
-    return JSONResponse(metrics_data)
+    try:
+        metrics_data = await performance_monitor.get_metrics()
+        return JSONResponse(metrics_data)
+    except Exception as e:
+        logger.error("Failed to get metrics", error=str(e))
+        return JSONResponse({
+            "status": "error",
+            "message": "Failed to retrieve metrics",
+            "error": str(e)
+        })
 
 
 @app.get("/")
