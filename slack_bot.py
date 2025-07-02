@@ -1695,92 +1695,103 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
         return any(pattern in text_lower for pattern in question_patterns)
     
     def _handle_options_query(self, text: str, conversation: Dict) -> Dict:
-        """Handle user questions about available options - but proactively create examples"""
+        """Handle user questions about available options - but proactively create examples using AI"""
         # Use AI to understand what the user is asking for
         try:
             logo_info = conversation.get("logo_info")
-            text_lower = text.lower()
             
-            # Check if they're asking about specific color families with preferred examples
-            color_families = {
-                'light blue': {
-                    'colors': ['Baby Blue', 'Light Blue', 'Sky', 'Aqua'],
-                    'preferred_example': 'Sky'  # Best example color for light blue
-                },
-                'blue': {
-                    'colors': ['Baby Blue', 'Light Blue', 'Sky', 'Heather Blue', 'Royal Blue'],
-                    'preferred_example': 'Royal Blue'
-                },
-                'purple': {
-                    'colors': ['Purple', 'Heather Purple', 'Heather Team Purple', 'Team Purple'],
-                    'preferred_example': 'Purple'
-                },
-                'orange': {
-                    'colors': ['Orange', 'Burnt Orange', 'Heather Orange'],
-                    'preferred_example': 'Orange'
-                },
-                'green': {
-                    'colors': ['Evergreen', 'Heather Green', 'Military Green', 'Kelly', 'Forest'],
-                    'preferred_example': 'Kelly'
-                }
-            }
-            
-            # Detect what color family they're asking about
-            detected_family = None
-            detected_colors = []
-            example_color = None
-            
-            for family, family_data in color_families.items():
-                colors = family_data['colors']
-                if family in text_lower or any(color.lower() in text_lower for color in colors):
-                    detected_family = family
-                    # Get actual available colors from this family
-                    jersey_colors = product_service.get_colors_for_product('12')
-                    detected_colors = [c for c in jersey_colors if any(fc.lower() in c.lower() for fc in colors)]
-                    
-                    # Use preferred example if available, otherwise use first available
-                    preferred = family_data['preferred_example']
-                    if preferred in detected_colors:
-                        example_color = preferred
-                    else:
-                        example_color = detected_colors[0] if detected_colors else None
-                    break
-            
-            if detected_family and detected_colors and example_color and logo_info and logo_info.get("printify_image_id"):
+            # Use AI to analyze what color family/type the user is asking about
+            if logo_info and logo_info.get("printify_image_id"):
+                # Get all available colors for context
+                jersey_colors = product_service.get_colors_for_product('12')
+                hoodie_colors = product_service.get_colors_for_product('92')
                 
-                # Send immediate response about creating example
-                self._send_message(conversation.get('channel', ''), 
-                                 f"Great question! Here are the {detected_family} colors available: {', '.join(detected_colors)}. "
-                                 f"Let me create a {example_color} t-shirt example to show you right now! 🎨")
+                # Create AI prompt to understand the color query and suggest examples
+                color_analysis_prompt = f"""
+                A user is asking about colors for custom team merchandise: "{text}"
                 
-                # Create the example product
-                selected_variant = product_service._find_variant_by_color('12', example_color)
-                if selected_variant:
-                    product_info = {"id": "12", "formatted": {"title": "Unisex Jersey Short Sleeve Tee"}}
+                Available colors for Jersey Tee: {', '.join(jersey_colors)}
+                Available colors for Hoodie: {', '.join(hoodie_colors)}
+                
+                Please analyze their query and respond with a JSON object:
+                {{
+                    "is_color_query": true/false,
+                    "color_family_requested": "description of what colors they want (e.g., 'light blue colors', 'purple options', 'green shades')",
+                    "matching_colors": ["list", "of", "matching", "color", "names"],
+                    "best_example_color": "single best color to create as example",
+                    "suggested_product": "shirt" or "hoodie",
+                    "proactive_message": "friendly message explaining the colors and what example you'll create"
+                }}
+                
+                Guidelines:
+                - If asking about light blue, blue tones, or sky colors - find blue-family colors
+                - If asking about purple, violet - find purple-family colors  
+                - If asking about orange, burnt orange - find orange-family colors
+                - If asking about green, forest, kelly - find green-family colors
+                - Choose the most appealing color as the example (avoid basic "Black" unless specifically requested)
+                - Default to creating a t-shirt unless they mention hoodie
+                - Be enthusiastic and explain what you're doing
+                """
+                
+                # Get AI analysis
+                try:
+                    response = openai_service.client.chat.completions.create(
+                        model="gpt-4-turbo-preview",
+                        messages=[
+                            {"role": "system", "content": color_analysis_prompt},
+                            {"role": "user", "content": text}
+                        ],
+                        response_format={"type": "json_object"},
+                        temperature=0.3
+                    )
                     
-                    # Get conversation details for the creation
-                    channel = conversation.get('channel', '')
-                    user = conversation.get('user', '')
+                    import json
+                    ai_analysis = json.loads(response.choices[0].message.content)
                     
-                    # Create the mockup
-                    response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
-                    
-                    if response and response.get("image_url") and response.get("purchase_url"):
-                        # Send the product with alternatives
-                        other_colors = [c for c in detected_colors if c != example_color]
-                        alternatives_text = f"Also available in: {', '.join(other_colors)}" if other_colors else ""
+                    if ai_analysis.get("is_color_query") and ai_analysis.get("matching_colors") and ai_analysis.get("best_example_color"):
+                        detected_colors = ai_analysis["matching_colors"]
+                        example_color = ai_analysis["best_example_color"]
+                        proactive_message = ai_analysis.get("proactive_message", f"Here are the colors available: {', '.join(detected_colors)}. Let me create a {example_color} example!")
                         
-                        self._send_product_result_with_alternatives(
-                            channel, 
-                            response["image_url"], 
-                            response["purchase_url"], 
-                            f"Team {response['product_title']} ({example_color})",
-                            other_colors,
-                            "product_created",
-                            logo_info.get("url")
-                        )
+                        # Send immediate response about creating example
+                        self._send_message(conversation.get('channel', ''), proactive_message)
                         
-                        return {"status": "created_example", "color": example_color, "alternatives": other_colors}
+                        # Create the example product
+                        product_id = "12"  # Jersey Tee (default)
+                        if ai_analysis.get("suggested_product") == "hoodie":
+                            product_id = "92"
+                        
+                        selected_variant = product_service._find_variant_by_color(product_id, example_color)
+                        if selected_variant:
+                            product_title = "Unisex Jersey Short Sleeve Tee" if product_id == "12" else "Unisex College Hoodie"
+                            product_info = {"id": product_id, "formatted": {"title": product_title}}
+                            
+                            # Get conversation details for the creation
+                            channel = conversation.get('channel', '')
+                            user = conversation.get('user', '')
+                            
+                            # Create the mockup
+                            response = self._create_single_mockup_with_variant(conversation, logo_info, product_info, selected_variant, channel, user)
+                            
+                            if response and response.get("image_url") and response.get("purchase_url"):
+                                # Send the product with alternatives
+                                other_colors = [c for c in detected_colors if c != example_color]
+                                
+                                self._send_product_result_with_alternatives(
+                                    channel, 
+                                    response["image_url"], 
+                                    response["purchase_url"], 
+                                    f"Team {response['product_title']} ({example_color})",
+                                    other_colors,
+                                    "product_created",
+                                    logo_info.get("url")
+                                )
+                                
+                                return {"status": "created_example", "color": example_color, "alternatives": other_colors}
+                
+                except Exception as e:
+                    logger.error(f"AI color analysis failed: {e}")
+                    # Fall through to regular response
             
             # Fallback to regular informational response if no proactive creation
             # Get available products and colors for AI context
