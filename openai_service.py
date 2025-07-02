@@ -233,7 +233,21 @@ class OpenAIService:
                 model="gpt-4-turbo-preview",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Please select the top 6 colors for {product_name} that would work best with this logo."}
+                    {
+                        "role": "user", 
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": f"Please analyze this logo and select the top 6 colors for {product_name} that would work best with it."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": logo_url
+                                }
+                            }
+                        ]
+                    }
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.3

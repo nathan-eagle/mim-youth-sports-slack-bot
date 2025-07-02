@@ -1,5 +1,33 @@
 {
-  "conversations": {},
+  "conversations": {
+    "test_channel_test_user": {
+      "state": "initial",
+      "product_selected": null,
+      "logo_info": null,
+      "team_info": {},
+      "selected_variants": {},
+      "created_at": 1751457985.789189,
+      "last_activity": 1751457985.789192,
+      "error_count": 0,
+      "last_error": null,
+      "test_data": "hello"
+    },
+    "C_TEST_U_TEST": {
+      "state": "creating_mockups",
+      "product_selected": null,
+      "logo_info": {
+        "printify_image_id": "test_123",
+        "url": "https://example.com/logo.png"
+      },
+      "team_info": {},
+      "selected_variants": {},
+      "created_at": 1751479400.410305,
+      "last_activity": 1751479400.410835,
+      "error_count": 0,
+      "last_error": null,
+      "pending_request": "I want a blue tshirt in a color similar to the blue in my logo"
+    }
+  },
   "processed_events": [],
-  "last_updated": 1751389096.546279
+  "last_updated": 1751479400.410836
 }

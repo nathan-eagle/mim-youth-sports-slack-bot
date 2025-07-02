@@ -89,6 +89,9 @@ I'll create custom mockups of our top youth sports products:
                         response = self._handle_logo_request(text, conversation, event, channel, user)
                     elif conversation["state"] == "awaiting_color_selection":
                         response = self._handle_color_selection(text, conversation, channel, user)
+                    elif conversation["state"] == "creating_mockups":
+                        # Handle user requests while mockups are being created
+                        response = self._handle_creating_mockups_interruption(text, conversation, channel, user)
                     elif conversation["state"] == "completed":
                         response = self._handle_completed_conversation(text, conversation, channel, user)
                     else:
@@ -624,6 +627,24 @@ I'll create custom mockups of our top youth sports products:
             logger.error(f"Error in _handle_completed_conversation: {e}")
             raise e
     
+    def _handle_creating_mockups_interruption(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
+        """Handle user messages while initial mockups are being created"""
+        try:
+            # Check if they have a logo (they should from restart)
+            logo_info = conversation.get("logo_info")
+            if not logo_info or not logo_info.get("printify_image_id"):
+                return {"message": "I'm still processing your initial products. Please wait a moment!"}
+            
+            # Store their request for after the initial creation
+            conversation_manager.update_conversation(channel, user, {"pending_request": text})
+            
+            # Acknowledge their request
+            return {"message": f"Got it! I'll create that for you right after I finish setting up your initial products. Just a moment... 🎨"}
+            
+        except Exception as e:
+            logger.error(f"Error in _handle_creating_mockups_interruption: {e}")
+            return {"message": "I'm still setting up your initial products. Please wait a moment and try again!"}
+    
     def _handle_color_selection(self, text: str, conversation: Dict, channel: str, user: str) -> Dict:
         """Handle color selection input from user"""
         try:
@@ -1031,6 +1052,16 @@ I'll create custom mockups of our top youth sports products:
             
             # Update conversation state
             conversation_manager.update_conversation(channel, user, {"state": "completed"})
+            
+            # Check if there's a pending request from when user interrupted
+            conversation = conversation_manager.get_conversation(channel, user)
+            pending_request = conversation.get("pending_request")
+            if pending_request:
+                # Clear the pending request
+                conversation_manager.update_conversation(channel, user, {"pending_request": None})
+                # Process the pending request now
+                self._send_message(channel, f"Now handling your request: '{pending_request}'")
+                self._handle_completed_conversation(pending_request, conversation, channel, user)
             
         except Exception as e:
             logger.error(f"Error in _generate_all_mockups_with_default_colors: {e}")
