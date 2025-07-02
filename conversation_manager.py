@@ -12,7 +12,18 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 class ConversationManager:
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls, state_file: str = "conversation_state.json"):
+        if cls._instance is None:
+            cls._instance = super(ConversationManager, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self, state_file: str = "conversation_state.json"):
+        if self._initialized:
+            return
+        
         self.state_file = Path(state_file)
         self.conversations = {}
         self.processed_events = set()  # For event deduplication
@@ -23,6 +34,9 @@ class ConversationManager:
         
         # Clean up old conversations (older than 24 hours)
         self._cleanup_old_conversations()
+        
+        self._initialized = True
+        logger.info("ConversationManager singleton initialized")
     
     def _load_state(self):
         """Load conversation state from disk"""
