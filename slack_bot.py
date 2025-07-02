@@ -841,7 +841,7 @@ I'll create custom mockups of our top youth sports products:
             self._send_message(channel, "Sorry, had some issues creating the mockups. Please try uploading your logo again!")
     
     def _generate_all_mockups_with_default_colors(self, conversation: Dict, logo_info: Dict, channel: str, user: str):
-        """Generate mockups for all 3 products using default colors - new streamlined flow"""
+        """Generate mockups for 2 products using default colors - Jersey Tee and College Hoodie only"""
         try:
             team_info = conversation.get("team_info", {})
             team_name = team_info.get("name", "your team")
@@ -1522,11 +1522,7 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
         try:
             products_to_analyze = {
                 '12': 'Unisex Jersey Short Sleeve Tee',
-                '92': 'Unisex College Hoodie', 
-                '6': 'Unisex Heavy Cotton Tee',
-                '145': 'Unisex Softstyle T-Shirt',
-                '499': 'Unisex Supply Hoodie',
-                '1525': 'Unisex Midweight Softstyle Fleece Hoodie'
+                '92': 'Unisex College Hoodie'
             }
             
             ai_defaults = {}

@@ -243,14 +243,7 @@ class ProductService:
             'fleece': '1525',  # Midweight Softstyle Fleece Hoodie
             'supply': '499',  # Supply Hoodie
             
-            # Hats
-            'hat': 'hat',
-            'cap': 'hat',
-            'dad hat': 'hat_1221',  # Dad Hat with Leather Patch
-            'baseball cap': 'hat_1221',  # Dad Hat with Leather Patch
-            'leather patch': 'hat_1221',  # Dad Hat with Leather Patch
-            'patch': 'hat_1221',  # Dad Hat with Leather Patch
-            'snapback': 'hat_1221',  # Dad Hat with Leather Patch (will add more later)
+            # Hats - removed to match 2-product focus
         }
         
         # First try to find specific product by ID
@@ -299,30 +292,21 @@ class ProductService:
         return None
     
     def get_product_suggestions_text(self) -> str:
-        """Get formatted text with product suggestions"""
-        products = self.get_all_products()
-        
-        if not products:
-            return "No products available at the moment."
-        
-        # Group by category
-        shirts = self.get_products_by_category('shirt')
-        hoodies = self.get_products_by_category('hoodie')
-        hats = self.get_products_by_category('hat')
-        
+        """Get formatted text with product suggestions - only Jersey Tee and College Hoodie"""
         suggestions = []
         
-        if shirts:
-            shirt_list = [f"• {product.get('title')}" for product in list(shirts.values())[:3]]
-            suggestions.extend(shirt_list)
+        # Only show the 2 main products as requested
+        jersey_tee = self.get_product_by_id('12')  # Jersey Short Sleeve Tee
+        college_hoodie = self.get_product_by_id('92')  # College Hoodie
         
-        if hoodies:
-            hoodie_list = [f"• {product.get('title')}" for product in list(hoodies.values())[:3]]
-            suggestions.extend(hoodie_list)
+        if jersey_tee:
+            suggestions.append(f"• {jersey_tee.get('title')}")
         
-        if hats:
-            hat_list = [f"• {product.get('title')}" for product in list(hats.values())[:3]]
-            suggestions.extend(hat_list)
+        if college_hoodie:
+            suggestions.append(f"• {college_hoodie.get('title')}")
+        
+        if not suggestions:
+            return "No products available at the moment."
         
         return "\n".join(suggestions)
     
@@ -348,7 +332,7 @@ class ProductService:
             target_products = [product_match['id']]
         else:
             # No specific product mentioned, try main products
-            target_products = ['12', '6', '92', 'hat_1221']  # Jersey, Heavy Cotton, Hoodie, Dad Hat
+            target_products = ['12', '92']  # Jersey Tee, College Hoodie only
         
         # For each target product, use AI to find best color match
         for product_id in target_products:

@@ -21,11 +21,7 @@ class OpenAIService:
         
         Available products:
         - Unisex Jersey Short Sleeve Tee (shirt)
-        - Unisex Heavy Cotton Tee (shirt)
-        - Unisex Softstyle T-Shirt (shirt)
         - Unisex College Hoodie (hoodie)
-        - Unisex Midweight Softstyle Fleece Hoodie (hoodie)
-        - Unisex Supply Hoodie (hoodie)
         
         Your job is to:
         1. Determine if the parent has specified a product type (shirt, hoodie)
