@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     Application settings with validation and type safety
     
     All settings can be overridden via environment variables
-    with the prefix 'MIM_' (e.g., MIM_REDIS_URL)
+    with the prefix 'MIM_' (e.g., MIM_DEBUG_MODE)
     """
     
     # Application settings

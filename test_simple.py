@@ -85,7 +85,7 @@ async def test_core_functionality():
         health = {
             'status': 'healthy',
             'healthy': True,
-            'services': {'redis': 'healthy', 'ai': 'healthy'}
+            'services': {'supabase': 'healthy', 'ai': 'healthy'}
         }
         
         print(f"   ✅ Metrics structure: {len(metrics)} fields")
@@ -142,7 +142,7 @@ def test_file_structure():
         "app_async.py",
         "core/config.py", 
         "core/services/service_orchestrator.py",
-        "core/services/redis_state_manager.py",
+        "core/services/supabase_state_manager.py",
         "core/services/intelligent_cache.py",
         "core/services/optimized_ai_service.py",
         "core/services/async_product_service.py",
@@ -209,7 +209,7 @@ async def main():
         
         print("\n💡 Ready for production deployment!")
         print("   Next steps:")
-        print("   1. Set up Redis for state management")
+        print("   1. Run SQL setup in Supabase for state management tables")
         print("   2. Configure production environment variables")
         print("   3. Deploy with: uvicorn app_async:app --host 0.0.0.0 --port $PORT")
         

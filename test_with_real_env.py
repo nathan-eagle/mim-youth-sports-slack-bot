@@ -195,7 +195,7 @@ async def test_with_real_environment():
     # Test 6: FastAPI App Structure
     print("\n6️⃣  Testing FastAPI App Structure...")
     try:
-        # We can't fully initialize the app without Redis, but we can test the structure
+        # We can test the FastAPI app structure
         print("   ✅ FastAPI app file exists: app_async.py")
         print("   ✅ Service orchestrator exists")
         print("   ✅ All core services implemented")
@@ -204,7 +204,7 @@ async def test_with_real_environment():
         required_files = [
             'core/config.py',
             'core/services/service_orchestrator.py',
-            'core/services/redis_state_manager.py',
+            'core/services/supabase_state_manager.py',
             'core/services/intelligent_cache.py',
             'core/services/optimized_ai_service.py',
             'core/services/async_product_service.py',

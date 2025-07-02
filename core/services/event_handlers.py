@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 import structlog
 
-from .redis_state_manager import RedisStateManager
+from .supabase_state_manager import SupabaseStateManager
 
 logger = structlog.get_logger(__name__)
 
@@ -18,12 +18,12 @@ class BaseEventHandler:
     Base class for event handlers
     """
     
-    def __init__(self, state_manager: RedisStateManager):
+    def __init__(self, state_manager: SupabaseStateManager):
         """
         Initialize base event handler
         
         Args:
-            state_manager: Redis state manager
+            state_manager: Supabase state manager
         """
         self.state_manager = state_manager
     

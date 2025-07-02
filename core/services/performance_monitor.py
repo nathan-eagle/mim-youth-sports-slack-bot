@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from collections import defaultdict, deque
 import structlog
 
-import redis.asyncio as redis
+# Using in-memory metrics instead of Redis
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 logger = structlog.get_logger(__name__)
@@ -27,14 +27,11 @@ class PerformanceMonitor:
     - Resource usage monitoring
     """
     
-    def __init__(self, redis_client: Optional[redis.Redis] = None):
+    def __init__(self):
         """
-        Initialize performance monitor
-        
-        Args:
-            redis_client: Optional Redis client for persistent metrics
+        Initialize performance monitor with in-memory metrics
         """
-        self.redis = redis_client
+        self.redis = None  # Not using Redis anymore
         
         # Prometheus metrics
         self.operation_counter = Counter(
@@ -100,9 +97,8 @@ class PerformanceMonitor:
     async def initialize(self):
         """Initialize performance monitoring"""
         try:
-            if self.redis:
-                await self.redis.ping()
-                logger.info("Performance monitor connected to Redis")
+            # Using in-memory metrics only
+            logger.info("Performance monitor initialized with in-memory metrics")
             
             # Start background tasks
             asyncio.create_task(self._background_metrics_collection())
@@ -358,13 +354,9 @@ class PerformanceMonitor:
                       message=message, 
                       severity=alert['severity'])
         
-        # Store in Redis if available
-        if self.redis:
-            try:
-                await self.redis.lpush('performance_alerts', str(alert))
-                await self.redis.ltrim('performance_alerts', 0, 99)  # Keep last 100
-            except Exception as e:
-                logger.error("Failed to store alert in Redis", error=str(e))
+        # Store alerts in memory (could extend to store in Supabase if needed)
+        # For now, just log the alert
+        pass
     
     def _get_alert_severity(self, alert_type: str) -> str:
         """Get severity level for alert type"""
