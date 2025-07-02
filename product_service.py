@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 class ProductService:
-    def __init__(self, cache_file_path: str = "top3_product_cache_optimized.json"):
+    def __init__(self, cache_file_path: str = "product_cache_2items.json"):
         self.cache_file_path = cache_file_path
         self.products_cache = {}
         self.cache_metadata = {}

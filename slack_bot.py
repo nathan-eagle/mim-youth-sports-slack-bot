@@ -459,17 +459,20 @@ I'll create custom mockups of our top youth sports products:
                 if product_match and product_match.get('id'):
                     # Check if they have existing logo to use
                     if logo_info and logo_info.get("printify_image_id"):
+                        # Get product title safely
+                        product_title = "product"
+                        if product_match.get('formatted') and product_match['formatted'].get('title'):
+                            product_title = product_match['formatted']['title']
+                        elif product_match.get('product') and product_match['product'].get('title'):
+                            product_title = product_match['product']['title']
+                        
                         # Use existing logo for new product
-                        self._send_message(channel, f"🎨 Creating {product_match['formatted']['title']} with your existing logo...")
+                        self._send_message(channel, f"🎨 Creating {product_title} with your existing logo...")
                         
                         # Find default color for this product
                         default_variants = {
                             '12': 'Black',    # Unisex Jersey Short Sleeve Tee
-                            '6': 'Black',     # Unisex Heavy Cotton Tee
-                            '145': 'Black',   # Unisex Softstyle T-Shirt
-                            '92': 'Navy',     # Unisex College Hoodie
-                            '1525': 'Black',  # Unisex Midweight Softstyle Fleece Hoodie
-                            '499': 'Black'    # Unisex Supply Hoodie
+                            '92': 'Navy'      # Unisex College Hoodie
                         }
                         product_id = product_match['id']
                         default_color = default_variants.get(product_id, 'Black')
