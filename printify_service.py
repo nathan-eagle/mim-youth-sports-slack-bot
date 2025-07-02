@@ -3,6 +3,7 @@ import requests
 import logging
 from typing import Dict, List, Optional
 import base64
+import time
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -267,7 +268,7 @@ class PrintifyService:
                     logger.info(f"Reusing existing product: {existing_design['printify_product_id']}")
                     
                     # Get fresh mockup from existing product for the specific variant
-                    mockup_result = self._get_product_mockup(existing_design["printify_product_id"], variant_id)
+                    mockup_result = self._get_product_mockup_with_retry(existing_design["printify_product_id"], variant_id)
                     
                     return {
                         "success": True,
@@ -346,8 +347,11 @@ class PrintifyService:
                 
                 logger.info(f"Created permanent product for stable mockups: {product_id}")
                 
+                # Add a small delay to allow Printify to generate mockups
+                time.sleep(2)
+                
                 # Generate mockup from the created product for the specific variant
-                mockup_result = self._get_product_mockup(product_id, variant_id)
+                mockup_result = self._get_product_mockup_with_retry(product_id, variant_id)
                 
                 # Keep the product for stable mockup URLs (don't delete)
                 
@@ -370,6 +374,20 @@ class PrintifyService:
             logger.error(f"Exception creating product design: {e}")
             return {"success": False, "error": str(e)}
     
+    def _get_product_mockup_with_retry(self, product_id: str, variant_id: int = None, max_retries: int = 3) -> Dict:
+        """Get mockup with retry logic"""
+        for attempt in range(max_retries):
+            result = self._get_product_mockup(product_id, variant_id)
+            if result.get("mockup_url"):
+                return result
+            
+            if attempt < max_retries - 1:
+                logger.info(f"Mockup not ready yet, retrying in {2 ** attempt} seconds...")
+                time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, 4s
+        
+        logger.warning(f"Failed to get mockup after {max_retries} attempts")
+        return {"mockup_url": None}
+    
     def _get_product_mockup(self, product_id: str, variant_id: int = None) -> Dict:
         """Get mockup images from a created product, optionally for a specific variant"""
         try:
@@ -387,8 +405,12 @@ class PrintifyService:
                     for image in images:
                         variant_ids = image.get('variant_ids', [])
                         if variant_id in variant_ids and image.get('position') == 'front':
-                            logger.info(f"Found variant-specific mockup for variant {variant_id}")
-                            return {"mockup_url": image.get('src')}
+                            mockup_url = image.get('src')
+                            if mockup_url and mockup_url.startswith('http'):
+                                logger.info(f"Found variant-specific mockup for variant {variant_id}: {mockup_url}")
+                                return {"mockup_url": mockup_url}
+                            else:
+                                logger.warning(f"Invalid mockup URL for variant {variant_id}: {mockup_url}")
                     
                     # If no specific variant image found, this product doesn't support this variant
                     logger.warning(f"Product {product_id} does not support variant {variant_id}")

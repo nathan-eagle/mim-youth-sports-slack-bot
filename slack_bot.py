@@ -1368,6 +1368,9 @@ I'll create custom mockups of our top youth sports products:
     def _send_product_result(self, channel: str, image_url: str, purchase_url: str, product_name: str, publish_method: str = None):
         """Send product creation result with drop link for purchase"""
         try:
+            # Log the image URL for debugging
+            logger.info(f"Sending product result with image URL: {image_url}")
+            
             # Simple, clean messaging for the new flow (using proper Slack formatting)
             if "Tee" in product_name:
                 # Add color info for the first product to guide users
@@ -1449,29 +1452,75 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
 🛒 <{purchase_url}|*Shop this design*>{alternatives_text}"""
 
             # Send the image with the message
-            self.client.chat_postMessage(
-                channel=channel,
-                text=success_message,
-                blocks=[
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": success_message
+            try:
+                # Log the image URL for debugging
+                logger.info(f"Attempting to send product with image URL: {image_url}")
+                
+                self.client.chat_postMessage(
+                    channel=channel,
+                    text=success_message,
+                    blocks=[
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": success_message
+                            }
+                        },
+                        {
+                            "type": "image",
+                            "image_url": image_url,
+                            "alt_text": f"Preview of {product_name}"
                         }
-                    },
-                    {
-                        "type": "image",
-                        "image_url": image_url,
-                        "alt_text": f"Preview of {product_name}"
-                    }
-                ]
-            )
+                    ]
+                )
+            except SlackApiError as slack_error:
+                # Check if it's specifically an image download error
+                error_data = slack_error.response.get('error', '')
+                if 'downloading image failed' in str(slack_error) or 'invalid_blocks' in error_data:
+                    logger.warning(f"Slack couldn't download image from {image_url}, sending without image")
+                    # Send without the image block
+                    self.client.chat_postMessage(
+                        channel=channel,
+                        text=success_message,
+                        blocks=[
+                            {
+                                "type": "section",
+                                "text": {
+                                    "type": "mrkdwn",
+                                    "text": success_message + "\n\n_🖼️ Product mockup is being generated and will appear on the product page!_"
+                                }
+                            }
+                        ]
+                    )
+                else:
+                    # Re-raise if it's a different error
+                    raise
+            except Exception as img_error:
+                # If image fails, send without the image block
+                logger.warning(f"Failed to send with image, sending text only: {img_error}")
+                self.client.chat_postMessage(
+                    channel=channel,
+                    text=success_message,
+                    blocks=[
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": success_message + "\n\n_🖼️ Product mockup is being generated and will appear on the product page!_"
+                            }
+                        }
+                    ]
+                )
             
         except Exception as e:
             logger.error(f"Error sending product result with alternatives: {e}")
-            # Fallback to regular product result
-            self._send_product_result(channel, image_url, purchase_url, product_name, publish_method)
+            # Final fallback - simple message
+            try:
+                self.client.chat_postMessage(
+                    channel=channel,
+                    text=f"🎉 *{product_name}*\n\n🛒 <{purchase_url}|*Shop this design*>"
+                )
     
     def _get_ai_default_colors_for_products(self, logo_url: str) -> Dict[str, str]:
         """Get AI-recommended default colors for each of the main products based on logo"""

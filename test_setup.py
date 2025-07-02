@@ -66,8 +66,7 @@ def test_product_cache():
         print(f"✅ Found {len(best_products)} products tagged as 'best':")
         
         for product_id, product in best_products.items():
-            formatted = product_service.format_product_for_slack(product_id, product)
-            print(f"   • {formatted['title']} ({formatted['category']})")
+            print(f"   • {product['title']} ({product.get('category', 'apparel')})")
         
         return True
         
