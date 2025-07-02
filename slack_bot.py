@@ -1521,6 +1521,8 @@ _Available in 30+ colors including Black, White, Navy, Red, Royal Blue, and more
                     channel=channel,
                     text=f"🎉 *{product_name}*\n\n🛒 <{purchase_url}|*Shop this design*>"
                 )
+            except Exception as final_error:
+                logger.error(f"Final fallback message failed: {final_error}")
     
     def _get_ai_default_colors_for_products(self, logo_url: str) -> Dict[str, str]:
         """Get AI-recommended default colors for each of the main products based on logo"""
