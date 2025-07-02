@@ -60,7 +60,7 @@
     "94": "Harrier",
     "48": "Colorway",
     "70": "Printed Mint",
-    "55": "Druk\u0101tava",
+    "55": "Drukātava",
     "47": "Miami Sublimation",
     "59": "Imagine Your Photos",
     "69": "Prodigi",
@@ -14886,1226 +14886,1226 @@
       "variants": [
         {
           "id": 109355,
-          "color": "S",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109356,
-          "color": "S",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109357,
-          "color": "S",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109358,
-          "color": "S",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109360,
-          "color": "S",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109361,
-          "color": "S",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109362,
-          "color": "S",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109363,
-          "color": "S",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109364,
-          "color": "S",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109365,
-          "color": "S",
-          "size": "Red",
+          "color": "Red",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109366,
-          "color": "S",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109367,
-          "color": "S",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109368,
-          "color": "S",
-          "size": "White",
+          "color": "White",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109370,
-          "color": "S",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109371,
-          "color": "S",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109372,
-          "color": "S",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109373,
-          "color": "S",
-          "size": "Black",
+          "color": "Black",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109374,
-          "color": "S",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109376,
-          "color": "S",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109377,
-          "color": "S",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109378,
-          "color": "M",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109379,
-          "color": "M",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109380,
-          "color": "M",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109381,
-          "color": "M",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109382,
-          "color": "M",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109383,
-          "color": "M",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109384,
-          "color": "M",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109385,
-          "color": "M",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109387,
-          "color": "M",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109388,
-          "color": "M",
-          "size": "Red",
+          "color": "Red",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109389,
-          "color": "M",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109390,
-          "color": "M",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109391,
-          "color": "M",
-          "size": "White",
+          "color": "White",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109393,
-          "color": "M",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109394,
-          "color": "M",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109395,
-          "color": "M",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109396,
-          "color": "M",
-          "size": "Black",
+          "color": "Black",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109397,
-          "color": "M",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109398,
-          "color": "M",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109399,
-          "color": "M",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109400,
-          "color": "M",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109401,
-          "color": "L",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109402,
-          "color": "L",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109403,
-          "color": "L",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109404,
-          "color": "L",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109405,
-          "color": "L",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109406,
-          "color": "L",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109407,
-          "color": "L",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109408,
-          "color": "L",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109409,
-          "color": "L",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109410,
-          "color": "L",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109411,
-          "color": "L",
-          "size": "Red",
+          "color": "Red",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109412,
-          "color": "L",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109413,
-          "color": "L",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109414,
-          "color": "L",
-          "size": "White",
+          "color": "White",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109415,
-          "color": "L",
-          "size": "Sky",
+          "color": "Sky",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109416,
-          "color": "L",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109417,
-          "color": "L",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109418,
-          "color": "L",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109419,
-          "color": "L",
-          "size": "Black",
+          "color": "Black",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109420,
-          "color": "L",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109421,
-          "color": "L",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109422,
-          "color": "L",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109423,
-          "color": "L",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109424,
-          "color": "XL",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109425,
-          "color": "XL",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109426,
-          "color": "XL",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109427,
-          "color": "XL",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109428,
-          "color": "XL",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109429,
-          "color": "XL",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109430,
-          "color": "XL",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109431,
-          "color": "XL",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109432,
-          "color": "XL",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109433,
-          "color": "XL",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109434,
-          "color": "XL",
-          "size": "Red",
+          "color": "Red",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109435,
-          "color": "XL",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109436,
-          "color": "XL",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109437,
-          "color": "XL",
-          "size": "White",
+          "color": "White",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109438,
-          "color": "XL",
-          "size": "Sky",
+          "color": "Sky",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109439,
-          "color": "XL",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109440,
-          "color": "XL",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109441,
-          "color": "XL",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109442,
-          "color": "XL",
-          "size": "Black",
+          "color": "Black",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109443,
-          "color": "XL",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109444,
-          "color": "XL",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109445,
-          "color": "XL",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109446,
-          "color": "XL",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109447,
-          "color": "2XL",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109448,
-          "color": "2XL",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109449,
-          "color": "2XL",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109450,
-          "color": "2XL",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109451,
-          "color": "2XL",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109452,
-          "color": "2XL",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109453,
-          "color": "2XL",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109454,
-          "color": "2XL",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109455,
-          "color": "2XL",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109456,
-          "color": "2XL",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109457,
-          "color": "2XL",
-          "size": "Red",
+          "color": "Red",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109458,
-          "color": "2XL",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109459,
-          "color": "2XL",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109460,
-          "color": "2XL",
-          "size": "White",
+          "color": "White",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109461,
-          "color": "2XL",
-          "size": "Sky",
+          "color": "Sky",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109462,
-          "color": "2XL",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109463,
-          "color": "2XL",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109464,
-          "color": "2XL",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109465,
-          "color": "2XL",
-          "size": "Black",
+          "color": "Black",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109466,
-          "color": "2XL",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109467,
-          "color": "2XL",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109468,
-          "color": "2XL",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109469,
-          "color": "2XL",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109470,
-          "color": "3XL",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109471,
-          "color": "3XL",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109472,
-          "color": "3XL",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109473,
-          "color": "3XL",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109474,
-          "color": "3XL",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109475,
-          "color": "3XL",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109476,
-          "color": "3XL",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109477,
-          "color": "3XL",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109478,
-          "color": "3XL",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109479,
-          "color": "3XL",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109480,
-          "color": "3XL",
-          "size": "Red",
+          "color": "Red",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109481,
-          "color": "3XL",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109482,
-          "color": "3XL",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109483,
-          "color": "3XL",
-          "size": "White",
+          "color": "White",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109484,
-          "color": "3XL",
-          "size": "Sky",
+          "color": "Sky",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109485,
-          "color": "3XL",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109486,
-          "color": "3XL",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109487,
-          "color": "3XL",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109488,
-          "color": "3XL",
-          "size": "Black",
+          "color": "Black",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109489,
-          "color": "3XL",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109490,
-          "color": "3XL",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109491,
-          "color": "3XL",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109492,
-          "color": "3XL",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109493,
-          "color": "4XL",
-          "size": "Cocoa",
+          "color": "Cocoa",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109494,
-          "color": "4XL",
-          "size": "Paragon",
+          "color": "Paragon",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109495,
-          "color": "4XL",
-          "size": "Pink Lemonade",
+          "color": "Pink Lemonade",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109496,
-          "color": "4XL",
-          "size": "Charcoal",
+          "color": "Charcoal",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109497,
-          "color": "4XL",
-          "size": "Daisy",
+          "color": "Daisy",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109498,
-          "color": "4XL",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109499,
-          "color": "4XL",
-          "size": "Maroon",
+          "color": "Maroon",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109500,
-          "color": "4XL",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109501,
-          "color": "4XL",
-          "size": "Pistachio",
+          "color": "Pistachio",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109502,
-          "color": "4XL",
-          "size": "Purple",
+          "color": "Purple",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109503,
-          "color": "4XL",
-          "size": "Red",
+          "color": "Red",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109504,
-          "color": "4XL",
-          "size": "Royal",
+          "color": "Royal",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109505,
-          "color": "4XL",
-          "size": "Sand",
+          "color": "Sand",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109506,
-          "color": "4XL",
-          "size": "White",
+          "color": "White",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109507,
-          "color": "4XL",
-          "size": "Sky",
+          "color": "Sky",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109508,
-          "color": "4XL",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109509,
-          "color": "4XL",
-          "size": "Tangerine",
+          "color": "Tangerine",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109510,
-          "color": "4XL",
-          "size": "Yellow Haze",
+          "color": "Yellow Haze",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109511,
-          "color": "4XL",
-          "size": "Black",
+          "color": "Black",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109512,
-          "color": "4XL",
-          "size": "Forest Green",
+          "color": "Forest Green",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109513,
-          "color": "4XL",
-          "size": "Light Pink",
+          "color": "Light Pink",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109514,
-          "color": "4XL",
-          "size": "Military Green",
+          "color": "Military Green",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109515,
-          "color": "4XL",
-          "size": "Stone Blue",
+          "color": "Stone Blue",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109521,
-          "color": "5XL",
-          "size": "Dark Heather",
+          "color": "Dark Heather",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109523,
-          "color": "5XL",
-          "size": "Navy",
+          "color": "Navy",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109526,
-          "color": "5XL",
-          "size": "Red",
+          "color": "Red",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109529,
-          "color": "5XL",
-          "size": "White",
+          "color": "White",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109531,
-          "color": "5XL",
-          "size": "Sport Grey",
+          "color": "Sport Grey",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109534,
-          "color": "5XL",
-          "size": "Black",
+          "color": "Black",
+          "size": "5XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109539,
-          "color": "S",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109540,
-          "color": "S",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "S",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109541,
-          "color": "M",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109542,
-          "color": "M",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "M",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109543,
-          "color": "L",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "L",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109545,
-          "color": "XL",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109546,
-          "color": "XL",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109547,
-          "color": "2XL",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109548,
-          "color": "2XL",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "2XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109549,
-          "color": "3XL",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109550,
-          "color": "3XL",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "3XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109551,
-          "color": "4XL",
-          "size": "Cement",
+          "color": "Cement",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         },
         {
           "id": 109552,
-          "color": "4XL",
-          "size": "Mustard",
+          "color": "Mustard",
+          "size": "4XL",
           "available": true,
           "price": 20.0
         }
