@@ -65,6 +65,14 @@ class SimpleConversationManager:
         last_activity = conversation.get('last_activity', 0)
         age = (time.time() - last_activity) / 60
         return f"state={state}, age={age:.1f}min"
+    
+    def is_duplicate_event(self, event: Dict) -> bool:
+        """Check if event is duplicate - always return False for in-memory"""
+        return False
+    
+    def cleanup_old_conversations(self):
+        """Cleanup old conversations - no-op for in-memory"""
+        pass
 
 # Global instance
 conversation_manager = SimpleConversationManager()
