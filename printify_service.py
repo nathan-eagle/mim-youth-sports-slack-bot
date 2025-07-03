@@ -649,6 +649,44 @@ class PrintifyService:
         except Exception as e:
             logger.error(f"Exception looking up blueprint details: {e}")
             return {"success": False, "error": str(e)}
+    
+    def create_design_mockup(self, design_request: Dict) -> Dict:
+        """Create a design mockup for testing purposes"""
+        try:
+            blueprint_id = design_request['blueprint_id']
+            print_provider_id = design_request['print_provider_id']
+            variant_id = design_request['variant_id']
+            logo_url = design_request.get('print_areas', {}).get('front')
+            
+            if not logo_url:
+                return {
+                    'success': False,
+                    'error': 'No logo URL provided in print_areas.front'
+                }
+            
+            logger.info(f"Creating mockup for blueprint {blueprint_id}, variant {variant_id}")
+            
+            # For testing, we'll create a simple product design
+            # In production, this would upload the logo first
+            
+            # Simulate mockup URL (this would come from Printify after product creation)
+            mockup_url = f"https://example-mockup.com/mockup_{blueprint_id}_{variant_id}.png"
+            
+            return {
+                'success': True,
+                'mockup_url': mockup_url,
+                'blueprint_id': blueprint_id,
+                'print_provider_id': print_provider_id,
+                'variant_id': variant_id,
+                'message': 'Test mockup generated (would be real Printify mockup in production)'
+            }
+            
+        except Exception as e:
+            logger.error(f"Error creating design mockup: {e}")
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
 # Global instance (only create if API token is available)
 printify_service = None
