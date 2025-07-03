@@ -103,7 +103,7 @@ class ConversationManager:
         # Save to Supabase
         if self.supabase:
             try:
-                # Prepare data for Supabase
+                # Prepare data for Supabase (timestamps as integers for Unix timestamp columns)
                 supabase_data = {
                     "conversation_key": conversation_key,
                     "channel": channel,
@@ -113,8 +113,8 @@ class ConversationManager:
                     "logo_info": conversation.get("logo_info"),
                     "team_info": conversation.get("team_info"),
                     "selected_variants": conversation.get("selected_variants"),
-                    "created_at": conversation.get("created_at"),
-                    "last_activity": conversation.get("last_activity"),
+                    "created_at": int(conversation.get("created_at", time.time())),  # Convert to integer
+                    "last_activity": int(conversation.get("last_activity", time.time())),  # Convert to integer
                     "error_count": conversation.get("error_count"),
                     "last_error": conversation.get("last_error"),
                     "pending_request": conversation.get("pending_request"),
