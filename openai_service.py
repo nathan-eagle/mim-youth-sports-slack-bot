@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 import openai
 from typing import Dict, Optional
@@ -51,7 +52,6 @@ class OpenAIService:
                 temperature=0.3
             )
             
-            import json
             result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"OpenAI analysis result: {result}")
             return result
@@ -182,7 +182,6 @@ class OpenAIService:
                 temperature=0.3
             )
             
-            import json
             result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI color analysis result: {result}")
             return result
@@ -251,7 +250,6 @@ class OpenAIService:
                 temperature=0.3
             )
             
-            import json
             result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI logo-inspired colors for {product_name}: {result}")
             return result
@@ -307,7 +305,6 @@ class OpenAIService:
                 temperature=0.3
             )
             
-            import json
             result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI product analysis result: {result}")
             return result
