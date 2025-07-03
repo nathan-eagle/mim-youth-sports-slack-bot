@@ -1,4 +1,4 @@
 # Slack bot module
-from .bot import SlackBot
+from .bot import SlackBot, slack_bot
 
-__all__ = ['SlackBot']
+__all__ = ['SlackBot', 'slack_bot']
