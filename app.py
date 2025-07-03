@@ -5,7 +5,7 @@ import hmac
 import json
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from slack_bot import slack_bot
+from slack.bot import slack_bot
 
 # Load environment variables
 load_dotenv()

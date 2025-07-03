@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 
 import json
-from openai_service import openai_service
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 class AIColorService:
     """AI-powered service to convert color names to hex codes"""
@@ -30,17 +35,16 @@ class AIColorService:
         
         try:
             color_list = ", ".join(color_names)
-            response = openai_service.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Convert these colors to hex codes: {color_list}"}
                 ],
-                response_format={"type": "json_object"},
                 temperature=0.1  # Low temperature for consistency
             )
             
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response['choices'][0]['message']['content'])
             return result
             
         except Exception as e:
@@ -60,6 +64,69 @@ class AIColorService:
             }
             for color in color_names
         ]
+    
+    @classmethod
+    def get_default_colors_for_products(cls, logo_url: str) -> dict:
+        """Get AI-recommended default colors for different product types based on logo"""
+        
+        system_prompt = """You are a youth sports merchandise expert. Analyze the logo/image and recommend appropriate colors for different product types.
+        
+        Consider:
+        - Colors that complement the logo
+        - Colors popular with youth sports teams
+        - Colors that are appropriate for children/teenagers
+        - Colors that work well for team merchandise
+        
+        Respond in JSON format:
+        {
+            "success": true,
+            "colors": {
+                "tshirt": "color_name",
+                "hoodie": "color_name", 
+                "headwear": "color_name",
+                "tank": "color_name",
+                "long_sleeve": "color_name"
+            }
+        }
+        
+        Use colors like: Black, Navy, White, Red, Blue, Green, Gray, Purple, Orange
+        Avoid: Neon colors, hot pink, lime green"""
+        
+        try:
+            user_prompt = f"""Analyze this team logo and recommend colors for youth sports merchandise: {logo_url}
+            
+            What colors would work best for t-shirts, hoodies, hats, tank tops, and long sleeve shirts for a youth sports team?"""
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.3
+            )
+            
+            result = json.loads(response['choices'][0]['message']['content'])
+            return result
+            
+        except Exception as e:
+            print(f"AI color recommendation error: {e}")
+            # Fallback to safe defaults
+            return {
+                "success": False,
+                "error": str(e),
+                "colors": {
+                    "tshirt": "Black",
+                    "hoodie": "Navy", 
+                    "headwear": "Black",
+                    "tank": "Black",
+                    "long_sleeve": "Navy"
+                }
+            }
+
+
+# Create singleton instance
+ai_color_service = AIColorService()
 
 # Test the AI service
 if __name__ == "__main__":

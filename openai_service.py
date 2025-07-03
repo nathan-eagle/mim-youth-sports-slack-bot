@@ -1,6 +1,6 @@
 import os
 import logging
-from openai import OpenAI
+import openai
 from typing import Dict, Optional
 from dotenv import load_dotenv
 
@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 
 class OpenAIService:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        openai.api_key = os.getenv('OPENAI_API_KEY')
+        self.client = openai  # For compatibility with the rest of the code
         
     def analyze_parent_request(self, message: str, context: str = "") -> Dict:
         """Analyze parent's message to understand their product needs"""
@@ -41,18 +42,17 @@ class OpenAIService:
         }"""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Context: {context}\n\nParent message: {message}"}
                 ],
-                response_format={"type": "json_object"},
                 temperature=0.3
             )
             
             import json
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"OpenAI analysis result: {result}")
             return result
             
@@ -78,8 +78,8 @@ class OpenAIService:
         products_text = ", ".join(available_products)
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Ask parent to choose from these products: {products_text}"}
@@ -104,8 +104,8 @@ class OpenAIService:
         Mention they can upload a file or provide a URL. Keep it enthusiastic and brief."""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"Ask for team logo for {product_name}{team_context}"}
@@ -124,8 +124,8 @@ class OpenAIService:
         """Generate context-aware response using LLM intelligence"""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": context_prompt},
                     {"role": "user", "content": user_message}
@@ -173,18 +173,17 @@ class OpenAIService:
         }}"""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"User's color request: '{user_request}'"}
                 ],
-                response_format={"type": "json_object"},
                 temperature=0.3
             )
             
             import json
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI color analysis result: {result}")
             return result
             
@@ -229,8 +228,8 @@ class OpenAIService:
         }}"""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {
@@ -249,12 +248,11 @@ class OpenAIService:
                         ]
                     }
                 ],
-                response_format={"type": "json_object"},
                 temperature=0.3
             )
             
             import json
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI logo-inspired colors for {product_name}: {result}")
             return result
             
@@ -300,18 +298,17 @@ class OpenAIService:
         }}"""
         
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"User's product request: '{user_request}'"}
                 ],
-                response_format={"type": "json_object"},
                 temperature=0.3
             )
             
             import json
-            result = json.loads(response.choices[0].message.content)
+            result = json.loads(response['choices'][0]['message']['content'])
             logger.info(f"AI product analysis result: {result}")
             return result
             
@@ -324,6 +321,60 @@ class OpenAIService:
                 "confidence": "low",
                 "reasoning": "AI analysis failed, using fallback product",
                 "product_type_detected": "unknown"
+            }
+    
+    def analyze_product_request_conversation(self, text: str, conversation_context: Dict) -> Dict:
+        """Analyze user request for product categories in conversation context"""
+        
+        system_prompt = """You are an expert youth sports merchandise assistant.
+        
+        Parents request products for their kids' sports teams. Extract what product types they need.
+        
+        Map requests to these categories:
+        - tshirt (shirt, tee, jersey, t-shirt)
+        - hoodie (sweatshirt, hooded, pullover, zip-up)
+        - headwear (hat, cap, beanie)
+        - tank (tank top, racerback, muscle)
+        - long_sleeve (long sleeve, longsleeve)
+        
+        Consider sport context and age group when making decisions.
+        
+        Respond in JSON format:
+        {
+            "success": true,
+            "products": ["category1", "category2"],
+            "sport_context": "detected sport or null",
+            "confidence": "high|medium|low"
+        }"""
+        
+        try:
+            sport_context = conversation_context.get('sport_context', '')
+            age_group = conversation_context.get('age_group', '')
+            
+            user_prompt = f"""User request: "{text}"
+            Sport context: {sport_context}
+            Age group: {age_group}
+            
+            What product categories do they need?"""
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                temperature=0.3
+            )
+            
+            result = json.loads(response['choices'][0]['message']['content'])
+            return result
+            
+        except Exception as e:
+            logger.error(f"Product request analysis error: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "products": []
             }
 
 # Global instance
