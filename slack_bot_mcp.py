@@ -130,7 +130,7 @@ class SlackBotMCP:
             self._send_message(channel, msg)
             return {"message": msg}
         
-        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie"]) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
+        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie", "shirt", "tshirt", "t-shirt"]) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
             product_id = "92" if "hoodie" in text.lower() else "12"
             
             # Use default logo if no custom logo uploaded
@@ -141,6 +141,13 @@ class SlackBotMCP:
                 team_name=team_name or "Team",
                 sport=sport or ""
             )
+            
+            # Handle None response from MCP client
+            if mockup_result is None:
+                error_msg = "Sorry, couldn't create mockup: No response from server"
+                self._send_message(channel, error_msg)
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"status": "error", "message": error_msg}
             
             if mockup_result.get("error"):
                 error_msg = f"Sorry, couldn't create mockup: {mockup_result['error']}"
@@ -188,7 +195,7 @@ class SlackBotMCP:
                 msg = "Hi! 🎨 I'm ready to create team merchandise! What's your team name and sport?\n\n💡 I'll use the MiM logo by default, or you can upload your own team logo anytime."
             else:
                 custom_logo_status = "your custom logo" if logo_url != self.default_logo_url else "the MiM logo"
-                msg = f"Perfect! I can help create merchandise for {team_name} using {custom_logo_status}.\n\nSay 'create mockup' or 'suggest products'!"
+                msg = f"Perfect! I can help create merchandise for the {team_name} using {custom_logo_status}.\n\nTry saying:\n• 'create shirt' or 'show me a tshirt'\n• 'create hoodie' \n• 'suggest products'"
             
             self._send_message(channel, msg)
             return {"message": msg}
@@ -196,13 +203,13 @@ class SlackBotMCP:
     def _extract_team_name(self, text: str) -> str:
         """Extract team name from message"""
         # Skip common words that aren't team names
-        skip_words = {"logo", "team", "club", "the", "a", "an", "create", "make", "mockup", "suggest", "products", "jersey", "hoodie", "hi", "hello", "can", "you", "help", "me", "please", "thanks", "thank"}
+        skip_words = {"logo", "team", "club", "the", "a", "an", "create", "make", "mockup", "suggest", "products", "jersey", "hoodie", "hi", "hello", "can", "you", "help", "me", "please", "thanks", "thank", "want", "see", "show", "tshirt", "shirt", "play", "for"}
         
         words = text.split()
         
-        # Look for patterns like "Eagles basketball" or "team Eagles"
+        # Look for patterns like "I play for the Lions" or "team Eagles"
         for i, word in enumerate(words):
-            if word.lower() in ["team", "club"] and i + 1 < len(words):
+            if word.lower() in ["team", "club", "for"] and i + 1 < len(words):
                 next_word = words[i + 1]
                 if next_word.lower() not in skip_words and next_word.isalpha() and len(next_word) > 2:
                     return next_word.title()
@@ -213,6 +220,12 @@ class SlackBotMCP:
                 len(word) > 2 and 
                 word.lower() not in skip_words):
                 return word
+        
+        # Look for common team names (case insensitive)
+        common_teams = ["lions", "eagles", "hawks", "tigers", "bears", "wolves", "panthers", "raiders", "chiefs", "giants", "falcons", "rams", "bulls", "sharks"]
+        for word in words:
+            if word.lower() in common_teams:
+                return word.title()
         
         return ""
     
