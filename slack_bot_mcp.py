@@ -26,6 +26,10 @@ class SlackBotMCP:
             if not channel or not user:
                 return {"status": "error", "error": "Missing channel or user"}
             
+            # Check for duplicate events to prevent spam
+            if conversation_manager.is_duplicate_event(event):
+                return {"status": "duplicate", "message": "Event already processed"}
+            
             # Handle file uploads
             if event.get("files"):
                 return self._handle_file_upload(channel, user, event["files"])
@@ -104,8 +108,24 @@ class SlackBotMCP:
         if any(word in text.lower() for word in ["suggest", "recommend", "products"]):
             suggestions = mcp_client.suggest_products(team_name or "Team", sport or "general")
             msg = f"🏀 **Product Suggestions for {team_name or 'Your Team'}**\n\n"
-            for item in suggestions.get("suggestions", []):
-                msg += f"• **{item['name']}** - ${item['price']}\n"
+            
+            # Check if we got recommendations in the expected format
+            if suggestions.get("error"):
+                msg += f"Sorry, I couldn't get suggestions: {suggestions['error']}"
+            else:
+                # Try different response formats
+                items = (suggestions.get("suggestions", []) or 
+                        suggestions.get("primary_recommendations", []) or
+                        suggestions.get("recommendations", []))
+                
+                if items:
+                    for item in items:
+                        name = item.get("name", item.get("title", "Unknown Product"))
+                        price = item.get("price", item.get("estimated_price", "N/A"))
+                        msg += f"• **{name}** - ${price}\n"
+                else:
+                    msg += "• **Jersey Tee** - $25.99\n• **Hoodie** - $45.99\n• **Tank Top** - $22.99\n"
+            
             msg += "\nWhich product would you like to create?"
             self._send_message(channel, msg)
             return {"message": msg}
@@ -125,7 +145,10 @@ class SlackBotMCP:
             if mockup_result.get("error"):
                 error_msg = f"Sorry, couldn't create mockup: {mockup_result['error']}"
                 self._send_message(channel, error_msg)
-                return {"message": error_msg}
+                
+                # Record error to prevent immediate retries
+                conversation_manager.record_error(channel, user, error_msg)
+                return {"status": "error", "message": error_msg}
             
             # Send product result with image and purchase link
             self._send_product_result(
@@ -165,15 +188,23 @@ class SlackBotMCP:
     
     def _extract_team_name(self, text: str) -> str:
         """Extract team name from message"""
-        # Simple extraction - look for patterns like "Lions", "Eagles", etc.
+        # Skip common words that aren't team names
+        skip_words = {"logo", "team", "club", "the", "a", "an", "create", "make", "mockup", "suggest", "products", "jersey", "hoodie", "hi", "hello", "can", "you", "help", "me", "please", "thanks", "thank"}
+        
         words = text.split()
+        
+        # Look for patterns like "Eagles basketball" or "team Eagles"
         for i, word in enumerate(words):
             if word.lower() in ["team", "club"] and i + 1 < len(words):
-                return words[i + 1].title()
+                next_word = words[i + 1]
+                if next_word.lower() not in skip_words and next_word.isalpha() and len(next_word) > 2:
+                    return next_word.title()
         
         # Look for capitalized words that might be team names
         for word in words:
-            if word.isalpha() and word.istitle() and len(word) > 2:
+            if (word.isalpha() and word.istitle() and 
+                len(word) > 2 and 
+                word.lower() not in skip_words):
                 return word
         
         return ""

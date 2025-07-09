@@ -44,7 +44,7 @@ class MCPClient:
         """Create a team mockup using the MCP server"""
         try:
             response = self.client.post(
-                f"{self.base_url}/create_team_mockup",
+                f"{self.base_url}/create_mockup",
                 json={
                     "logo_url": logo_url,
                     "product_id": product_id,
@@ -75,7 +75,7 @@ class MCPClient:
         """Handle bulk orders for teams"""
         try:
             response = self.client.post(
-                f"{self.base_url}/bulk_order_handler",
+                f"{self.base_url}/bulk_order",
                 json={
                     "team_name": team_name,
                     "product_ids": product_ids,
