@@ -14,6 +14,7 @@ class SlackBotMCP:
     def __init__(self):
         self.client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
         self.conversation_manager = conversation_manager
+        self.default_logo_url = "https://static.wixstatic.com/media/d072b4_a933c375e992435ea9f972afc685cff9~mv2.png/v1/fill/w_190,h_190,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/MiM%20Color%20Logo.png"
 
     def handle_message(self, event: Dict[str, Any]) -> Dict[str, Any]:
         """Handle incoming Slack messages"""
@@ -58,12 +59,12 @@ class SlackBotMCP:
                             colors = analysis.get("colors", [])
                             suggestions = analysis.get("suggestions", "")
                             
-                            msg = f"🎨 **Logo Analysis Complete!**\n\n"
+                            msg = f"🎨 **Custom Logo Uploaded!**\n\n"
                             if colors:
                                 msg += f"**Colors detected:** {', '.join(colors)}\n"
                             if suggestions:
                                 msg += f"**Suggestions:** {suggestions}\n"
-                            msg += f"\nWhat's your team name and sport?"
+                            msg += f"\n✅ I'll now use your custom logo for mockups!\nWhat's your team name and sport?"
                             
                             self._send_message(channel, msg)
                         
@@ -80,7 +81,7 @@ class SlackBotMCP:
         """Process message using MCP server tools"""
         
         conversation = conversation_manager.get_conversation(channel, user)
-        logo_url = conversation.get("logo_url")
+        logo_url = conversation.get("logo_url") or self.default_logo_url
         
         # Get existing team info from conversation
         team_info = conversation.get('team_info', {})
@@ -110,11 +111,10 @@ class SlackBotMCP:
             return {"message": msg}
         
         elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie"]):
-            if not logo_url:
-                self._send_message(channel, "Please upload your team logo first!")
-                return {"message": "Please upload your team logo first!"}
-            
             product_id = "92" if "hoodie" in text.lower() else "12"
+            
+            # Use default logo if no custom logo uploaded
+            using_default_logo = logo_url == self.default_logo_url
             mockup_result = mcp_client.create_team_mockup(
                 logo_url=logo_url,
                 product_id=product_id,
@@ -154,12 +154,11 @@ class SlackBotMCP:
         
         else:
             # Guide the user
-            if not logo_url:
-                msg = "Hi! Upload your team logo to get started! 🎨"
-            elif not team_name:
-                msg = "Great! I have your logo. What's your team name and sport?"
+            if not team_name:
+                msg = "Hi! 🎨 I'm ready to create team merchandise! What's your team name and sport?\n\n💡 I'll use the MiM logo by default, or you can upload your own team logo anytime."
             else:
-                msg = f"Perfect! I can help you create merchandise for {team_name}. Say 'create mockup' or 'suggest products'!"
+                custom_logo_status = "your custom logo" if logo_url != self.default_logo_url else "the MiM logo"
+                msg = f"Perfect! I can help create merchandise for {team_name} using {custom_logo_status}.\n\nSay 'create mockup' or 'suggest products'!"
             
             self._send_message(channel, msg)
             return {"message": msg}
