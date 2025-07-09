@@ -5,7 +5,7 @@ import hmac
 import json
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
-from slack_bot import slack_bot
+from slack_bot_mcp import slack_bot_mcp
 
 # Load environment variables
 load_dotenv()
@@ -98,13 +98,13 @@ def slack_events():
                     return jsonify({"status": "ignored"})
                 
                 # Handle regular message
-                result = slack_bot.handle_message(event)
+                result = slack_bot_mcp.handle_message(event)
                 logger.info(f"Message handling result: {result}")
                 
             elif event_type == 'file_shared':
                 # Handle file upload - add channel info from parent data
                 event['channel'] = event.get('channel_id') or data.get('event', {}).get('channel')
-                result = slack_bot.handle_file_share(event)
+                result = slack_bot_mcp.handle_message(event)
                 logger.info(f"File share handling result: {result}")
             
             else:

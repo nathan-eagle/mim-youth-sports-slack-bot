@@ -1,0 +1,218 @@
+import os
+import json
+import logging
+import re
+from typing import Dict, Any, Optional
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+from mcp_client import mcp_client
+from conversation_manager import conversation_manager
+
+logger = logging.getLogger(__name__)
+
+class SlackBotMCP:
+    def __init__(self):
+        self.client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
+        self.conversation_manager = conversation_manager
+
+    def handle_message(self, event: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle incoming Slack messages"""
+        try:
+            channel = event.get("channel", "")
+            user = event.get("user", "")
+            text = event.get("text", "")
+            
+            if not channel or not user:
+                return {"status": "error", "error": "Missing channel or user"}
+            
+            # Handle file uploads
+            if event.get("files"):
+                return self._handle_file_upload(channel, user, event["files"])
+            
+            # Process message with MCP
+            return self._process_message_with_mcp(channel, user, text, event)
+            
+        except Exception as e:
+            logger.error(f"Error handling message: {e}")
+            return {"status": "error", "error": str(e)}
+    
+    def _handle_file_upload(self, channel: str, user: str, files: list) -> Dict[str, Any]:
+        """Handle file uploads (logos)"""
+        try:
+            for file_info in files:
+                if file_info.get("mimetype", "").startswith("image/"):
+                    file_url = file_info.get("url_private", "")
+                    
+                    if file_url:
+                        # Store logo URL in conversation
+                        conversation_manager.save_logo_url(channel, user, file_url)
+                        
+                        # Analyze logo with MCP
+                        analysis = mcp_client.analyze_logo(file_url)
+                        
+                        if analysis.get("error"):
+                            self._send_message(channel, f"Error analyzing logo: {analysis['error']}")
+                        else:
+                            colors = analysis.get("colors", [])
+                            suggestions = analysis.get("suggestions", "")
+                            
+                            msg = f"🎨 **Logo Analysis Complete!**\n\n"
+                            if colors:
+                                msg += f"**Colors detected:** {', '.join(colors)}\n"
+                            if suggestions:
+                                msg += f"**Suggestions:** {suggestions}\n"
+                            msg += f"\nWhat's your team name and sport?"
+                            
+                            self._send_message(channel, msg)
+                        
+                        return {"status": "success", "message": "Logo processed"}
+            
+            return {"status": "success", "message": "No image files found"}
+            
+        except Exception as e:
+            logger.error(f"Error handling file: {e}")
+            self._send_message(channel, f"Error processing your logo: {str(e)}")
+            return {"status": "error", "error": str(e)}
+    
+    def _process_message_with_mcp(self, channel: str, user: str, text: str, event: Dict) -> Dict:
+        """Process message using MCP server tools"""
+        
+        conversation = conversation_manager.get_conversation(channel, user)
+        logo_url = conversation.get("logo_url")
+        
+        # Extract team info
+        team_name = self._extract_team_name(text)
+        sport = self._extract_sport(text)
+        
+        if team_name:
+            conversation_manager.set_team_info(channel, user, team_name, sport)
+        
+        # Handle different requests
+        if any(word in text.lower() for word in ["suggest", "recommend", "products"]):
+            suggestions = mcp_client.suggest_products(team_name or "Team", sport or "general")
+            msg = f"🏀 **Product Suggestions for {team_name or 'Your Team'}**\n\n"
+            for item in suggestions.get("suggestions", []):
+                msg += f"• **{item['name']}** - ${item['price']}\n"
+            msg += "\nWhich product would you like to create?"
+            self._send_message(channel, msg)
+            return {"message": msg}
+        
+        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie"]):
+            if not logo_url:
+                self._send_message(channel, "Please upload your team logo first!")
+                return {"message": "Please upload your team logo first!"}
+            
+            product_id = "92" if "hoodie" in text.lower() else "12"
+            mockup_result = mcp_client.create_team_mockup(
+                logo_url=logo_url,
+                product_id=product_id,
+                team_name=team_name or "Team",
+                sport=sport or ""
+            )
+            
+            if mockup_result.get("error"):
+                error_msg = f"Sorry, couldn't create mockup: {mockup_result['error']}"
+                self._send_message(channel, error_msg)
+                return {"message": error_msg}
+            
+            # Send product result with image and purchase link
+            self._send_product_result(
+                channel,
+                mockup_result.get("mockup_url", ""),
+                mockup_result.get("drop_link", ""),
+                mockup_result.get("product_title", "Custom Product")
+            )
+            
+            return {
+                "image_url": mockup_result.get("mockup_url", ""),
+                "purchase_url": mockup_result.get("drop_link", ""),
+                "product_title": mockup_result.get("product_title", "Custom Product")
+            }
+        
+        elif any(word in text.lower() for word in ["analytics", "stats", "report"]):
+            analytics = mcp_client.get_analytics(team_name or "")
+            msg = f"📊 **Team Analytics**\n\n"
+            if analytics.get("error"):
+                msg += f"Error getting analytics: {analytics['error']}"
+            else:
+                msg += f"Coming soon! Analytics will show team order history and popular products."
+            
+            self._send_message(channel, msg)
+            return {"message": msg}
+        
+        else:
+            # Guide the user
+            if not logo_url:
+                msg = "Hi! Upload your team logo to get started! 🎨"
+            elif not team_name:
+                msg = "Great! I have your logo. What's your team name and sport?"
+            else:
+                msg = f"Perfect! I can help you create merchandise for {team_name}. Say 'create mockup' or 'suggest products'!"
+            
+            self._send_message(channel, msg)
+            return {"message": msg}
+    
+    def _extract_team_name(self, text: str) -> str:
+        """Extract team name from message"""
+        # Simple extraction - look for patterns like "Lions", "Eagles", etc.
+        words = text.split()
+        for i, word in enumerate(words):
+            if word.lower() in ["team", "club"] and i + 1 < len(words):
+                return words[i + 1].title()
+        
+        # Look for capitalized words that might be team names
+        for word in words:
+            if word.isalpha() and word.istitle() and len(word) > 2:
+                return word
+        
+        return ""
+    
+    def _extract_sport(self, text: str) -> str:
+        """Extract sport from message"""
+        sports = ["basketball", "football", "soccer", "baseball", "hockey", "tennis", "volleyball", "lacrosse"]
+        for sport in sports:
+            if sport in text.lower():
+                return sport
+        return ""
+    
+    def _send_message(self, channel: str, message: str):
+        """Send message to Slack"""
+        try:
+            self.client.chat_postMessage(channel=channel, text=message)
+        except SlackApiError as e:
+            logger.error(f"Error sending message: {e}")
+    
+    def _send_product_result(self, channel: str, image_url: str, purchase_url: str, product_title: str):
+        """Send product result with purchase link"""
+        try:
+            blocks = [
+                {
+                    "type": "image",
+                    "image_url": image_url,
+                    "alt_text": product_title
+                },
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": f"🎽 **{product_title}**\n\nReady to purchase!"}
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {"type": "plain_text", "text": "🛒 Purchase Now"},
+                            "url": purchase_url,
+                            "style": "primary"
+                        }
+                    ]
+                }
+            ]
+            
+            self.client.chat_postMessage(channel=channel, blocks=blocks)
+        except SlackApiError as e:
+            logger.error(f"Error sending product result: {e}")
+            # Fall back to simple message
+            self._send_message(channel, f"🎽 {product_title}\n\nPurchase: {purchase_url}")
+
+# Create bot instance
+slack_bot_mcp = SlackBotMCP() 
