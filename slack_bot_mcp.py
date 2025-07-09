@@ -113,7 +113,7 @@ class SlackBotMCP:
             self._send_message(channel, msg)
             return {"message": msg}
         
-        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie", "shirt", "tshirt", "t-shirt"]) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
+        elif (any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie", "shirt", "tshirt", "t-shirt", "tee"]) or "t shirt" in text.lower()) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
             product_id = "92" if "hoodie" in text.lower() else "12"
             
             # Extract color if specified

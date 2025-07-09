@@ -57,7 +57,8 @@ class MCPClient:
                 json=payload
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            return result if result is not None else {"error": "No response from server"}
         except Exception as e:
             logger.error(f"Error creating team mockup: {e}")
             return {"error": str(e)}
