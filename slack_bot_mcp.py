@@ -45,7 +45,9 @@ class SlackBotMCP:
                     
                     if file_url:
                         # Store logo URL in conversation
-                        conversation_manager.save_logo_url(channel, user, file_url)
+                        conversation_manager.update_conversation(channel, user, {
+                            'logo_url': file_url
+                        })
                         
                         # Analyze logo with MCP
                         analysis = mcp_client.analyze_logo(file_url)
@@ -80,12 +82,22 @@ class SlackBotMCP:
         conversation = conversation_manager.get_conversation(channel, user)
         logo_url = conversation.get("logo_url")
         
-        # Extract team info
-        team_name = self._extract_team_name(text)
-        sport = self._extract_sport(text)
+        # Get existing team info from conversation
+        team_info = conversation.get('team_info', {})
+        existing_team_name = team_info.get('name', '')
+        existing_sport = team_info.get('sport', '')
+        
+        # Extract team info from current message
+        team_name = self._extract_team_name(text) or existing_team_name
+        sport = self._extract_sport(text) or existing_sport
         
         if team_name:
-            conversation_manager.set_team_info(channel, user, team_name, sport)
+            conversation_manager.update_conversation(channel, user, {
+                'team_info': {
+                    'name': team_name,
+                    'sport': sport
+                }
+            })
         
         # Handle different requests
         if any(word in text.lower() for word in ["suggest", "recommend", "products"]):
