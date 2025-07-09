@@ -40,17 +40,21 @@ class MCPClient:
             logger.error(f"Error getting product suggestions: {e}")
             return {"error": str(e)}
     
-    def create_team_mockup(self, logo_url: str, product_id: str, team_name: str, sport: str = "") -> Dict[str, Any]:
+    def create_team_mockup(self, logo_url: str, product_id: str, team_name: str, sport: str = "", color: str = "") -> Dict[str, Any]:
         """Create a team mockup using the MCP server"""
         try:
+            payload = {
+                "logo_url": logo_url,
+                "product_id": product_id,
+                "team_name": team_name,
+                "sport": sport
+            }
+            if color:
+                payload["color"] = color
+                
             response = self.client.post(
                 f"{self.base_url}/create_mockup",
-                json={
-                    "logo_url": logo_url,
-                    "product_id": product_id,
-                    "team_name": team_name,
-                    "sport": sport
-                }
+                json=payload
             )
             response.raise_for_status()
             return response.json()

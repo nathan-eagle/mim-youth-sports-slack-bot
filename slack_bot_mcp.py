@@ -116,13 +116,17 @@ class SlackBotMCP:
         elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie", "shirt", "tshirt", "t-shirt"]) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
             product_id = "92" if "hoodie" in text.lower() else "12"
             
+            # Extract color if specified
+            color = self._extract_color(text)
+            
             # Use default logo if no custom logo uploaded
             using_default_logo = logo_url == self.default_logo_url
             mockup_result = mcp_client.create_team_mockup(
                 logo_url=logo_url,
                 product_id=product_id,
                 team_name="Custom",  # Simple default
-                sport=""
+                sport="",
+                color=color
             )
             
             # Handle None response from MCP client
