@@ -87,27 +87,10 @@ class SlackBotMCP:
         conversation = conversation_manager.get_conversation(channel, user)
         logo_url = conversation.get("logo_url") or self.default_logo_url
         
-        # Get existing team info from conversation
-        team_info = conversation.get('team_info', {})
-        existing_team_name = team_info.get('name', '')
-        existing_sport = team_info.get('sport', '')
-        
-        # Extract team info from current message
-        team_name = self._extract_team_name(text) or existing_team_name
-        sport = self._extract_sport(text) or existing_sport
-        
-        if team_name:
-            conversation_manager.update_conversation(channel, user, {
-                'team_info': {
-                    'name': team_name,
-                    'sport': sport
-                }
-            })
-        
         # Handle different requests
         if any(word in text.lower() for word in ["suggest", "recommend", "products"]):
-            suggestions = mcp_client.suggest_products(team_name or "Team", sport or "general")
-            msg = f"🏀 **Product Suggestions for {team_name or 'Your Team'}**\n\n"
+            suggestions = mcp_client.suggest_products("Custom", "general")
+            msg = f"🏀 **Product Options**\n\n"
             
             # Check if we got recommendations in the expected format
             if suggestions.get("error"):
@@ -138,8 +121,8 @@ class SlackBotMCP:
             mockup_result = mcp_client.create_team_mockup(
                 logo_url=logo_url,
                 product_id=product_id,
-                team_name=team_name or "Team",
-                sport=sport or ""
+                team_name="Custom",  # Simple default
+                sport=""
             )
             
             # Handle None response from MCP client
@@ -179,62 +162,30 @@ class SlackBotMCP:
             }
         
         elif any(word in text.lower() for word in ["analytics", "stats", "report"]):
-            analytics = mcp_client.get_analytics(team_name or "")
-            msg = f"📊 **Team Analytics**\n\n"
+            analytics = mcp_client.get_analytics("")
+            msg = f"📊 **Analytics**\n\n"
             if analytics.get("error"):
                 msg += f"Error getting analytics: {analytics['error']}"
             else:
-                msg += f"Coming soon! Analytics will show team order history and popular products."
+                msg += f"Coming soon! Analytics will show order history and popular products."
             
             self._send_message(channel, msg)
             return {"message": msg}
         
         else:
-            # Guide the user
-            if not team_name:
-                msg = "Hi! 🎨 I'm ready to create team merchandise! What's your team name and sport?\n\n💡 I'll use the MiM logo by default, or you can upload your own team logo anytime."
-            else:
-                custom_logo_status = "your custom logo" if logo_url != self.default_logo_url else "the MiM logo"
-                msg = f"Perfect! I can help create merchandise for the {team_name} using {custom_logo_status}.\n\nTry saying:\n• 'create shirt' or 'show me a tshirt'\n• 'create hoodie' \n• 'suggest products'"
+            # Simple guide - just about products
+            custom_logo_status = "your custom logo" if logo_url != self.default_logo_url else "the MiM logo"
+            msg = f"Hi! 🎨 I'll put {custom_logo_status} on any product you want.\n\nTry saying:\n• 'create shirt' or 'show me a tshirt'\n• 'create hoodie'\n• 'suggest products'\n\n💡 Upload your own logo anytime to replace the default!"
             
             self._send_message(channel, msg)
             return {"message": msg}
     
-    def _extract_team_name(self, text: str) -> str:
-        """Extract team name from message"""
-        # Skip common words that aren't team names
-        skip_words = {"logo", "team", "club", "the", "a", "an", "create", "make", "mockup", "suggest", "products", "jersey", "hoodie", "hi", "hello", "can", "you", "help", "me", "please", "thanks", "thank", "want", "see", "show", "tshirt", "shirt", "play", "for"}
-        
-        words = text.split()
-        
-        # Look for patterns like "I play for the Lions" or "team Eagles"
-        for i, word in enumerate(words):
-            if word.lower() in ["team", "club", "for"] and i + 1 < len(words):
-                next_word = words[i + 1]
-                if next_word.lower() not in skip_words and next_word.isalpha() and len(next_word) > 2:
-                    return next_word.title()
-        
-        # Look for capitalized words that might be team names
-        for word in words:
-            if (word.isalpha() and word.istitle() and 
-                len(word) > 2 and 
-                word.lower() not in skip_words):
-                return word
-        
-        # Look for common team names (case insensitive)
-        common_teams = ["lions", "eagles", "hawks", "tigers", "bears", "wolves", "panthers", "raiders", "chiefs", "giants", "falcons", "rams", "bulls", "sharks"]
-        for word in words:
-            if word.lower() in common_teams:
-                return word.title()
-        
-        return ""
-    
-    def _extract_sport(self, text: str) -> str:
-        """Extract sport from message"""
-        sports = ["basketball", "football", "soccer", "baseball", "hockey", "tennis", "volleyball", "lacrosse"]
-        for sport in sports:
-            if sport in text.lower():
-                return sport
+    def _extract_color(self, text: str) -> str:
+        """Extract color from message"""
+        colors = ["red", "blue", "green", "black", "white", "yellow", "orange", "purple", "pink", "gray", "grey", "navy", "maroon"]
+        for color in colors:
+            if color in text.lower():
+                return color
         return ""
     
     def _send_message(self, channel: str, message: str):
