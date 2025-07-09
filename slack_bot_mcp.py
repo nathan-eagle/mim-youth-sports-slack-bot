@@ -130,7 +130,7 @@ class SlackBotMCP:
             self._send_message(channel, msg)
             return {"message": msg}
         
-        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie"]):
+        elif any(word in text.lower() for word in ["mockup", "create", "jersey", "hoodie"]) and not any(word in text.lower() for word in ["restart", "reset", "start"]):
             product_id = "92" if "hoodie" in text.lower() else "12"
             
             # Use default logo if no custom logo uploaded
@@ -144,7 +144,14 @@ class SlackBotMCP:
             
             if mockup_result.get("error"):
                 error_msg = f"Sorry, couldn't create mockup: {mockup_result['error']}"
-                self._send_message(channel, error_msg)
+                
+                # Check if we recently had this error to prevent spam
+                conversation = conversation_manager.get_conversation(channel, user)
+                last_error = conversation.get('last_error', {})
+                
+                # Only send error message if it's different from the last one
+                if last_error.get('message', '') != error_msg:
+                    self._send_message(channel, error_msg)
                 
                 # Record error to prevent immediate retries
                 conversation_manager.record_error(channel, user, error_msg)
